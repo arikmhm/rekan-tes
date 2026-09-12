@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 |---|---|
 | Status | Disepakati untuk MVP |
-| Tanggal | 12 September 2026 |
+| Tanggal | 13 September 2026 |
 | Dokumen produk | [PRD.md](./PRD.md) |
 | Rancangan database | [DATABASE_DESIGN.md](./DATABASE_DESIGN.md) |
 
@@ -35,6 +35,8 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Server Action digunakan untuk mutasi dari UI. Route Handler digunakan untuk Better Auth, autosave, dan webhook DOKU.
 - Otorisasi, deadline tes, scoring, dan aktivasi attempt selalu diverifikasi di server.
 - Environment server dibaca hanya melalui `env` dari `src/lib/env.ts`, bukan `process.env` langsung. Variabel baru ditambahkan ke schema dan `.env.example` pada issue yang benar-benar memakainya.
+- Akses database hanya melalui `db` dari `src/db/index.ts`. Driver yang dipakai `neon-serverless`, bukan `neon-http`, karena `neon-http` melempar error pada `transaction()` sementara RT-010 membutuhkan transaksi sungguhan.
+- Runtime aplikasi memakai `DATABASE_URL` (pooled); migrasi Drizzle Kit memakai `DATABASE_URL_UNPOOLED` (direct).
 - Tidak ada backend terpisah, microservice, Redis, message queue, atau WebSocket pada MVP.
 
 ## Akun pengguna
@@ -60,7 +62,9 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Shell halaman publik dan metadata dasar sudah menggunakan identitas Rekan Tes.
 - shadcn/ui belum dipasang; tambahkan hanya saat komponen pertama benar-benar membutuhkannya.
 - Zod dan Vitest sudah terpasang. Validasi environment server ada di `src/lib/env-schema.ts`, dan singleton `src/lib/env.ts` dijaga paket `server-only`.
-- Better Auth, Drizzle, dan Neon driver belum tercatat di `package.json`.
+- Drizzle ORM, Drizzle Kit, dan Neon serverless driver sudah terpasang. Schema domain ada di `src/db/schema.ts` dan migrasi awal sudah diterapkan ke Neon.
+- `@neon/config` dan `@neon/env` hasil `neon init` sudah dihapus. Rekan Tes tidak mendeklarasikan layanan Neon apa pun, dan `neon env pull` bekerja tanpa `neon.ts`. Pasang kembali hanya jika nanti memakai branch policy atau layanan Neon.
+- Better Auth belum tercatat di `package.json`.
 - Urutan pekerjaan terperinci dan statusnya dicatat di [ISSUES.md](./ISSUES.md).
 
 ## Urutan implementasi awal

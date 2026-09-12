@@ -1,10 +1,17 @@
 import { z } from "zod";
 
+const postgresUrl = (label: string) =>
+  z.string().min(1, "wajib diisi").startsWith("postgres", `harus berupa ${label}`);
+
 const envSchema = z.object({
-  DATABASE_URL: z
-    .string()
-    .min(1, "wajib diisi")
-    .startsWith("postgres", "harus berupa connection string PostgreSQL"),
+  /** Endpoint pooled (PgBouncer). Dipakai runtime aplikasi. */
+  DATABASE_URL: postgresUrl("connection string PostgreSQL"),
+  /**
+   * Endpoint direct tanpa pooling. Hanya dibutuhkan untuk migrasi Drizzle Kit;
+   * endpoint pooled dapat menggagalkan DDL. Opsional agar runtime produksi
+   * tidak perlu menyetel variabel yang tidak dipakainya.
+   */
+  DATABASE_URL_UNPOOLED: postgresUrl("connection string PostgreSQL").optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -29,4 +36,23 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
   }
 
   return result.data;
+}
+
+/**
+ * Environment untuk migrasi. Menolak endpoint pooled karena PgBouncer dalam
+ * mode transaction dapat menggagalkan DDL.
+ */
+export function parseMigrationEnv(source: Record<string, string | undefined>): {
+  url: string;
+} {
+  const env = parseEnv(source);
+
+  if (!env.DATABASE_URL_UNPOOLED) {
+    throw new Error(
+      "DATABASE_URL_UNPOOLED wajib untuk migrasi karena endpoint pooled dapat " +
+        "menggagalkan DDL.\nJalankan `pnpx neon@latest env pull` untuk mengisinya.",
+    );
+  }
+
+  return { url: env.DATABASE_URL_UNPOOLED };
 }

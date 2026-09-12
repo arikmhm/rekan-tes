@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 |---|---|
 | Versi | 0.4 (Draft) |
-| Tanggal | 12 September 2026 |
+| Tanggal | 13 September 2026 |
 | Cakupan | Database MVP |
 | Dokumen produk | [PRD.md](./PRD.md) |
 | Keputusan teknis | [TECH_STACK.md](./TECH_STACK.md) |
@@ -19,6 +19,7 @@
 - Nama tabel dan kolom memakai `snake_case`, waktu disimpan dalam UTC, dan nilai rupiah memakai integer.
 - Semua primary key bertipe `text` berisi UUID v4 yang dibuat aplikasi melalui `crypto.randomUUID()`. Satu tipe ID dipakai untuk tabel auth maupun domain sehingga tidak ada friksi dengan adapter Better Auth dan tidak perlu ekstensi PostgreSQL tambahan.
 - `test_subtest_questions.weight` bertipe `integer` dengan default `1` dan constraint `> 0`. Skor subtes adalah jumlah bobot jawaban benar. Jika kelak dibutuhkan pembobotan lebih halus, naikkan skalanya (misalnya basis 100) tanpa mengubah tipe kolom.
+- Runtime aplikasi memakai connection string pooled, sedangkan migrasi Drizzle Kit memakai endpoint direct (`DATABASE_URL_UNPOOLED`). PgBouncer dalam mode transaction dapat menggagalkan DDL.
 
 ## 2. Tabel autentikasi
 
@@ -108,6 +109,7 @@ Schema final bagian ini dibuat melalui CLI Better Auth agar sesuai dengan versi 
 - `UNIQUE(test_subtest_id, question_id)` dan `UNIQUE(test_subtest_id, position)` pada `test_subtest_questions`.
 - Kategori soal harus sama dengan kategori subtes saat assignment dibuat.
 - `test_subtest_questions.weight` harus lebih besar dari nol.
+- `position`, `duration_seconds`, dan `question_limit` harus lebih besar dari nol.
 
 ### Transaksi dan pengerjaan
 
@@ -173,7 +175,15 @@ Autosave melakukan upsert berdasarkan pasangan unik `attempt_subtest_id` dan `te
 - Tes yang sudah memiliki attempt tidak boleh menghapus subtes atau assignment historis secara fisik.
 - Snapshot atau versioning baru ditambahkan ketika aturan di atas tidak lagi mencukupi.
 
-## 12. Keputusan teknis terbuka
+## 12. Penyimpangan implementasi
+
+Dicatat saat RT-002 agar tidak terbaca sebagai kelalaian:
+
+- `orders.access_expires_at` dibuat nullable. Masa akses baru diketahui ketika pembayaran berhasil (RT-009), sehingga tidak dapat terisi saat order masih `pending`.
+- `orders.user_id` belum memiliki foreign key. Tabel `user` dibuat CLI Better Auth pada RT-003, dan constraint ditambahkan pada migrasi issue tersebut.
+- Tiga index pada bagian 9 belum dibuat. `attempt_subtests(attempt_id, status)` dan `attempt_answers(attempt_subtest_id)` sudah tercakup prefix unique index yang ada, sedangkan search index `questions.prompt` menunggu keputusan strategi pencarian.
+
+## 13. Keputusan teknis terbuka
 
 - Strategi pencarian teks soal.
 - Penyimpanan dan representasi gambar soal figural.

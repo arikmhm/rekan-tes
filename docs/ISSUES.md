@@ -19,8 +19,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 |---:|---|---|---|---|
 | 0 | RT-000 | Fondasi App Router dan shell produk | Done | — |
 | 1 | RT-001 | Environment, validasi, dan test runner | Done | RT-000 |
-| 2 | RT-002 | Neon, Drizzle, schema, dan migrasi MVP | Next | RT-001 |
-| 3 | RT-003 | Better Auth dan otorisasi dasar | Queued | RT-002 |
+| 2 | RT-002 | Neon, Drizzle, schema, dan migrasi MVP | Done | RT-001 |
+| 3 | RT-003 | Better Auth dan otorisasi dasar | Next | RT-002 |
 | 4 | RT-004 | Verifikasi email dan reset password | Blocked | RT-003, provider email |
 | 5 | RT-005 | Admin kategori dan bank soal | Queued | RT-003 |
 | 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Queued | RT-005 |
@@ -74,33 +74,37 @@ Catatan: schema hanya memuat `DATABASE_URL`. Variabel Better Auth, email, dan DO
 
 ### RT-002 — Neon, Drizzle, schema, dan migrasi MVP
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Membuat sumber data server sesuai `DATABASE_DESIGN.md`.
 
-Scope:
+Hasil implementasi:
 
-- Pasang Drizzle ORM, Drizzle Kit, dan Neon serverless driver.
-- Pakai tipe ID dan `weight` yang sudah ditetapkan di `DATABASE_DESIGN.md`: primary key `text` berisi UUID v4 dan `weight` integer default `1`.
-- Muat `.env*` di luar runtime Next.js untuk konfigurasi Drizzle Kit menggunakan `@next/env`.
-- Implementasikan enum/status, tabel domain, foreign key, unique constraint, check constraint, dan index minimum.
-- Buat migrasi awal serta perintah generate/migrate.
+- Drizzle ORM, Drizzle Kit, dan `@neondatabase/serverless` terpasang; script `pnpm db:generate` dan `pnpm db:migrate` tersedia.
+- `src/db/schema.ts` memuat 6 enum dan 12 tabel domain dengan foreign key, unique constraint, check constraint, dan index.
+- `src/db/index.ts` mengekspor `db` dan dijaga paket `server-only`. Driver `neon-serverless` dipilih karena `neon-http` melempar error pada `transaction()`, sementara RT-010 membutuhkan transaksi.
+- `drizzle.config.ts` memuat `.env*` melalui `@next/env` dan memakai `DATABASE_URL_UNPOOLED`; `parseMigrationEnv` menolak berjalan tanpa endpoint direct karena pooled dapat menggagalkan DDL.
+- Migrasi `drizzle/0000_rich_skin.sql` sudah diterapkan ke Neon (PostgreSQL 18.6).
 
 Acceptance criteria:
 
-- Migrasi dapat diterapkan ke database kosong dan menghasilkan schema yang terdokumentasi.
-- Constraint mencegah assignment soal duplikat, attempt kedua untuk order yang sama, dan nominal negatif.
-- Koneksi database hanya dibuat dari kode server.
+- Migrasi dapat diterapkan ke database kosong dan menghasilkan schema yang terdokumentasi. Diverifikasi terhadap Neon: 12 tabel, 6 enum, 9 check constraint, 15 foreign key.
+- Constraint mencegah assignment soal duplikat, attempt kedua untuk order yang sama, dan nominal negatif. Diverifikasi dengan 12 percobaan pelanggaran terhadap Neon; seluruhnya ditolak database. Data uji dijalankan dalam transaksi dan di-rollback.
+- Koneksi database hanya dibuat dari kode server, dijaga `server-only` pada `src/db/index.ts`.
+
+Catatan: penyimpangan dari `DATABASE_DESIGN.md` dicatat pada bagian 12 dokumen tersebut.
 
 ### RT-003 — Better Auth dan otorisasi dasar
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Menyediakan registrasi, login username, logout, session, serta role peserta/admin.
 
 Scope:
 
 - Pasang Better Auth dan username plugin; hasilkan schema auth menggunakan CLI versi terpasang.
+- Tambahkan foreign key `orders.user_id` ke `user.id` setelah tabel auth ada.
+- Evaluasi Managed Better Auth dari Neon sebagai alternatif self-host, terutama kaitannya dengan blocker provider email di RT-004.
 - Registrasi meminta username, email, password; `name` mengikuti username.
 - Tambahkan halaman registrasi dan login serta Route Handler auth.
 - Buat helper otorisasi server untuk session, kepemilikan resource, dan role admin.

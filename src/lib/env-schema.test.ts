@@ -1,13 +1,14 @@
 import { expect, test } from "vitest";
 
-import { parseEnv } from "./env-schema";
+import { parseEnv, parseMigrationEnv } from "./env-schema";
 
-const valid = {
-  DATABASE_URL: "postgresql://user:pass@host.neon.tech/rekan_tes?sslmode=require",
-};
+const pooled = "postgresql://u:p@host-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+const direct = "postgresql://u:p@host.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
 
 test("menerima environment yang lengkap dan mengabaikan variabel lain", () => {
-  expect(parseEnv({ ...valid, TZ: "Asia/Jakarta" })).toEqual(valid);
+  expect(parseEnv({ DATABASE_URL: pooled, TZ: "Asia/Jakarta" })).toEqual({
+    DATABASE_URL: pooled,
+  });
 });
 
 test("gagal dengan pesan yang menyebut variabel dan cara memperbaikinya", () => {
@@ -20,4 +21,24 @@ test("menolak DATABASE_URL kosong atau bukan PostgreSQL", () => {
   expect(() => parseEnv({ DATABASE_URL: "mysql://localhost/rekan_tes" })).toThrowError(
     /PostgreSQL/,
   );
+});
+
+test("DATABASE_URL_UNPOOLED opsional untuk runtime aplikasi", () => {
+  expect(parseEnv({ DATABASE_URL: pooled, DATABASE_URL_UNPOOLED: direct })).toEqual({
+    DATABASE_URL: pooled,
+    DATABASE_URL_UNPOOLED: direct,
+  });
+});
+
+test("migrasi memakai endpoint direct, bukan pooled", () => {
+  expect(parseMigrationEnv({ DATABASE_URL: pooled, DATABASE_URL_UNPOOLED: direct })).toEqual({
+    url: direct,
+  });
+});
+
+test("migrasi gagal jelas ketika hanya ada endpoint pooled", () => {
+  expect(() => parseMigrationEnv({ DATABASE_URL: pooled })).toThrowError(
+    /DATABASE_URL_UNPOOLED/,
+  );
+  expect(() => parseMigrationEnv({ DATABASE_URL: pooled })).toThrowError(/neon@latest env pull/);
 });

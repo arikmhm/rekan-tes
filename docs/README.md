@@ -18,6 +18,7 @@ Dokumen di direktori ini adalah sumber keputusan produk dan teknis untuk MVP Rek
 - Zod, Vitest, validasi environment server, dan `.env.example` sudah tersedia.
 - Drizzle, Neon driver, schema domain, dan migrasi awal sudah diterapkan ke Neon.
 - Better Auth, halaman daftar/masuk, dan otorisasi role sudah tersedia.
-- Verifikasi email, DOKU, serta fitur produk belum diimplementasikan.
+- Verifikasi email dan reset password sudah berjalan lewat Resend.
+- DOKU serta fitur produk belum diimplementasikan.
 
 Mulai pekerjaan berikutnya dari issue berstatus `Next` di [ISSUES.md](./ISSUES.md). Jika keputusan produk, database, atau stack berubah, perbarui dokumen sumber dan backlog dalam perubahan yang sama.

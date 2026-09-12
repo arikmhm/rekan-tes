@@ -24,6 +24,10 @@ export default async function MasukPage() {
           <Link className="font-semibold text-brand hover:text-brand-dark" href="/daftar">
             Daftar
           </Link>
+          {" · "}
+          <Link className="font-semibold text-brand hover:text-brand-dark" href="/lupa-password">
+            Lupa password
+          </Link>
         </>
       }
     >

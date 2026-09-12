@@ -6,15 +6,31 @@ const pooled = "postgresql://u:p@host-pooler.ap-southeast-1.aws.neon.tech/neondb
 const direct = "postgresql://u:p@host.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
 const secret = "x".repeat(43);
 
-const minimal = { DATABASE_URL: pooled, BETTER_AUTH_SECRET: secret };
+const minimal = {
+  DATABASE_URL: pooled,
+  BETTER_AUTH_SECRET: secret,
+  RESEND_API_KEY: "re_kunci_uji",
+  BETTER_AUTH_URL: "http://localhost:3000",
+};
 
 test("menerima environment minimum dan mengabaikan variabel lain", () => {
-  expect(parseEnv({ ...minimal, TZ: "Asia/Jakarta" })).toEqual(minimal);
+  expect(parseEnv({ ...minimal, TZ: "Asia/Jakarta" })).toEqual({
+    ...minimal,
+    // Diisi default; domain uji Resend sampai domain sendiri terverifikasi.
+    EMAIL_FROM: "Rekan Tes <onboarding@resend.dev>",
+  });
+});
+
+test("menolak RESEND_API_KEY yang bukan key Resend", () => {
+  expect(() => parseEnv({ ...minimal, RESEND_API_KEY: "kunci-salah" })).toThrowError(
+    /API key Resend/,
+  );
 });
 
 test("gagal dengan pesan yang menyebut variabel dan cara memperbaikinya", () => {
   expect(() => parseEnv({})).toThrowError(/DATABASE_URL/);
   expect(() => parseEnv({})).toThrowError(/BETTER_AUTH_SECRET/);
+  expect(() => parseEnv({})).toThrowError(/RESEND_API_KEY/);
   expect(() => parseEnv({})).toThrowError(/\.env\.example/);
 });
 
@@ -31,11 +47,10 @@ test("menolak secret yang terlalu pendek", () => {
   );
 });
 
-test("BETTER_AUTH_URL harus absolut bila diisi", () => {
+test("BETTER_AUTH_URL wajib dan harus absolut", () => {
+  const { BETTER_AUTH_URL: _, ...tanpaUrl } = minimal;
+  expect(() => parseEnv(tanpaUrl)).toThrowError(/BETTER_AUTH_URL/);
   expect(() => parseEnv({ ...minimal, BETTER_AUTH_URL: "/api/auth" })).toThrowError(/URL absolut/);
-  expect(parseEnv({ ...minimal, BETTER_AUTH_URL: "https://rekan-tes.test" })).toMatchObject({
-    BETTER_AUTH_URL: "https://rekan-tes.test",
-  });
 });
 
 test("DATABASE_URL_UNPOOLED opsional untuk runtime aplikasi", () => {

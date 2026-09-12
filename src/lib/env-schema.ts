@@ -17,10 +17,18 @@ const envSchema = z.object({
     .string()
     .min(32, "minimal 32 karakter; buat dengan `openssl rand -base64 32`"),
   /**
-   * Base URL aplikasi. Wajib di produksi agar tautan verifikasi dan cookie
-   * memakai origin yang benar; di lokal Better Auth memakai localhost:3000.
+   * Base URL aplikasi. Wajib: tautan verifikasi email dan reset password
+   * dibangun dari nilai ini, dan nilai yang salah membuat tautan tidak bisa
+   * dipakai. Tanpa ini Better Auth menebaknya dari request.
    */
-  BETTER_AUTH_URL: z.string().url("harus berupa URL absolut").optional(),
+  BETTER_AUTH_URL: z.string().url("harus berupa URL absolut, misalnya http://localhost:3000"),
+  /** API key Resend untuk email verifikasi dan reset password. */
+  RESEND_API_KEY: z.string().startsWith("re_", "harus berupa API key Resend"),
+  /**
+   * Alamat pengirim. Default memakai domain uji Resend; ganti ke domain sendiri
+   * yang sudah terverifikasi sebelum rilis.
+   */
+  EMAIL_FROM: z.string().default("Rekan Tes <onboarding@resend.dev>"),
 });
 
 export type Env = z.infer<typeof envSchema>;

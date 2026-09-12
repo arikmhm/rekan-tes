@@ -40,6 +40,8 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Otorisasi server memakai helper di `src/lib/authz.ts`: `getSession`, `requireUser`, `requireAdmin`, dan `assertOwner`.
 - Penolakan otorisasi memakai `redirect` dan `notFound`, bukan `forbidden`/`unauthorized` dari Next.js, karena keduanya masih memerlukan flag eksperimental `authInterrupts`. Batas otorisasi tidak diletakkan di atas API eksperimental, dan `notFound` sekaligus tidak membocorkan keberadaan route admin.
 - Role admin diberikan lewat database oleh operator, bukan lewat UI. `role` adalah field server-owned; Better Auth menolak permintaan klien yang mencoba menyetelnya.
+- Email belum terverifikasi tidak memblokir login, hanya pembelian, sesuai PRD. Gunakan `requireVerifiedUser` pada jalur checkout.
+- `BETTER_AUTH_URL` wajib diisi karena tautan verifikasi dan reset password dibangun darinya.
 - Runtime aplikasi memakai `DATABASE_URL` (pooled); migrasi Drizzle Kit memakai `DATABASE_URL_UNPOOLED` (direct).
 - Tidak ada backend terpisah, microservice, Redis, message queue, atau WebSocket pada MVP.
 
@@ -69,7 +71,8 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Drizzle ORM, Drizzle Kit, dan Neon serverless driver sudah terpasang. Schema domain ada di `src/db/schema.ts` dan migrasi awal sudah diterapkan ke Neon.
 - `@neon/config` dan `@neon/env` hasil `neon init` sudah dihapus. Rekan Tes tidak mendeklarasikan layanan Neon apa pun, dan `neon env pull` bekerja tanpa `neon.ts`. Pasang kembali hanya jika nanti memakai branch policy atau layanan Neon.
 - Better Auth beserta username plugin sudah terpasang; tabel auth, halaman daftar/masuk, Route Handler, dan helper otorisasi sudah ada.
-- Provider transactional email sudah ditetapkan: Resend. Pengiriman email diimplementasikan pada RT-004.
+- Resend sudah terpasang lewat REST API di `src/lib/email.ts`; SDK `resend` tidak dipakai. Verifikasi email dan reset password sudah berjalan.
+- Pengirim masih memakai domain uji Resend. Verifikasi domain sendiri sebelum rilis, lalu ubah `EMAIL_FROM`.
 - Urutan pekerjaan terperinci dan statusnya dicatat di [ISSUES.md](./ISSUES.md).
 
 ## Urutan implementasi awal

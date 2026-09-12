@@ -46,6 +46,20 @@ export async function requireAdmin() {
 }
 
 /**
+ * User yang sudah memverifikasi email. Dipakai pada jalur pembelian (RT-009):
+ * PRD mewajibkan verifikasi sebelum membeli, bukan sebelum login.
+ */
+export async function requireVerifiedUser() {
+  const user = await requireUser();
+
+  if (!user.emailVerified) {
+    redirect("/verifikasi-dibutuhkan");
+  }
+
+  return user;
+}
+
+/**
  * Memastikan resource memang milik peminta. Admin dikecualikan agar dapat
  * menangani kendala operasional pada RT-015.
  */

@@ -61,7 +61,11 @@ Akses database hanya melalui `db` dari `src/db/index.ts`, yang dijaga `server-on
 
 ## Akun dan otorisasi
 
-Registrasi di `/daftar` meminta username, email, dan password. Login di `/masuk` memakai username.
+Registrasi di `/daftar` meminta username, email, dan password. Login di `/masuk` memakai username. Reset password lewat `/lupa-password`.
+
+Email verifikasi dikirim otomatis setelah registrasi. Email belum terverifikasi tetap bisa login, tetapi tidak bisa membeli sesi — pembatasan itu dipasang lewat `requireVerifiedUser()` pada jalur checkout.
+
+Pengirim email masih memakai domain uji Resend (`onboarding@resend.dev`), yang hanya bisa mengirim ke alamat pemilik akun Resend. Verifikasi domain sendiri di Resend sebelum rilis, lalu isi `EMAIL_FROM`.
 
 `role` adalah field server-owned: Better Auth menolak permintaan klien yang mencoba menyetelnya. Admin pertama dibuat lewat database, bukan lewat UI:
 

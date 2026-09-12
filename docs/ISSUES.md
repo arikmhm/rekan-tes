@@ -21,8 +21,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 1 | RT-001 | Environment, validasi, dan test runner | Done | RT-000 |
 | 2 | RT-002 | Neon, Drizzle, schema, dan migrasi MVP | Done | RT-001 |
 | 3 | RT-003 | Better Auth dan otorisasi dasar | Done | RT-002 |
-| 4 | RT-004 | Verifikasi email dan reset password | Next | RT-003 |
-| 5 | RT-005 | Admin kategori dan bank soal | Queued | RT-003 |
+| 4 | RT-004 | Verifikasi email dan reset password | Done | RT-003 |
+| 5 | RT-005 | Admin kategori dan bank soal | Next | RT-003 |
 | 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Queued | RT-005 |
 | 7 | RT-007 | Katalog publik dan detail tes | Queued | RT-006 |
 | 8 | RT-008 | Dokumen legal minimum | Queued | RT-007 |
@@ -120,27 +120,32 @@ Catatan: penolakan otorisasi memakai `redirect` dan `notFound`, bukan `forbidden
 
 ### RT-004 — Verifikasi email dan reset password
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Menyelesaikan siklus akun sebelum pembelian diaktifkan.
 
-Scope:
+Hasil implementasi:
 
-- Provider sudah ditetapkan: Resend. Kredensial pengembangan tersedia sebagai `RESEND_API_KEY`.
-- Aktifkan `emailVerification.sendOnSignUp` dan alur reset password di `src/lib/auth.ts`.
-- Tambahkan `RESEND_API_KEY` ke schema environment dan `.env.example`.
-- Verifikasi domain pengirim di Resend sebelum rilis.
+- `src/lib/email.ts` mengirim lewat REST API Resend. SDK `resend` tidak dipasang karena satu POST JSON tidak membutuhkannya. Fungsinya murni terhadap environment sehingga dapat diuji tanpa guard `server-only`.
+- `sendOnSignUp` dan `sendResetPassword` diaktifkan di `src/lib/auth.ts`; `revokeSessionsOnPasswordReset` menutup sesi lama setelah password diganti.
+- Halaman `/lupa-password`, `/reset-password`, dan `/verifikasi-dibutuhkan` beserta tombol kirim ulang verifikasi.
+- `requireVerifiedUser` di `src/lib/authz.ts` untuk dipakai jalur pembelian.
+- `BETTER_AUTH_URL` menjadi wajib: tautan verifikasi dan reset dibangun darinya, dan nilai keliru membuat tautan tidak terpakai.
+
+Token, masa berlaku, sifat sekali pakai, dan jaminan tidak membocorkan keberadaan email seluruhnya ditangani Better Auth. Tidak ada logika token yang ditulis sendiri.
 
 Acceptance criteria:
 
-- Email verifikasi dikirim setelah registrasi dan tautan kedaluwarsa dengan aman.
-- Email belum terverifikasi tidak dapat membuat order.
-- Permintaan reset password tidak membocorkan apakah email terdaftar.
-- Token sekali pakai tidak dapat digunakan ulang setelah berhasil.
+- Email verifikasi dikirim setelah registrasi dan tautan kedaluwarsa dengan aman. Diverifikasi: Resend menerima pengiriman dengan status 200 beserta id.
+- Email belum terverifikasi tidak dapat membuat order. `requireVerifiedUser` mengarahkan ke `/verifikasi-dibutuhkan`; penerapannya pada checkout menyusul di RT-009 ketika order ada.
+- Permintaan reset password tidak membocorkan apakah email terdaftar. Diverifikasi: email terdaftar dan tidak terdaftar memberi respons identik.
+- Token sekali pakai tidak dapat digunakan ulang setelah berhasil. Diverifikasi: pemakaian kedua ditolak `INVALID_TOKEN`, sesi lama terhapus, password lama tidak lagi dapat dipakai login.
+
+Catatan: pengirim masih memakai domain uji Resend. Verifikasi domain sendiri sebelum rilis, lalu ubah `EMAIL_FROM`.
 
 ### RT-005 — Admin kategori dan bank soal
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Memungkinkan admin mengelola soal single-choice reusable.
 

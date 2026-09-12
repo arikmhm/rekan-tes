@@ -25,6 +25,12 @@ export function AdminShell({
         <Link className={tab} href="/admin/soal">
           Bank soal
         </Link>
+        <Link className={tab} href="/admin/subtes">
+          Subtes
+        </Link>
+        <Link className={tab} href="/admin/tes">
+          Produk tes
+        </Link>
       </nav>
 
       <div className="mt-7 flex flex-wrap items-start justify-between gap-4">

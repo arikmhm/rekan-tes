@@ -23,8 +23,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 3 | RT-003 | Better Auth dan otorisasi dasar | Done | RT-002 |
 | 4 | RT-004 | Verifikasi email dan reset password | Done | RT-003 |
 | 5 | RT-005 | Admin kategori dan bank soal | Done | RT-003 |
-| 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Next | RT-005 |
-| 7 | RT-007 | Katalog publik dan detail tes | Queued | RT-006 |
+| 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Done | RT-005 |
+| 7 | RT-007 | Katalog publik dan detail tes | Next | RT-006 |
 | 8 | RT-008 | Dokumen legal minimum | Queued | RT-007 |
 | 9 | RT-009 | Order dan DOKU Checkout | Queued | RT-004, RT-007, RT-008 |
 | 10 | RT-010 | Webhook DOKU dan pemberian attempt | Queued | RT-009 |
@@ -167,26 +167,30 @@ Catatan: `requireAdmin` memakai `notFound` yang cocok untuk halaman, tetapi meng
 
 ### RT-006 — Admin subtes, produk tes, dan publikasi
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Menyusun produk tes dari subtes dan assignment soal.
 
-Scope:
+Hasil implementasi:
 
-- CRUD subtes dan produk tes.
-- Atur posisi, durasi, question limit, weight, dan assignment soal.
-- Validasi kecocokan kategori soal dengan subtes.
-- Validasi kelengkapan secara atomik saat publish.
+- Halaman `/admin/subtes` (CRUD subtes) serta `/admin/tes` dan `/admin/tes/[id]` (produk tes, konfigurasi subtes, dan assignment soal).
+- Server Action dan query baru menyusul pola RT-005 di `src/lib/admin.ts`; `src/lib/test-publish.ts` memuat syarat publikasi sebagai fungsi murni yang dapat diuji.
+- Posisi tidak pernah diketik admin: subtes dan assignment masuk di urutan terakhir lewat subquery `max(position) + 1`, dan urutan subtes diubah dengan tombol naik/turun. Penukaran memarkir satu baris di posisi di luar jangkauan karena `UNIQUE(test_id, position)` melarang dua baris berbagi posisi walau sesaat.
+- Daftar soal pada formulir assignment sudah difilter ke soal terbit yang sekategori, tetapi server memeriksa ulang kategori dan status karena form dapat dikirim dari mana saja.
+- Durasi diisi dalam menit di UI dan disimpan sebagai detik, sesuai kolom `duration_seconds`.
+- Tes yang sudah pernah dikerjakan membekukan susunan subtes dan soalnya; nama, deskripsi, harga, dan status tetap dapat diperbarui.
 
 Acceptance criteria:
 
-- Posisi subtes dan soal unik dalam parent masing-masing.
-- Produk tidak dapat terbit jika jumlah soal kurang atau mengandung konten tidak valid.
-- Produk yang sudah memiliki attempt tidak kehilangan konfigurasi historis secara fisik.
+- Posisi subtes dan soal unik dalam parent masing-masing. Dijamin unique index dan pemberian posisi oleh database. Diverifikasi terhadap Neon: dua subtes berurutan mendapat posisi 1 dan 2, subtes yang sama ditolak saat dimasukkan dua kali, dan penukaran urutan menghasilkan posisi 1 dan 2 dengan urutan tertukar.
+- Produk tidak dapat terbit jika jumlah soal kurang atau mengandung konten tidak valid. Diverifikasi terhadap Neon: publikasi tes tanpa soal ditolak dan status tetap `draft`; setelah soal dilengkapi publikasi berhasil; mengarsipkan satu soal membuat publikasi berikutnya ditolak lagi. Assignment soal beda kategori dan soal ganda juga ditolak server.
+- Produk yang sudah memiliki attempt tidak kehilangan konfigurasi historis secara fisik. Seluruh mutasi struktural memeriksa keberadaan `attempt_subtests` pada tes tersebut dan menolak lebih dulu; tidak ada jalur yang menghapus `test_subtests` atau `test_subtest_questions` setelah tes dikerjakan.
+
+Catatan: kelengkapan diperiksa di dalam transaksi yang sama dengan perubahan status, sehingga publikasi yang gagal tidak menyisakan status `published`. Bobot assignment ditetapkan saat penugasan; mengubahnya berarti menghapus lalu menugaskan ulang. Formulir bobot per baris ditambahkan bila penyusunan tes benar-benar membutuhkannya.
 
 ### RT-007 — Katalog publik dan detail tes
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Menampilkan hanya produk valid yang dapat dipahami sebelum checkout.
 
@@ -327,7 +331,7 @@ Acceptance criteria:
 
 | Keputusan | Dibutuhkan sebelum | Pemilik keputusan |
 |---|---|---|
-| Blueprint jumlah soal dan durasi produk pertama | RT-006 | Produk/penyusun konten |
+| Blueprint jumlah soal dan durasi produk pertama | Pengisian produk pertama | Produk/penyusun konten |
 | Harga produk pertama | RT-007/RT-009 | Produk/bisnis |
 | Object storage gambar figural | Saat soal bergambar pertama dibuat | Engineering |
 

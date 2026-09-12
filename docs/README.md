@@ -19,7 +19,7 @@ Dokumen di direktori ini adalah sumber keputusan produk dan teknis untuk MVP Rek
 - Drizzle, Neon driver, schema domain, dan migrasi awal sudah diterapkan ke Neon.
 - Better Auth, halaman daftar/masuk, dan otorisasi role sudah tersedia.
 - Verifikasi email dan reset password sudah berjalan lewat Resend.
-- Admin kategori dan bank soal sudah tersedia di `/admin`.
-- Subtes, produk tes, katalog, DOKU, dan test engine belum diimplementasikan.
+- Admin kategori, bank soal, subtes, dan produk tes sudah tersedia di `/admin`, termasuk validasi publikasi tes.
+- Katalog publik, DOKU, dan test engine belum diimplementasikan.
 
 Mulai pekerjaan berikutnya dari issue berstatus `Next` di [ISSUES.md](./ISSUES.md). Jika keputusan produk, database, atau stack berubah, perbarui dokumen sumber dan backlog dalam perubahan yang sama.

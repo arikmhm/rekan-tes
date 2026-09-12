@@ -18,6 +18,16 @@ const items = [
     title: "Bank soal",
     description: "Buat dan kelola soal pilihan ganda yang dapat dipakai ulang di banyak tes.",
   },
+  {
+    href: "/admin/subtes",
+    title: "Subtes",
+    description: "Tentukan jenis subtes beserta kategori soal yang boleh mengisinya.",
+  },
+  {
+    href: "/admin/tes",
+    title: "Produk tes",
+    description: "Susun subtes menjadi produk tes, atur durasi dan soalnya, lalu terbitkan.",
+  },
 ];
 
 export default async function AdminPage() {
@@ -26,7 +36,7 @@ export default async function AdminPage() {
   return (
     <AdminShell
       title="Panel admin"
-      description={`Masuk sebagai ${admin.username ?? admin.name}. Subtes dan produk tes dibangun pada RT-006.`}
+      description={`Masuk sebagai ${admin.username ?? admin.name}. Katalog publik dibangun pada RT-007.`}
     >
       <ul className="grid gap-4 sm:grid-cols-2">
         {items.map((item) => (

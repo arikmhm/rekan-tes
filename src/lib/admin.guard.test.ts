@@ -11,8 +11,27 @@ import { expect, test } from "vitest";
  */
 const source = readFileSync(join(process.cwd(), "src/lib/admin.ts"), "utf8");
 
-const MUTATIONS = ["saveCategory", "saveQuestion", "duplicateQuestion"];
-const READS = ["listCategories", "listQuestions", "getQuestion"];
+const MUTATIONS = [
+  "saveCategory",
+  "saveQuestion",
+  "duplicateQuestion",
+  "saveSubtest",
+  "saveTest",
+  "addTestSubtest",
+  "updateTestSubtest",
+  "removeTestSubtest",
+  "moveTestSubtest",
+  "addAssignment",
+  "removeAssignment",
+];
+const READS = [
+  "listCategories",
+  "listQuestions",
+  "getQuestion",
+  "listSubtests",
+  "listTests",
+  "getTest",
+];
 
 function badanFungsi(nama: string) {
   const mulai = source.indexOf(`export async function ${nama}`);

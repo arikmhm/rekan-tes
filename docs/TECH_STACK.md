@@ -19,6 +19,7 @@ MVP dibangun sebagai satu aplikasi Next.js modular monolith. UI, autentikasi, lo
 | Web | Next.js App Router dan React |
 | UI | Tailwind CSS dan komponen shadcn/ui seperlunya |
 | Autentikasi | Better Auth dengan username plugin |
+| Transactional email | Resend |
 | Database | Neon PostgreSQL |
 | Akses database | Drizzle ORM, Drizzle Kit, dan Neon serverless driver |
 | Validasi | Zod pada input dari luar aplikasi |
@@ -36,6 +37,9 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Otorisasi, deadline tes, scoring, dan aktivasi attempt selalu diverifikasi di server.
 - Environment server dibaca hanya melalui `env` dari `src/lib/env.ts`, bukan `process.env` langsung. Variabel baru ditambahkan ke schema dan `.env.example` pada issue yang benar-benar memakainya.
 - Akses database hanya melalui `db` dari `src/db/index.ts`. Driver yang dipakai `neon-serverless`, bukan `neon-http`, karena `neon-http` melempar error pada `transaction()` sementara RT-010 membutuhkan transaksi sungguhan.
+- Otorisasi server memakai helper di `src/lib/authz.ts`: `getSession`, `requireUser`, `requireAdmin`, dan `assertOwner`.
+- Penolakan otorisasi memakai `redirect` dan `notFound`, bukan `forbidden`/`unauthorized` dari Next.js, karena keduanya masih memerlukan flag eksperimental `authInterrupts`. Batas otorisasi tidak diletakkan di atas API eksperimental, dan `notFound` sekaligus tidak membocorkan keberadaan route admin.
+- Role admin diberikan lewat database oleh operator, bukan lewat UI. `role` adalah field server-owned; Better Auth menolak permintaan klien yang mencoba menyetelnya.
 - Runtime aplikasi memakai `DATABASE_URL` (pooled); migrasi Drizzle Kit memakai `DATABASE_URL_UNPOOLED` (direct).
 - Tidak ada backend terpisah, microservice, Redis, message queue, atau WebSocket pada MVP.
 
@@ -64,7 +68,8 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Zod dan Vitest sudah terpasang. Validasi environment server ada di `src/lib/env-schema.ts`, dan singleton `src/lib/env.ts` dijaga paket `server-only`.
 - Drizzle ORM, Drizzle Kit, dan Neon serverless driver sudah terpasang. Schema domain ada di `src/db/schema.ts` dan migrasi awal sudah diterapkan ke Neon.
 - `@neon/config` dan `@neon/env` hasil `neon init` sudah dihapus. Rekan Tes tidak mendeklarasikan layanan Neon apa pun, dan `neon env pull` bekerja tanpa `neon.ts`. Pasang kembali hanya jika nanti memakai branch policy atau layanan Neon.
-- Better Auth belum tercatat di `package.json`.
+- Better Auth beserta username plugin sudah terpasang; tabel auth, halaman daftar/masuk, Route Handler, dan helper otorisasi sudah ada.
+- Provider transactional email sudah ditetapkan: Resend. Pengiriman email diimplementasikan pada RT-004.
 - Urutan pekerjaan terperinci dan statusnya dicatat di [ISSUES.md](./ISSUES.md).
 
 ## Urutan implementasi awal
@@ -80,7 +85,6 @@ Rincian dependensi dan kriteria selesai untuk setiap tahap tersedia di [ISSUES.m
 
 ## Keputusan yang belum ditetapkan
 
-- Provider transactional email.
 - Object storage untuk gambar soal figural.
 
 Pilih layanan tersebut ketika fiturnya mulai diimplementasikan; jangan menambahkannya hanya untuk persiapan.

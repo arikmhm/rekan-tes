@@ -17,13 +17,15 @@
 - Satu soal dapat digunakan pada banyak tes tanpa diduplikasi.
 - Satu order dapat memiliki beberapa percobaan pembayaran, tetapi maksimal satu test attempt.
 - Nama tabel dan kolom memakai `snake_case`, waktu disimpan dalam UTC, dan nilai rupiah memakai integer.
-- Semua primary key bertipe `text` berisi UUID v4 yang dibuat aplikasi melalui `crypto.randomUUID()`. Satu tipe ID dipakai untuk tabel auth maupun domain sehingga tidak ada friksi dengan adapter Better Auth dan tidak perlu ekstensi PostgreSQL tambahan.
+- Semua primary key bertipe `text` berisi UUID v4 yang dibuat aplikasi melalui `crypto.randomUUID()`. Satu tipe ID dipakai untuk tabel auth maupun domain sehingga tidak ada friksi dengan adapter Better Auth dan tidak perlu ekstensi PostgreSQL tambahan. Better Auth disetel memakai generator yang sama lewat `advanced.database.generateId`.
 - `test_subtest_questions.weight` bertipe `integer` dengan default `1` dan constraint `> 0`. Skor subtes adalah jumlah bobot jawaban benar. Jika kelak dibutuhkan pembobotan lebih halus, naikkan skalanya (misalnya basis 100) tanpa mengubah tipe kolom.
 - Runtime aplikasi memakai connection string pooled, sedangkan migrasi Drizzle Kit memakai endpoint direct (`DATABASE_URL_UNPOOLED`). PgBouncer dalam mode transaction dapat menggagalkan DDL.
 
 ## 2. Tabel autentikasi
 
-Schema final bagian ini dibuat melalui CLI Better Auth agar sesuai dengan versi library dan adapter database.
+Tabel bagian ini dikelola Better Auth dan diimplementasikan di `src/db/auth-schema.ts`.
+
+CLI Better Auth tidak dipakai: rilis stabilnya tertinggal beberapa minor dari library terpasang, sehingga schema hasil generate berisiko tidak cocok. Tabel ditulis tangan, lalu `src/db/auth-schema.test.ts` membandingkannya dengan `getAuthTables()` milik library agar perbedaan langsung terlihat saat versi dinaikkan.
 
 | Tabel | Kolom penting | Fungsi |
 |---|---|---|
@@ -180,7 +182,6 @@ Autosave melakukan upsert berdasarkan pasangan unik `attempt_subtest_id` dan `te
 Dicatat saat RT-002 agar tidak terbaca sebagai kelalaian:
 
 - `orders.access_expires_at` dibuat nullable. Masa akses baru diketahui ketika pembayaran berhasil (RT-009), sehingga tidak dapat terisi saat order masih `pending`.
-- `orders.user_id` belum memiliki foreign key. Tabel `user` dibuat CLI Better Auth pada RT-003, dan constraint ditambahkan pada migrasi issue tersebut.
 - Tiga index pada bagian 9 belum dibuat. `attempt_subtests(attempt_id, status)` dan `attempt_answers(attempt_subtest_id)` sudah tercakup prefix unique index yang ada, sedangkan search index `questions.prompt` menunggu keputusan strategi pencarian.
 
 ## 13. Keputusan teknis terbuka

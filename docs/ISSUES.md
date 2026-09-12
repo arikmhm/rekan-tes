@@ -20,8 +20,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 0 | RT-000 | Fondasi App Router dan shell produk | Done | — |
 | 1 | RT-001 | Environment, validasi, dan test runner | Done | RT-000 |
 | 2 | RT-002 | Neon, Drizzle, schema, dan migrasi MVP | Done | RT-001 |
-| 3 | RT-003 | Better Auth dan otorisasi dasar | Next | RT-002 |
-| 4 | RT-004 | Verifikasi email dan reset password | Blocked | RT-003, provider email |
+| 3 | RT-003 | Better Auth dan otorisasi dasar | Done | RT-002 |
+| 4 | RT-004 | Verifikasi email dan reset password | Next | RT-003 |
 | 5 | RT-005 | Admin kategori dan bank soal | Queued | RT-003 |
 | 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Queued | RT-005 |
 | 7 | RT-007 | Katalog publik dan detail tes | Queued | RT-006 |
@@ -96,33 +96,40 @@ Catatan: penyimpangan dari `DATABASE_DESIGN.md` dicatat pada bagian 12 dokumen t
 
 ### RT-003 — Better Auth dan otorisasi dasar
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Menyediakan registrasi, login username, logout, session, serta role peserta/admin.
 
-Scope:
+Hasil implementasi:
 
-- Pasang Better Auth dan username plugin; hasilkan schema auth menggunakan CLI versi terpasang.
-- Tambahkan foreign key `orders.user_id` ke `user.id` setelah tabel auth ada.
-- Evaluasi Managed Better Auth dari Neon sebagai alternatif self-host, terutama kaitannya dengan blocker provider email di RT-004.
-- Registrasi meminta username, email, password; `name` mengikuti username.
-- Tambahkan halaman registrasi dan login serta Route Handler auth.
-- Buat helper otorisasi server untuk session, kepemilikan resource, dan role admin.
+- Better Auth 1.7.4 dengan username plugin; adapter Drizzle memakai `db` yang sudah ada.
+- Tabel auth di `src/db/auth-schema.ts`, diterapkan ke Neon bersama foreign key `orders.user_id`.
+- CLI Better Auth tidak dipakai karena rilis stabilnya tertinggal beberapa minor dari library terpasang. Tabel ditulis tangan, lalu `src/db/auth-schema.test.ts` membandingkannya dengan `getAuthTables()` milik library sebagai penjaga perbedaan versi.
+- ID dibuat dengan `crypto.randomUUID()` lewat `advanced.database.generateId`, menjaga invariant primary key pada `DATABASE_DESIGN.md`.
+- Halaman `/daftar` dan `/masuk`, Route Handler `/api/auth/[...all]`, dan tombol keluar di navigasi.
+- Helper otorisasi `src/lib/authz.ts`: `getSession`, `requireUser`, `requireAdmin`, `assertOwner`. Landing `/admin` sudah memakai `requireAdmin`.
 
 Acceptance criteria:
 
-- Username dan email unik, password tidak disimpan di tabel domain aplikasi.
-- Role tidak dapat ditentukan atau diubah oleh peserta.
-- Route admin menolak non-admin di server, bukan hanya menyembunyikan UI.
-- Peserta tidak dapat membaca data peserta lain.
+- Username dan email unik, password tidak disimpan di tabel domain aplikasi. Diverifikasi: hash berada di `account` dengan `provider_id=credential`, dan `user` tidak memiliki kolom password.
+- Role tidak dapat ditentukan atau diubah oleh peserta. Diverifikasi terhadap Neon: registrasi yang mengirim `role=admin` tersimpan sebagai `participant`, dan `update-user` dengan `role` ditolak `FIELD_NOT_ALLOWED` tanpa mengubah field lain.
+- Route admin menolak non-admin di server. Diverifikasi: anonim dan peserta menerima 404, admin menerima 200.
+- Peserta tidak dapat membaca data peserta lain. `assertOwner` tersedia dan dipakai mulai RT-009 ketika order serta attempt milik peserta ada.
+
+Catatan: penolakan otorisasi memakai `redirect` dan `notFound`, bukan `forbidden`/`unauthorized` yang masih memerlukan flag eksperimental `authInterrupts`. Role admin diberikan operator lewat database, bukan lewat UI.
 
 ### RT-004 — Verifikasi email dan reset password
 
-**Status:** Blocked
-
-**Blocker:** Pilih provider transactional email dan siapkan kredensial pengembangan.
+**Status:** Next
 
 **Tujuan:** Menyelesaikan siklus akun sebelum pembelian diaktifkan.
+
+Scope:
+
+- Provider sudah ditetapkan: Resend. Kredensial pengembangan tersedia sebagai `RESEND_API_KEY`.
+- Aktifkan `emailVerification.sendOnSignUp` dan alur reset password di `src/lib/auth.ts`.
+- Tambahkan `RESEND_API_KEY` ke schema environment dan `.env.example`.
+- Verifikasi domain pengirim di Resend sebelum rilis.
 
 Acceptance criteria:
 
@@ -312,7 +319,6 @@ Acceptance criteria:
 
 | Keputusan | Dibutuhkan sebelum | Pemilik keputusan |
 |---|---|---|
-| Provider transactional email | RT-004 | Produk/engineering |
 | Blueprint jumlah soal dan durasi produk pertama | RT-006 | Produk/penyusun konten |
 | Harga produk pertama | RT-007/RT-009 | Produk/bisnis |
 | Object storage gambar figural | Saat soal bergambar pertama dibuat | Engineering |

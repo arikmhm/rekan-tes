@@ -1,3 +1,5 @@
+import { AccountNav } from "./_components/account-nav";
+
 const categories = [
   "Numerik",
   "Verbal",
@@ -28,7 +30,7 @@ const steps = [
 export default function Home() {
   return (
     <div className="min-h-screen overflow-hidden bg-background text-ink">
-      <header className="border-b border-black/8 bg-background/90">
+      <header className="relative z-10 border-b border-black/8 bg-background/90">
         <nav
           aria-label="Navigasi utama"
           className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8"
@@ -46,19 +48,19 @@ export default function Home() {
             <a className="transition hover:text-ink" href="#cakupan">
               Cakupan tes
             </a>
-            <a
-              className="rounded-full border border-black/10 bg-white px-4 py-2 font-semibold text-ink shadow-sm transition hover:border-brand/30"
-              href="#status"
-            >
-              Status MVP
-            </a>
+            <AccountNav />
           </div>
         </nav>
       </header>
 
       <main id="top">
         <section className="relative mx-auto grid max-w-6xl gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:py-28">
-          <div className="absolute -right-48 -top-36 -z-0 size-[520px] rounded-full bg-mint/70 blur-3xl" />
+          {/* Dekoratif: harus tidak pernah menerima klik. Tanpa
+              `pointer-events-none`, lingkaran ini menutupi navigasi kanan atas. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-48 -top-36 -z-0 size-[520px] rounded-full bg-mint/70 blur-3xl"
+          />
           <div className="relative z-10">
             <p className="mb-5 inline-flex rounded-full border border-brand/15 bg-mint px-4 py-2 text-xs font-bold tracking-[0.16em] text-brand-dark uppercase">
               Simulasi tes kerja perbankan

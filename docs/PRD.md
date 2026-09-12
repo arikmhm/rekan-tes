@@ -165,7 +165,7 @@ Automasi MVP menggunakan Vitest pada logika bisnis dan integrasi server. Alur br
 | Nama final | Rekan Tes sebagai nama kerja |
 | Produk pertama | Core Aptitude Perbankan |
 | Harga sesi | Uji Rp19.000–Rp25.000 |
-| Email provider | Dipilih sebelum implementasi verifikasi dan reset password |
+| Email provider | Resend |
 | Penyimpanan gambar soal | Dipilih saat soal figural mulai diimplementasikan |
 | Blueprint soal | Jumlah dan durasi ditetapkan bersama penyusun konten |
 | Masa akses | 30 hari setelah pembayaran |

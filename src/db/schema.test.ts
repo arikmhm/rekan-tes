@@ -37,8 +37,28 @@ test("soal tidak dimiliki langsung oleh tes atau subtes", () => {
   expect(tabelQuestions).not.toMatch(/test_id|subtest_id/);
 });
 
-test("seluruh tabel domain MVP ada di migrasi", () => {
+test("seluruh tabel MVP ada di migrasi", () => {
   const tabel = [...sql.matchAll(/CREATE TABLE "([a-z_]+)"/g)].map((m) => m[1]);
-  expect(tabel).toHaveLength(12);
-  expect(tabel).toContain("test_subtest_questions");
+
+  const domain = [
+    "question_categories",
+    "questions",
+    "question_options",
+    "subtests",
+    "tests",
+    "test_subtests",
+    "test_subtest_questions",
+    "orders",
+    "payments",
+    "test_attempts",
+    "attempt_subtests",
+    "attempt_answers",
+  ];
+  const auth = ["user", "session", "account", "verification"];
+
+  expect(tabel.toSorted()).toEqual([...domain, ...auth].toSorted());
+});
+
+test("orders terhubung ke tabel user milik Better Auth", () => {
+  expect(sql).toMatch(/ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_user_id_fk"/);
 });

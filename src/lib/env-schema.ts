@@ -12,6 +12,15 @@ const envSchema = z.object({
    * tidak perlu menyetel variabel yang tidak dipakainya.
    */
   DATABASE_URL_UNPOOLED: postgresUrl("connection string PostgreSQL").optional(),
+  /** Secret penanda tangan session Better Auth. Minimal 32 karakter. */
+  BETTER_AUTH_SECRET: z
+    .string()
+    .min(32, "minimal 32 karakter; buat dengan `openssl rand -base64 32`"),
+  /**
+   * Base URL aplikasi. Wajib di produksi agar tautan verifikasi dan cookie
+   * memakai origin yang benar; di lokal Better Auth memakai localhost:3000.
+   */
+  BETTER_AUTH_URL: z.string().url("harus berupa URL absolut").optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

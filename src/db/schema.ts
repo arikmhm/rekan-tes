@@ -11,6 +11,10 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+import { user } from "./auth-schema";
+
+export * from "./auth-schema";
+
 // ---------------------------------------------------------------------------
 // Status. Lihat docs/DATABASE_DESIGN.md bagian 7.
 // ---------------------------------------------------------------------------
@@ -191,16 +195,15 @@ export const testSubtestQuestions = pgTable(
 
 // ---------------------------------------------------------------------------
 // Transaksi
-//
-// `user_id` belum memiliki foreign key karena tabel `user` dibuat oleh CLI
-// Better Auth pada RT-003. Constraint ditambahkan di migrasi RT-003.
 // ---------------------------------------------------------------------------
 
 export const orders = pgTable(
   "orders",
   {
     id: id(),
-    userId: text("user_id").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
     testId: text("test_id")
       .notNull()
       .references(() => tests.id),

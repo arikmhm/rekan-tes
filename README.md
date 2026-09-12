@@ -4,7 +4,7 @@ Platform B2C untuk simulasi tes masuk kerja, dengan fokus awal perbankan dan pem
 
 ## Status
 
-Fondasi aplikasi sudah menggunakan Next.js App Router dan Tailwind CSS. Halaman publik awal sudah diselaraskan dengan positioning produk, validasi environment server dan test runner sudah tersedia, serta schema database MVP sudah diterapkan ke Neon. Fitur akun, bank soal, pembayaran, test engine, dan hasil masih berada dalam backlog.
+Fondasi aplikasi sudah menggunakan Next.js App Router dan Tailwind CSS. Halaman publik awal sudah diselaraskan dengan positioning produk, schema database MVP sudah diterapkan ke Neon, serta registrasi, login, dan otorisasi role sudah berjalan. Verifikasi email, bank soal, pembayaran, test engine, dan hasil masih berada dalam backlog.
 
 Urutan implementasi tersedia di [docs/ISSUES.md](./docs/ISSUES.md).
 
@@ -58,6 +58,18 @@ pnpm db:migrate
 ```
 
 Akses database hanya melalui `db` dari `src/db/index.ts`, yang dijaga `server-only` agar tidak pernah masuk bundle klien.
+
+## Akun dan otorisasi
+
+Registrasi di `/daftar` meminta username, email, dan password. Login di `/masuk` memakai username.
+
+`role` adalah field server-owned: Better Auth menolak permintaan klien yang mencoba menyetelnya. Admin pertama dibuat lewat database, bukan lewat UI:
+
+```bash
+psql "$DATABASE_URL_UNPOOLED" -c "update \"user\" set role='admin' where username='ganti-username';"
+```
+
+Otorisasi server memakai helper di `src/lib/authz.ts`. Gunakan `requireAdmin()` pada route admin dan `assertOwner()` untuk resource milik peserta; keduanya menolak di server, bukan hanya menyembunyikan UI.
 
 ## Pemeriksaan sebelum commit
 

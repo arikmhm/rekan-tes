@@ -20,6 +20,7 @@ Dokumen di direktori ini adalah sumber keputusan produk dan teknis untuk MVP Rek
 - Better Auth, halaman daftar/masuk, dan otorisasi role sudah tersedia.
 - Verifikasi email dan reset password sudah berjalan lewat Resend.
 - Admin kategori, bank soal, subtes, dan produk tes sudah tersedia di `/admin`, termasuk validasi publikasi tes.
-- Katalog publik, DOKU, dan test engine belum diimplementasikan.
+- Katalog publik `/tes` dan detail tes sudah tersedia untuk produk berstatus `published`.
+- Dokumen legal, DOKU, dan test engine belum diimplementasikan.
 
 Mulai pekerjaan berikutnya dari issue berstatus `Next` di [ISSUES.md](./ISSUES.md). Jika keputusan produk, database, atau stack berubah, perbarui dokumen sumber dan backlog dalam perubahan yang sama.

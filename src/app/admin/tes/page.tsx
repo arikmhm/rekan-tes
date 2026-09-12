@@ -2,17 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { listTests } from "@/lib/admin";
+import { formatPrice } from "@/lib/format";
 
 import { AdminShell, StatusBadge } from "../_components/shell";
 import { TestForm } from "../_components/test-form";
 
 export const metadata: Metadata = { title: "Produk tes" };
-
-const rupiah = new Intl.NumberFormat("id-ID", {
-  style: "currency",
-  currency: "IDR",
-  maximumFractionDigits: 0,
-});
 
 export default async function TesPage() {
   const tes = await listTests();
@@ -47,7 +42,7 @@ export default async function TesPage() {
                 <StatusBadge status={t.status} />
                 <span className="font-medium">{t.name}</span>
                 <code className="rounded-lg bg-cream px-2 py-1 text-xs">{t.slug}</code>
-                <span className="text-sm text-muted">{rupiah.format(t.priceAmount)}</span>
+                <span className="text-sm text-muted">{formatPrice(t.priceAmount)}</span>
                 <span className="text-xs text-muted">{t.subtestCount} subtes</span>
               </Link>
             </li>

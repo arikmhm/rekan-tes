@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AccountNav } from "./_components/account-nav";
 
 const categories = [
@@ -42,6 +44,9 @@ export default function Home() {
             <span className="text-lg">Rekan Tes</span>
           </a>
           <div className="hidden items-center gap-7 text-sm text-muted sm:flex">
+            <Link className="transition hover:text-ink" href="/tes">
+              Katalog
+            </Link>
             <a className="transition hover:text-ink" href="#cara-kerja">
               Cara kerja
             </a>
@@ -72,12 +77,12 @@ export default function Home() {
               Latihan terstruktur dengan batas waktu, progres tersimpan, serta hasil dan pembahasan yang membantu menemukan area terlemahmu.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <a
+              <Link
                 className="rounded-full bg-brand px-6 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-brand/20 transition hover:bg-brand-dark"
-                href="#cakupan"
+                href="/tes"
               >
-                Lihat fokus latihan
-              </a>
+                Lihat katalog simulasi
+              </Link>
               <a
                 className="rounded-full border border-black/10 bg-white px-6 py-3.5 text-center text-sm font-bold transition hover:border-brand/30"
                 href="#cara-kerja"
@@ -183,11 +188,11 @@ export default function Home() {
               <p className="text-sm font-bold text-emerald-200">Status pengembangan</p>
               <h2 className="mt-2 text-3xl font-semibold tracking-tight">MVP sedang dibangun.</h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50/75">
-                Katalog, akun, pembayaran, dan sesi tes belum dibuka. Halaman ini menampilkan arah produk tanpa menerima transaksi.
+                Katalog dan akun sudah dapat dipakai. Pembayaran dan sesi pengerjaan belum dibuka, jadi halaman ini belum menerima transaksi.
               </p>
             </div>
             <span className="shrink-0 self-start rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold lg:self-auto">
-              Belum menerima pendaftaran
+              Belum menerima pembayaran
             </span>
           </div>
         </section>

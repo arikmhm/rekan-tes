@@ -24,8 +24,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 4 | RT-004 | Verifikasi email dan reset password | Done | RT-003 |
 | 5 | RT-005 | Admin kategori dan bank soal | Done | RT-003 |
 | 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Done | RT-005 |
-| 7 | RT-007 | Katalog publik dan detail tes | Next | RT-006 |
-| 8 | RT-008 | Dokumen legal minimum | Queued | RT-007 |
+| 7 | RT-007 | Katalog publik dan detail tes | Done | RT-006 |
+| 8 | RT-008 | Dokumen legal minimum | Next | RT-007 |
 | 9 | RT-009 | Order dan DOKU Checkout | Queued | RT-004, RT-007, RT-008 |
 | 10 | RT-010 | Webhook DOKU dan pemberian attempt | Queued | RT-009 |
 | 11 | RT-011 | Memulai attempt dan urutan subtes | Queued | RT-010 |
@@ -190,20 +190,31 @@ Catatan: kelengkapan diperiksa di dalam transaksi yang sama dengan perubahan sta
 
 ### RT-007 — Katalog publik dan detail tes
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Menampilkan hanya produk valid yang dapat dipahami sebelum checkout.
 
+Hasil implementasi:
+
+- Halaman `/tes` (katalog) dan `/tes/[slug]` (detail), memakai `src/app/_components/site-shell.tsx` sebagai kerangka publik bersama.
+- `src/lib/catalog.ts` memuat query publik dan konstanta `ACCESS_DAYS`; RT-009 menghitung `orders.access_expires_at` dari konstanta yang sama agar angka di halaman dan di data tidak berbeda.
+- `src/lib/format.ts` memformat harga dan durasi untuk locale Indonesia; halaman admin produk tes ikut memakainya agar formatnya tidak bercabang.
+- `src/app/not-found.tsx` menangani slug tidak dikenal maupun route lain yang salah, lengkap dengan tautan kembali ke katalog.
+- Katalog memakai `dynamic = "force-dynamic"`. Tanpa itu Next.js ikut mem-prerender daftar saat build dan produk baru tidak pernah muncul sampai deploy berikutnya.
+- Landing page menautkan katalog dan status pengembangannya diperbarui: pendaftaran dan katalog sudah dibuka, pembayaran belum.
+
 Acceptance criteria:
 
-- Katalog hanya menampilkan tes berstatus `published`.
-- Detail menampilkan harga, urutan subtes, jumlah soal, durasi, masa akses, dan disclaimer independensi.
-- Harga dan durasi diformat konsisten untuk locale Indonesia.
-- State kosong dan produk tidak ditemukan memiliki UI yang jelas.
+- Katalog hanya menampilkan tes berstatus `published`. Filter berada di query, bukan di UI. Diverifikasi dengan data uji di Neon: dari dua tes, hanya yang `published` muncul; slug tes draft memberi 404.
+- Detail menampilkan harga, urutan subtes, jumlah soal, durasi, masa akses, dan disclaimer independensi. Diverifikasi: harga `Rp 79.000`, 45 soal, 1 jam 15 menit, masa akses 30 hari, dua subtes berurutan beserta soal dan durasinya. Disclaimer berada di footer kerangka publik sehingga selalu ikut tampil.
+- Harga dan durasi diformat konsisten untuk locale Indonesia. Dikunci `src/lib/format.test.ts`, termasuk pemisah ribuan dan pemecahan durasi menjadi jam dan menit.
+- State kosong dan produk tidak ditemukan memiliki UI yang jelas. Diverifikasi: katalog tanpa produk menampilkan penjelasan, slug tidak dikenal dan slug draft memberi 404 dengan tautan kembali ke katalog.
+
+Catatan: tombol pembelian belum ada. Detail tes menutup dengan keterangan bahwa checkout sedang dikerjakan, diganti alur order pada RT-009.
 
 ### RT-008 — Dokumen legal minimum
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Menyediakan informasi wajib sebelum transaksi dibuka.
 

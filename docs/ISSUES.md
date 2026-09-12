@@ -141,7 +141,7 @@ Acceptance criteria:
 - Permintaan reset password tidak membocorkan apakah email terdaftar. Diverifikasi: email terdaftar dan tidak terdaftar memberi respons identik.
 - Token sekali pakai tidak dapat digunakan ulang setelah berhasil. Diverifikasi: pemakaian kedua ditolak `INVALID_TOKEN`, sesi lama terhapus, password lama tidak lagi dapat dipakai login.
 
-Catatan: pengirim masih memakai domain uji Resend. Verifikasi domain sendiri sebelum rilis, lalu ubah `EMAIL_FROM`.
+Catatan: pengirim memakai domain sendiri yang sudah terverifikasi di Resend, disetel lewat `EMAIL_FROM` di environment. Domain uji Resend hanya boleh mengirim ke alamat pemilik akun Resend, sehingga registrasi dengan alamat lain gagal dengan 403 selama `EMAIL_FROM` belum diganti. Kegagalan itu terjadi pada background task Better Auth: akun tetap terbuat dan tidak terverifikasi, sementara endpoint registrasi tetap membalas 200.
 
 ### RT-005 — Admin kategori dan bank soal
 
@@ -231,7 +231,7 @@ Acceptance criteria:
 - Pengguna dapat membaca kebijakan sebelum membuat order. Diverifikasi: `/privasi`, `/syarat`, dan `/refund` memberi 200, dan tautan ketiganya muncul di footer landing page maupun footer katalog dan detail tes.
 - Dokumen menjelaskan produk latihan independen, data yang dikumpulkan, masa akses, dan proses refund/penggantian akses. Syarat layanan menegaskan Rekan Tes bukan penyelenggara atau mitra rekrutmen dan tidak menjamin kelulusan; kebijakan privasi merinci data akun, pengerjaan, transaksi, dan teknis beserta pihak ketiga pemrosesnya; kebijakan refund memisahkan pengembalian dana penuh, hal yang tidak dikembalikan, dan penggantian akses setelah verifikasi admin sesuai PRD.
 
-Catatan: kontak masih menunjuk domain uji Resend selama `EMAIL_FROM` belum diganti, dan alamat itu tidak menerima balasan. Ganti `EMAIL_FROM` ke domain sendiri sebelum rilis, seperti sudah dicatat pada RT-004. Dokumen ini adalah kelengkapan minimum MVP, bukan hasil telaah penasihat hukum; tinjau ulang bersama penasihat sebelum transaksi produksi dibuka.
+Catatan: kontak mengikuti `EMAIL_FROM` dan kini menunjuk domain sendiri yang sudah terverifikasi. Resend menangani pengiriman, bukan penerimaan, jadi pastikan alamat kontak itu benar-benar dapat menerima balasan (MX atau forwarding) sebelum rilis. Dokumen ini adalah kelengkapan minimum MVP, bukan hasil telaah penasihat hukum; tinjau ulang bersama penasihat sebelum transaksi produksi dibuka.
 
 ### RT-009 — Order dan pembayaran QRIS
 

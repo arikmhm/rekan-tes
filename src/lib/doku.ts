@@ -1,205 +1,231 @@
-import { createHash, createHmac } from "node:crypto";
+import { createHash, createHmac, createSign } from "node:crypto";
 
 /**
- * Klien DOKU Checkout (non-SNAP). SDK resmi tidak dipasang karena integrasinya
- * satu POST JSON dengan header bertanda tangan.
+ * Klien DOKU SNAP untuk QRIS (Merchant Presented Mode).
+ *
+ * Alurnya dua panggilan: ambil access token B2B dengan tanda tangan asimetris,
+ * lalu generate QRIS dengan tanda tangan simetris. SDK resmi tidak dipasang
+ * karena keduanya hanya POST JSON dengan header bertanda tangan.
  *
  * Kredensial diterima sebagai argumen, sama seperti `email.ts`, sehingga modul
  * ini tidak butuh guard `server-only` dan tanda tangannya dapat diuji langsung.
  *
- * Acuan: https://developers.doku.com/accept-payments/doku-checkout
+ * Acuan: https://developers.doku.com/accept-payments/direct-api/snap
  */
 
-export const CHECKOUT_TARGET = "/checkout/v1/payment";
+export const TOKEN_PATH = "/authorization/v1/access-token/b2b";
+export const QRIS_GENERATE_PATH = "/snap-adapter/b2b/v1.0/qr/qr-mpm-generate";
+
+/** QRIS dijalankan host-to-host. */
+const CHANNEL_ID = "H2H";
+
+/** `feeType` 1 berarti tanpa tip. */
+const FEE_TYPE = "1";
 
 export type DokuCredentials = {
+  /** Client ID dari DOKU Back Office; dipakai sebagai partner id juga. */
   clientId: string;
+  /** Client secret untuk tanda tangan simetris. */
   secretKey: string;
-  /** Basis API: sandbox atau produksi. */
+  /** Private key RSA milik merchant, PEM, untuk tanda tangan token. */
+  privateKey: string;
+  /** Mall ID dari DOKU setelah registrasi QRIS disetujui. */
+  merchantId: string;
+  terminalId: string;
+  postalCode: string;
   baseUrl: string;
 };
 
-/** Timestamp ISO8601 UTC tanpa milidetik, format yang diminta DOKU. */
-export function dokuTimestamp(now = new Date()) {
-  return `${now.toISOString().slice(0, 19)}Z`;
+/**
+ * SNAP memakai ISO8601 dengan offset zona, bukan `Z`. Waktu Jakarta dipakai
+ * apa adanya agar cocok dengan pola `+07:00` pada spesifikasi notifikasi.
+ */
+export function snapTimestamp(now = new Date()) {
+  const wib = new Date(now.getTime() + 7 * 60 * 60_000);
+  return `${wib.toISOString().slice(0, 19)}+07:00`;
 }
 
-/** Digest = SHA256 base64 dari body JSON mentah. */
-export function digest(body: string) {
-  return createHash("sha256").update(body, "utf8").digest("base64");
+/** Nominal SNAP selalu dua desimal dalam bentuk string. */
+export function snapAmount(amount: number) {
+  return `${amount}.00`;
 }
 
 /**
- * Komponen tanda tangan. Urutan baris dan ketiadaan baris baru di akhir wajib
- * persis seperti dokumentasi DOKU; salah satu saja membuat signature ditolak.
+ * `X-EXTERNAL-ID` harus berupa string numerik yang unik dalam satu hari.
+ * Milidetik ditambah empat digit acak sudah memenuhi keduanya.
  */
-export function signatureComponent(parts: {
-  clientId: string;
-  requestId: string;
-  timestamp: string;
-  target: string;
-  digest: string;
-}) {
-  return [
-    `Client-Id:${parts.clientId}`,
-    `Request-Id:${parts.requestId}`,
-    `Request-Timestamp:${parts.timestamp}`,
-    `Request-Target:${parts.target}`,
-    `Digest:${parts.digest}`,
-  ].join("\n");
+export function externalId(now = new Date()) {
+  return `${now.getTime()}${Math.floor(Math.random() * 10_000)
+    .toString()
+    .padStart(4, "0")}`;
 }
 
-/** Header lengkap satu request DOKU, termasuk `Signature: HMACSHA256=...`. */
-export function dokuHeaders(
-  credentials: Pick<DokuCredentials, "clientId" | "secretKey">,
-  request: { requestId: string; timestamp: string; target: string; body: string },
-) {
-  const komponen = signatureComponent({
-    clientId: credentials.clientId,
-    requestId: request.requestId,
-    timestamp: request.timestamp,
-    target: request.target,
-    digest: digest(request.body),
-  });
-
-  const signature = createHmac("sha256", credentials.secretKey)
-    .update(komponen, "utf8")
-    .digest("base64");
-
-  return {
-    "Content-Type": "application/json",
-    "Client-Id": credentials.clientId,
-    "Request-Id": request.requestId,
-    "Request-Timestamp": request.timestamp,
-    Signature: `HMACSHA256=${signature}`,
-  };
-}
-
-/**
- * Nama pelanggan DOKU hanya menerima huruf dan spasi. Nama yang memuat angka
- * atau simbol ditolak, jadi dibersihkan lebih dulu ketimbang menggagalkan
- * checkout karena hal yang tidak penting bagi pembayaran.
- */
-export function customerName(name: string) {
-  const bersih = name.replace(/[^\p{L} ]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 255);
-  return bersih || "Peserta";
-}
-
-/**
- * Invoice number pendek dan unik. Dua batas DOKU sekaligus: maksimal 30
- * karakter bila kanal kartu kredit aktif, dan tanpa simbol sama sekali bila
- * kanal KKI aktif. Karena itu huruf dan angka saja, tanpa tanda hubung.
- */
+/** Invoice number kami, dipakai sebagai `partnerReferenceNo`. */
 export function invoiceNumber(now = new Date()) {
   const waktu = now.getTime().toString(36).toUpperCase();
   const acak = crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
   return `RT${waktu}${acak}`;
 }
 
-export type CheckoutRequest = {
-  /** Dipakai sebagai `Request-Id`; nilai sama membuat DOKU menolak duplikat. */
-  requestId: string;
-  invoiceNumber: string;
-  amount: number;
-  callbackUrl: string;
-  itemName: string;
-  customer: { id: string; name: string; email: string };
-  /** Umur checkout dalam menit. Default DOKU 60. */
-  dueMinutes?: number;
-};
-
-export type CheckoutResult = {
-  url: string;
-  tokenId: string;
-  /** Kedaluwarsa dari DOKU, sudah dalam bentuk `Date`. */
-  expiresAt: Date;
-};
-
-/** Body request checkout. Dipisah agar dapat diperiksa tanpa memanggil DOKU. */
-export function checkoutBody(request: CheckoutRequest) {
-  return {
-    order: {
-      amount: request.amount,
-      invoice_number: request.invoiceNumber,
-      currency: "IDR",
-      callback_url: request.callbackUrl,
-      // Mandatory menurut dokumentasi: menentukan ke mana peserta dikembalikan.
-      auto_redirect: true,
-      // Satu baris item senilai penuh; DOKU mensyaratkan total baris sama
-      // dengan `amount`.
-      // ponytail: hanya id, nama, harga, dan jumlah. Kanal paylater
-      // (Kredivo, Indodana, Akulaku) dan KKI menuntut sku, category, url, dan
-      // image_url; tambahkan saat kanal itu benar-benar diaktifkan.
-      line_items: [
-        {
-          id: request.invoiceNumber,
-          name: request.itemName,
-          price: request.amount,
-          quantity: 1,
-        },
-      ],
-    },
-    payment: { payment_due_date: request.dueMinutes ?? 60 },
-    customer: {
-      id: request.customer.id,
-      name: customerName(request.customer.name),
-      email: request.customer.email,
-    },
-  };
+/** Komponen tanda tangan token B2B. */
+export function tokenStringToSign(clientId: string, timestamp: string) {
+  return `${clientId}|${timestamp}`;
 }
 
 /**
- * `expired_date` DOKU berformat `yyyyMMddHHmmss` pada zona WIB (UTC+7), bukan
- * ISO. Diterjemahkan di sini agar sisa aplikasi hanya berurusan dengan `Date`.
+ * Komponen tanda tangan transaksi. Bodi di-minify (hasil `JSON.stringify`
+ * sudah minified), di-SHA256, lalu di-hex lowercase.
  */
-export function parseExpiredDate(value: string) {
-  const m = value.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
-  if (!m) return null;
-
-  const [, y, mo, d, h, mi, s] = m;
-  return new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}+07:00`);
+export function transactionStringToSign(parts: {
+  method: string;
+  path: string;
+  accessToken: string;
+  body: string;
+  timestamp: string;
+}) {
+  const digest = createHash("sha256").update(parts.body, "utf8").digest("hex").toLowerCase();
+  return [parts.method, parts.path, parts.accessToken, digest, parts.timestamp].join(":");
 }
 
-/** Membuat checkout DOKU dan mengembalikan URL pembayarannya. */
-export async function createCheckout(
-  credentials: DokuCredentials,
-  request: CheckoutRequest,
-): Promise<CheckoutResult> {
-  const body = JSON.stringify(checkoutBody(request));
-  const headers = dokuHeaders(credentials, {
-    requestId: request.requestId,
-    timestamp: dokuTimestamp(),
-    target: CHECKOUT_TARGET,
+/** Tanda tangan asimetris SHA256withRSA untuk permintaan access token. */
+export function tokenSignature(privateKey: string, stringToSign: string) {
+  return createSign("RSA-SHA256").update(stringToSign, "utf8").sign(privateKey, "base64");
+}
+
+/** Tanda tangan simetris HMAC-SHA512 untuk permintaan transaksi. */
+export function transactionSignature(secretKey: string, stringToSign: string) {
+  return createHmac("sha512", secretKey).update(stringToSign, "utf8").digest("base64");
+}
+
+/**
+ * Access token B2B, berlaku 15 menit.
+ *
+ * ponytail: token diambil baru setiap checkout. Cache hanya berguna kalau
+ * checkout sudah ramai, dan cache yang salah kedaluwarsa jauh lebih mahal
+ * daripada satu request tambahan.
+ */
+export async function accessToken(credentials: DokuCredentials, now = new Date()) {
+  const timestamp = snapTimestamp(now);
+  const body = JSON.stringify({ grantType: "client_credentials" });
+
+  const response = await fetch(`${credentials.baseUrl}${TOKEN_PATH}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CLIENT-KEY": credentials.clientId,
+      "X-TIMESTAMP": timestamp,
+      "X-SIGNATURE": tokenSignature(
+        credentials.privateKey,
+        tokenStringToSign(credentials.clientId, timestamp),
+      ),
+    },
     body,
   });
 
-  const response = await fetch(`${credentials.baseUrl}${CHECKOUT_TARGET}`, {
+  const text = await response.text();
+  const data = JSON.parse(text) as { accessToken?: string; responseMessage?: string };
+
+  if (!response.ok || !data.accessToken) {
+    throw new Error(`DOKU menolak permintaan token (${response.status}): ${text}`);
+  }
+
+  return data.accessToken;
+}
+
+export type QrisRequest = {
+  /** Invoice kami; dikembalikan DOKU pada notifikasi pembayaran. */
+  partnerReferenceNo: string;
+  /** `X-EXTERNAL-ID`, string numerik unik harian. */
+  externalId: string;
+  amount: number;
+  /** Umur QR dalam menit. */
+  validMinutes: number;
+};
+
+export type QrisResult = {
+  /** Payload QRIS yang dirender menjadi gambar QR. */
+  qrContent: string;
+  /** Nomor transaksi milik DOKU. */
+  referenceNo: string;
+  expiresAt: Date;
+};
+
+/** Body generate QRIS. Dipisah agar dapat diperiksa tanpa memanggil DOKU. */
+export function qrisBody(credentials: DokuCredentials, request: QrisRequest, now = new Date()) {
+  return {
+    partnerReferenceNo: request.partnerReferenceNo,
+    amount: { value: snapAmount(request.amount), currency: "IDR" },
+    merchantId: credentials.merchantId,
+    terminalId: credentials.terminalId,
+    validityPeriod: snapTimestamp(new Date(now.getTime() + request.validMinutes * 60_000)),
+    additionalInfo: { postalCode: credentials.postalCode, feeType: FEE_TYPE },
+  };
+}
+
+/** Header generate QRIS, termasuk tanda tangan simetris. */
+export function qrisHeaders(
+  credentials: DokuCredentials,
+  token: string,
+  request: { externalId: string; body: string; timestamp: string },
+) {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+    "X-PARTNER-ID": credentials.clientId,
+    "X-EXTERNAL-ID": request.externalId,
+    "X-TIMESTAMP": request.timestamp,
+    "CHANNEL-ID": CHANNEL_ID,
+    "X-SIGNATURE": transactionSignature(
+      credentials.secretKey,
+      transactionStringToSign({
+        method: "POST",
+        path: QRIS_GENERATE_PATH,
+        accessToken: token,
+        body: request.body,
+        timestamp: request.timestamp,
+      }),
+    ),
+  };
+}
+
+/** Membuat QRIS dinamis untuk satu percobaan pembayaran. */
+export async function generateQris(
+  credentials: DokuCredentials,
+  request: QrisRequest,
+  now = new Date(),
+): Promise<QrisResult> {
+  const token = await accessToken(credentials, now);
+  const timestamp = snapTimestamp(now);
+  const body = JSON.stringify(qrisBody(credentials, request, now));
+
+  const response = await fetch(`${credentials.baseUrl}${QRIS_GENERATE_PATH}`, {
     method: "POST",
-    headers,
+    headers: qrisHeaders(credentials, token, { externalId: request.externalId, body, timestamp }),
     body,
   });
 
   const text = await response.text();
 
   if (!response.ok) {
-    // Body DOKU memuat pesan validasi, bukan data pribadi maupun secret.
-    throw new Error(`DOKU menolak checkout (${response.status}): ${text}`);
+    // Balasan DOKU memuat pesan validasi, bukan data pribadi maupun secret.
+    throw new Error(`DOKU menolak generate QRIS (${response.status}): ${text}`);
   }
 
-  const payment = (JSON.parse(text) as {
-    response?: { payment?: { url?: string; token_id?: string; expired_date?: string } };
-  }).response?.payment;
+  const data = JSON.parse(text) as {
+    responseCode?: string;
+    qrContent?: string;
+    referenceNo?: string;
+  };
 
-  if (!payment?.url) {
-    throw new Error("DOKU membalas tanpa URL pembayaran.");
+  // SNAP membalas 200 dengan responseCode yang menjelaskan hasilnya, jadi
+  // status HTTP saja tidak cukup untuk menyatakan QR benar-benar terbit.
+  if (!data.qrContent || !data.responseCode?.startsWith("200")) {
+    throw new Error(`DOKU tidak mengembalikan QRIS: ${text}`);
   }
 
-  // ponytail: signature pada `response.headers` tidak diverifikasi. Balasan ini
-  // hanya dibaca untuk mengambil URL, dan jalurnya sudah dilindungi TLS.
-  // Validasi tanda tangan yang menentukan uang berada di notifikasi (RT-010).
   return {
-    url: payment.url,
-    tokenId: payment.token_id ?? "",
-    expiresAt: parseExpiredDate(payment.expired_date ?? "") ?? new Date(Date.now() + 60 * 60_000),
+    qrContent: data.qrContent,
+    referenceNo: data.referenceNo ?? "",
+    expiresAt: new Date(now.getTime() + request.validMinutes * 60_000),
   };
 }

@@ -51,7 +51,7 @@ CLI Better Auth tidak dipakai: rilis stabilnya tertinggal beberapa minor dari li
 | Tabel | Kolom penting | Fungsi |
 |---|---|---|
 | `orders` | `id PK`, `user_id FK`, `test_id FK`, `amount`, `status`, `access_expires_at`, timestamps | Pembelian satu sesi tes. `amount` menyimpan harga saat checkout. |
-| `payments` | `id PK`, `order_id FK`, `provider`, `external_id`, `request_id`, `checkout_url?`, `expires_at?`, `amount`, `status`, `paid_at?`, timestamps | Setiap percobaan pembayaran. Untuk DOKU, `external_id` menyimpan invoice number dan `request_id` menjaga request tetap unik. |
+| `payments` | `id PK`, `order_id FK`, `provider`, `external_id`, `request_id`, `qr_content?`, `expires_at?`, `amount`, `status`, `paid_at?`, timestamps | Setiap percobaan pembayaran. Untuk DOKU SNAP QRIS, `external_id` menyimpan `partnerReferenceNo` (invoice), `request_id` menyimpan `X-EXTERNAL-ID` yang wajib numerik dan unik harian, dan `qr_content` menyimpan payload QRIS yang dirender menjadi QR. |
 
 ## 5. Tabel pengerjaan
 
@@ -183,6 +183,7 @@ Dicatat saat RT-002 agar tidak terbaca sebagai kelalaian:
 
 - `orders.access_expires_at` dibuat nullable. Masa akses baru diketahui ketika pembayaran berhasil (RT-009), sehingga tidak dapat terisi saat order masih `pending`.
 - Tiga index pada bagian 9 belum dibuat. `attempt_subtests(attempt_id, status)` dan `attempt_answers(attempt_subtest_id)` sudah tercakup prefix unique index yang ada, sedangkan search index `questions.prompt` menunggu keputusan strategi pencarian.
+- `payments.checkout_url` diganti `payments.qr_content` pada RT-009 (migrasi `0002` dan `0003`). MVP memakai DOKU SNAP QRIS, sehingga yang disimpan adalah payload QRIS untuk dirender sendiri, bukan URL halaman pembayaran pihak ketiga.
 
 ## 13. Keputusan teknis terbuka
 

@@ -23,7 +23,7 @@ MVP dibangun sebagai satu aplikasi Next.js modular monolith. UI, autentikasi, lo
 | Database | Neon PostgreSQL |
 | Akses database | Drizzle ORM, Drizzle Kit, dan Neon serverless driver |
 | Validasi | Zod pada input dari luar aplikasi |
-| Pembayaran | DOKU Checkout |
+| Pembayaran | DOKU SNAP QRIS (direct API) |
 | Hosting | Vercel |
 | Pengujian otomatis | Vitest untuk logika bisnis dan integrasi server |
 | Pengujian browser | Smoke test manual; Playwright tidak digunakan pada MVP |
@@ -56,12 +56,16 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 
 ## Pembayaran DOKU
 
+MVP memakai satu metode pembayaran: QRIS lewat DOKU SNAP direct API. Peserta tidak
+pernah meninggalkan aplikasi, dan tidak ada halaman pemilihan kanal.
+
 1. Server membuat order dan payment attempt.
-2. Server membuat DOKU Checkout URL menggunakan request bertanda tangan.
-3. Peserta diarahkan ke halaman DOKU.
-4. Hanya HTTP Notification DOKU dengan signature valid yang boleh mengubah status pembayaran.
-5. Status `SUCCESS` menandai order `paid` dan membuat maksimal satu attempt dalam transaksi yang idempotent.
-6. Redirect browser hanya menampilkan status dan bukan bukti pembayaran.
+2. Server mengambil access token B2B dengan tanda tangan asimetris `SHA256withRSA(privateKey, clientId|timestamp)`.
+3. Server memanggil `/snap-adapter/b2b/v1.0/qr/qr-mpm-generate` dengan tanda tangan simetris `HMAC-SHA512(clientSecret, METHOD:path:token:sha256hex(body):timestamp)`.
+4. `qrContent` disimpan pada payment attempt dan dirender menjadi QR di halaman pesanan.
+5. Hanya HTTP Notification DOKU dengan signature valid yang boleh mengubah status pembayaran.
+6. Status sukses menandai order `paid` dan membuat maksimal satu attempt dalam transaksi yang idempotent.
+7. Memindai QR tidak mengubah apa pun di sisi kami; halaman pesanan hanya membaca status.
 
 ## Status repository
 

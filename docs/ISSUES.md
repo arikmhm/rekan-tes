@@ -26,7 +26,7 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Done | RT-005 |
 | 7 | RT-007 | Katalog publik dan detail tes | Done | RT-006 |
 | 8 | RT-008 | Dokumen legal minimum | Done | RT-007 |
-| 9 | RT-009 | Order dan DOKU Checkout | Done | RT-004, RT-007, RT-008 |
+| 9 | RT-009 | Order dan pembayaran QRIS | Done | RT-004, RT-007, RT-008 |
 | 10 | RT-010 | Webhook DOKU dan pemberian attempt | Next | RT-009 |
 | 11 | RT-011 | Memulai attempt dan urutan subtes | Queued | RT-010 |
 | 12 | RT-012 | Test engine, timer server, dan submit | Queued | RT-011 |
@@ -233,32 +233,34 @@ Acceptance criteria:
 
 Catatan: kontak masih menunjuk domain uji Resend selama `EMAIL_FROM` belum diganti, dan alamat itu tidak menerima balasan. Ganti `EMAIL_FROM` ke domain sendiri sebelum rilis, seperti sudah dicatat pada RT-004. Dokumen ini adalah kelengkapan minimum MVP, bukan hasil telaah penasihat hukum; tinjau ulang bersama penasihat sebelum transaksi produksi dibuka.
 
-### RT-009 — Order dan DOKU Checkout
+### RT-009 — Order dan pembayaran QRIS
 
 **Status:** Done
 
-**Tujuan:** Membuat checkout per sesi tanpa mempercayai harga atau identitas dari browser.
+**Tujuan:** Membuat pembayaran per sesi tanpa mempercayai harga atau identitas dari browser.
 
 Hasil implementasi:
 
-- `src/lib/doku.ts` membangun header bertanda tangan dan body DOKU Checkout non-SNAP. SDK resmi tidak dipasang karena integrasinya satu POST JSON. Kredensial diterima sebagai argumen seperti `email.ts`, sehingga tanda tangannya dapat diuji tanpa guard `server-only`.
-- Field request dicocokkan dengan dokumentasi resmi DOKU: `order.auto_redirect` wajib, invoice number memakai huruf dan angka saja agar lolos batas 30 karakter kanal kartu kredit sekaligus larangan simbol kanal KKI, dan total `line_items` sama dengan `order.amount`.
-- `src/lib/order.ts` memuat Server Action `startCheckout` dan query `getOrder`; tombol beli ada di detail tes dan status pesanan di `/order/[id]`.
+- `src/lib/doku.ts` membangun kedua tanda tangan DOKU SNAP: asimetris `SHA256withRSA(privateKey, clientId|timestamp)` untuk access token B2B, dan simetris `HMAC-SHA512(clientSecret, METHOD:path:token:sha256hex(body):timestamp)` untuk generate QRIS. SDK resmi tidak dipasang karena keduanya hanya POST JSON. Kredensial diterima sebagai argumen seperti `email.ts`, sehingga tanda tangannya dapat diuji tanpa guard `server-only`.
+- MVP memakai satu metode pembayaran: QRIS. Tidak ada halaman pemilihan kanal dan peserta tidak pernah meninggalkan aplikasi.
+- `src/lib/order.ts` memuat Server Action `startCheckout` dan query `getOrder`; tombol bayar ada di detail tes dan QR ditampilkan di `/order/[id]`.
+- QR dirender di server menjadi SVG memakai paket `qrcode`. Encoder QR bukan sesuatu yang layak ditulis sendiri, dan merender di server membuat isi QR tidak pernah berpindah ke pihak ketiga serta tidak menambah JavaScript di peramban.
 - Formulir hanya mengirim slug. Harga, identitas peserta, dan invoice ditentukan server, jadi nilai apa pun dari peramban tidak dapat memengaruhi order.
-- `DOKU_CLIENT_ID`, `DOKU_SECRET_KEY`, dan `DOKU_BASE_URL` opsional di `envSchema`; `parseDokuEnv` menuntutnya hanya pada jalur checkout, pola yang sama dengan `parseMigrationEnv`. Aplikasi tetap dapat dijalankan tanpa kredensial pembayaran.
-- Order pending milik peserta dipakai ulang, dan checkout yang masih hidup langsung dibuka kembali, sehingga satu peserta tidak menumpuk order untuk tes yang sama.
+- `payments.checkout_url` diganti `payments.qr_content` (migrasi `0002` dan `0003`, keduanya sudah diterapkan ke Neon). `request_id` kini menyimpan `X-EXTERNAL-ID` yang wajib numerik dan unik harian, bukan UUID.
+- Enam variabel DOKU (`DOKU_CLIENT_ID`, `DOKU_SECRET_KEY`, `DOKU_PRIVATE_KEY`, `DOKU_MERCHANT_ID`, `DOKU_TERMINAL_ID`, `DOKU_POSTAL_CODE`) opsional di `envSchema`; `parseDokuEnv` menuntut semuanya hanya pada jalur QRIS dan menyebutkan mana yang kurang, pola yang sama dengan `parseMigrationEnv`.
+- Order pending milik peserta dipakai ulang, dan QRIS yang masih hidup dipakai kembali, sehingga satu peserta tidak menumpuk order maupun QR untuk tes yang sama.
 - Galat dari DOKU dicatat di log server, sementara peserta menerima pesan netral. Pesan asli memuat detail konfigurasi yang tidak layak tampil di peramban.
 
 Acceptance criteria:
 
 - Hanya peserta terautentikasi dan terverifikasi yang dapat checkout. Diverifikasi di dev server: anonim diarahkan ke `/masuk`, peserta yang belum memverifikasi email diarahkan ke `/verifikasi-dibutuhkan`, dan tidak ada order maupun payment yang terbentuk pada kedua kasus tersebut.
 - Order menyimpan snapshot harga server-side dan masa akses 30 hari setelah pembayaran. Diverifikasi: order tercatat `amount` 25000; setelah harga katalog dinaikkan ke 99000, percobaan pembayaran berikutnya pada order yang sama tetap 25000. `access_expires_at` sengaja tetap null sampai pembayaran berhasil; pengisiannya berada di RT-010 bersama transisi status `paid`.
-- Request DOKU ditandatangani di server dan `request_id` idempotent. Komponen tanda tangan dikunci `src/lib/doku.test.ts` terhadap contoh pada dokumentasi DOKU, termasuk urutan baris dan tidak adanya baris baru di akhir. Setiap percobaan pembayaran menyimpan `request_id` dan invoice sendiri sebelum DOKU dipanggil, dijaga unique index `payments_provider_request_id_key`.
-- Redirect DOKU hanya menampilkan status; tidak pernah mengaktifkan order. `callback_url` menunjuk `/order/[id]` yang murni membaca database. Diverifikasi: halaman itu 404 untuk order milik peserta lain, 307 ke `/masuk` untuk anonim, dan tidak memiliki jalur mutasi apa pun.
+- Request DOKU ditandatangani di server dan `request_id` idempotent. Komponen kedua tanda tangan dikunci `src/lib/doku.test.ts`, termasuk verifikasi tanda tangan token dengan public key pasangannya dan pencocokan digest hex lowercase pada tanda tangan transaksi. Setiap percobaan pembayaran menyimpan `request_id` numerik dan invoice sendiri sebelum DOKU dipanggil, dijaga unique index `payments_provider_request_id_key`.
+- Redirect DOKU hanya menampilkan status; tidak pernah mengaktifkan order. Tidak ada redirect pihak ketiga sama sekali: QR ditampilkan di halaman kami dan `/order/[id]` murni membaca database. Diverifikasi: halaman itu 404 untuk order milik peserta lain, 307 ke `/masuk` untuk anonim, dan tidak memiliki jalur mutasi apa pun.
 
-Catatan: signature pada `response.headers` milik DOKU tidak diverifikasi. Balasan itu hanya dibaca untuk mengambil URL pembayaran dan jalurnya sudah dilindungi TLS; validasi tanda tangan yang menentukan uang berada di notifikasi RT-010. Kanal paylater dan KKI membutuhkan field `line_items` tambahan yang belum dikirim; tambahkan ketika kanal tersebut diaktifkan di DOKU Back Office.
+Catatan: jalur QRIS belum diuji terhadap DOKU Sandbox karena keenam variabel DOKU belum tersedia. Yang diverifikasi di dev server adalah jalur tanpa kredensial (pesan netral di UI, pesan yang menyebut variabel kurang di log) serta rendering QR, dengan `qr_content` diisi payload QRIS contoh langsung ke database: QR terbit sebagai SVG 51x51 modul, halaman menyegarkan diri tiap 15 detik selama status `pending`, QR kedaluwarsa berganti menjadi ajakan membuat pembayaran baru, dan klik kedua saat QR masih hidup mengarah ke pesanan yang sama tanpa menambah order atau payment. Smoke test DOKU Sandbox beserta simulator QRIS tetap menjadi bagian RT-016.
 
-Pengujian terhadap DOKU Sandbox belum dijalankan karena `DOKU_CLIENT_ID` dan `DOKU_SECRET_KEY` belum tersedia. Tanpa kredensial, checkout gagal dengan pesan netral di UI dan pesan yang menyebut variabelnya di log server; itulah jalur yang diverifikasi. Smoke test DOKU Sandbox tetap menjadi bagian RT-016.
+Keputusan terbuka: DOKU menandatangani balasannya sendiri, dan tanda tangan itu belum diverifikasi. Balasan hanya dibaca untuk mengambil `qrContent` dan jalurnya sudah dilindungi TLS; validasi tanda tangan yang menentukan uang berada di notifikasi RT-010.
 
 ### RT-010 — Webhook DOKU dan pemberian attempt
 

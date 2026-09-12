@@ -85,7 +85,8 @@ export default async function TesDetailPage({ params }: { params: Promise<{ slug
           <h2 className="text-lg font-semibold text-brand-dark">Beli sesi</h2>
           <p className="mt-2 text-sm leading-6 text-brand-dark/80">
             Satu pembelian memberi satu kali pengerjaan, dengan masa akses {ACCESS_DAYS} hari sejak
-            pembayaran berhasil. Pembayaran diproses DOKU.
+            pembayaran berhasil. Pembayaran memakai QRIS: kode muncul di halaman pesanan dan dapat
+            dipindai dari aplikasi bank atau dompet digital mana pun.
           </p>
           <div className="mt-5">
             <CheckoutButton slug={tes.slug} />

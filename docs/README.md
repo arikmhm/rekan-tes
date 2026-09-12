@@ -22,7 +22,7 @@ Dokumen di direktori ini adalah sumber keputusan produk dan teknis untuk MVP Rek
 - Admin kategori, bank soal, subtes, dan produk tes sudah tersedia di `/admin`, termasuk validasi publikasi tes.
 - Katalog publik `/tes` dan detail tes sudah tersedia untuk produk berstatus `published`.
 - Kebijakan privasi, syarat layanan, dan kebijakan refund tersedia di `/privasi`, `/syarat`, dan `/refund`.
-- Order dan DOKU Checkout sudah tersedia; kredensial DOKU diisi lewat `DOKU_CLIENT_ID` dan `DOKU_SECRET_KEY`.
+- Order dan pembayaran QRIS lewat DOKU SNAP sudah tersedia; kredensialnya diisi lewat variabel `DOKU_*` di `.env.local`.
 - Webhook DOKU, pemberian attempt, dan test engine belum diimplementasikan.
 
 Mulai pekerjaan berikutnya dari issue berstatus `Next` di [ISSUES.md](./ISSUES.md). Jika keputusan produk, database, atau stack berubah, perbarui dokumen sumber dan backlog dalam perubahan yang sama.

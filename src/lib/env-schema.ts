@@ -30,12 +30,19 @@ const envSchema = z.object({
    */
   EMAIL_FROM: z.string().default("Rekan Tes <onboarding@resend.dev>"),
   /**
-   * Kredensial DOKU Checkout. Dibiarkan opsional agar aplikasi tetap dapat
+   * Kredensial DOKU SNAP QRIS. Dibiarkan opsional agar aplikasi tetap dapat
    * dijalankan tanpa pembayaran; `parseDokuEnv` menuntutnya pada saat checkout
    * benar-benar dipakai, dengan pesan yang menyebut variabel yang kurang.
    */
   DOKU_CLIENT_ID: z.string().optional(),
   DOKU_SECRET_KEY: z.string().optional(),
+  /** Private key RSA merchant, PEM. Baris baru boleh ditulis sebagai `\n`. */
+  DOKU_PRIVATE_KEY: z.string().optional(),
+  /** Mall ID dan terminal dari DOKU setelah registrasi QRIS disetujui. */
+  DOKU_MERCHANT_ID: z.string().optional(),
+  DOKU_TERMINAL_ID: z.string().optional(),
+  /** Kode pos merchant, wajib pada permintaan generate QRIS. */
+  DOKU_POSTAL_CODE: z.string().optional(),
   /** Basis API DOKU. Kosong berarti sandbox. */
   DOKU_BASE_URL: z.string().url("harus berupa URL absolut").optional(),
 });
@@ -86,6 +93,16 @@ export function parseMigrationEnv(source: Record<string, string | undefined>): {
 /** Sandbox dipakai selama `DOKU_BASE_URL` belum disetel. */
 export const DOKU_SANDBOX_URL = "https://api-sandbox.doku.com";
 
+/** Variabel DOKU yang seluruhnya dibutuhkan jalur QRIS. */
+const DOKU_KEYS = [
+  "DOKU_CLIENT_ID",
+  "DOKU_SECRET_KEY",
+  "DOKU_PRIVATE_KEY",
+  "DOKU_MERCHANT_ID",
+  "DOKU_TERMINAL_ID",
+  "DOKU_POSTAL_CODE",
+] as const;
+
 /**
  * Kredensial DOKU untuk jalur pembayaran. Dipisah dari `parseEnv` dengan alasan
  * yang sama seperti `parseMigrationEnv`: variabel ini hanya wajib bagi bagian
@@ -94,20 +111,30 @@ export const DOKU_SANDBOX_URL = "https://api-sandbox.doku.com";
 export function parseDokuEnv(source: Record<string, string | undefined>): {
   clientId: string;
   secretKey: string;
+  privateKey: string;
+  merchantId: string;
+  terminalId: string;
+  postalCode: string;
   baseUrl: string;
 } {
   const env = parseEnv(source);
+  const kurang = DOKU_KEYS.filter((key) => !env[key]);
 
-  if (!env.DOKU_CLIENT_ID || !env.DOKU_SECRET_KEY) {
+  if (kurang.length > 0) {
     throw new Error(
-      "DOKU_CLIENT_ID dan DOKU_SECRET_KEY wajib untuk membuat checkout.\n" +
-        "Ambil keduanya dari DOKU Back Office lalu isi di .env.local.",
+      `Variabel DOKU berikut wajib untuk membuat QRIS: ${kurang.join(", ")}.\n` +
+        "Ambil kredensialnya dari DOKU Back Office lalu isi di .env.local.",
     );
   }
 
   return {
-    clientId: env.DOKU_CLIENT_ID,
-    secretKey: env.DOKU_SECRET_KEY,
+    clientId: env.DOKU_CLIENT_ID!,
+    secretKey: env.DOKU_SECRET_KEY!,
+    // Private key pada file .env ditulis satu baris; pulihkan baris barunya.
+    privateKey: env.DOKU_PRIVATE_KEY!.replace(/\\n/g, "\n"),
+    merchantId: env.DOKU_MERCHANT_ID!,
+    terminalId: env.DOKU_TERMINAL_ID!,
+    postalCode: env.DOKU_POSTAL_CODE!,
     baseUrl: env.DOKU_BASE_URL ?? DOKU_SANDBOX_URL,
   };
 }

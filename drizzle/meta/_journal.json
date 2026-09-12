@@ -15,6 +15,20 @@
       "when": 1789237842807,
       "tag": "0001_aromatic_masque",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789243780452,
+      "tag": "0002_fuzzy_hemingway",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789243786823,
+      "tag": "0003_tough_arclight",
+      "breakpoints": true
     }
   ]
 }

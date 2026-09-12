@@ -7,19 +7,21 @@ import { db, schema } from "@/db";
 
 import { assertOwner, requireVerifiedUser } from "./authz";
 import { getPublishedTest } from "./catalog";
-import { createCheckout, invoiceNumber } from "./doku";
-import { env } from "./env";
+import { externalId, generateQris, invoiceNumber } from "./doku";
 import { parseDokuEnv } from "./env-schema";
 
 const PROVIDER = "doku";
 
+/** Umur QRIS. Sama dengan default DOKU dan cukup untuk sekali bayar. */
+const QRIS_VALID_MINUTES = 60;
+
 /**
- * Membuat order lalu membuka checkout DOKU.
+ * Membuat order lalu menerbitkan QRIS lewat DOKU SNAP.
  *
  * Harga diambil dari database, tidak pernah dari formulir, dan disalin ke order
  * sebagai snapshot. Order pending yang sudah ada dipakai ulang agar satu
- * peserta tidak menumpuk order untuk tes yang sama, dan checkout yang masih
- * hidup langsung dipakai kembali ketimbang membuat percobaan pembayaran baru.
+ * peserta tidak menumpuk order untuk tes yang sama, dan QRIS yang masih hidup
+ * dipakai kembali ketimbang menerbitkan QR baru.
  */
 export async function startCheckout(_prev: string | null, form: FormData) {
   const user = await requireVerifiedUser();
@@ -48,14 +50,14 @@ export async function startCheckout(_prev: string | null, form: FormData) {
         and(
           eq(schema.payments.orderId, pending.id),
           eq(schema.payments.status, "pending"),
-          isNotNull(schema.payments.checkoutUrl),
+          isNotNull(schema.payments.qrContent),
           gt(schema.payments.expiresAt, new Date()),
         ),
       )
       .orderBy(desc(schema.payments.createdAt))
       .limit(1);
 
-    if (hidup?.checkoutUrl) redirect(hidup.checkoutUrl);
+    if (hidup?.qrContent) redirect(`/order/${pending.id}`);
   }
 
   // Order lama mempertahankan harganya; katalog boleh berubah setelahnya.
@@ -69,7 +71,10 @@ export async function startCheckout(_prev: string | null, form: FormData) {
         .returning()
     )[0].id;
 
-  const requestId = crypto.randomUUID();
+  // `X-EXTERNAL-ID` DOKU harus numerik, jadi bukan UUID seperti primary key
+  // aplikasi. Disimpan sebelum DOKU dipanggil agar notifikasi yang datang tetap
+  // dapat dicocokkan meski balasan generate gagal kami proses.
+  const requestId = externalId();
   const [payment] = await db
     .insert(schema.payments)
     .values({
@@ -81,30 +86,28 @@ export async function startCheckout(_prev: string | null, form: FormData) {
     })
     .returning();
 
-  let checkout;
+  let qris;
   try {
-    checkout = await createCheckout(parseDokuEnv(process.env), {
-      requestId,
-      invoiceNumber: payment.externalId,
+    qris = await generateQris(parseDokuEnv(process.env), {
+      partnerReferenceNo: payment.externalId,
+      externalId: requestId,
       amount,
-      // Tombol kembali dari DOKU hanya menampilkan status order, tidak
-      // mengaktifkan apa pun. Aktivasi menunggu notifikasi resmi di RT-010.
-      callbackUrl: `${env.BETTER_AUTH_URL}/order/${orderId}`,
-      itemName: tes.name,
-      customer: { id: user.id, name: user.name, email: user.email },
+      validMinutes: QRIS_VALID_MINUTES,
     });
   } catch (error) {
     // Pesan asli berisi detail konfigurasi dan balasan DOKU; cukup untuk log.
-    console.error("Checkout DOKU gagal:", error);
+    console.error("Generate QRIS DOKU gagal:", error);
     return "Pembayaran belum dapat dimulai. Coba beberapa saat lagi atau hubungi kami.";
   }
 
   await db
     .update(schema.payments)
-    .set({ checkoutUrl: checkout.url, expiresAt: checkout.expiresAt, updatedAt: new Date() })
+    .set({ qrContent: qris.qrContent, expiresAt: qris.expiresAt, updatedAt: new Date() })
     .where(eq(schema.payments.id, payment.id));
 
-  redirect(checkout.url);
+  // QR ditampilkan di halaman kami sendiri; peserta tidak pernah keluar dari
+  // aplikasi, jadi tidak ada redirect yang perlu dipercaya sebagai bukti bayar.
+  redirect(`/order/${orderId}`);
 }
 
 /** Satu order beserta percobaan pembayarannya, hanya untuk pemiliknya. */
@@ -133,7 +136,7 @@ export async function getOrder(id: string) {
       id: schema.payments.id,
       externalId: schema.payments.externalId,
       status: schema.payments.status,
-      checkoutUrl: schema.payments.checkoutUrl,
+      qrContent: schema.payments.qrContent,
       expiresAt: schema.payments.expiresAt,
       createdAt: schema.payments.createdAt,
     })

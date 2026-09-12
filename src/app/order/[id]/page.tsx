@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import QRCode from "qrcode";
 
 import { formatPrice } from "@/lib/format";
 import { getOrder } from "@/lib/order";
@@ -10,6 +11,7 @@ import { SiteShell } from "../../_components/site-shell";
 export const metadata: Metadata = { title: "Status pesanan" };
 
 const tanggal = new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeStyle: "short" });
+const jam = new Intl.DateTimeFormat("id-ID", { timeStyle: "short" });
 
 const keterangan: Record<string, string> = {
   pending: "Menunggu pembayaran. Status berubah setelah kami menerima notifikasi resmi DOKU.",
@@ -26,12 +28,22 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     notFound();
   }
 
-  const checkoutHidup = order.payments.find(
-    (p) => p.status === "pending" && p.checkoutUrl && p.expiresAt && p.expiresAt > new Date(),
+  const qris = order.payments.find(
+    (p) => p.status === "pending" && p.qrContent && p.expiresAt && p.expiresAt > new Date(),
   );
+
+  // QR dirender di server menjadi SVG; tidak ada JavaScript tambahan di
+  // peramban dan isi QR tidak pernah berpindah ke pihak ketiga.
+  const qrSvg = qris?.qrContent
+    ? await QRCode.toString(qris.qrContent, { type: "svg", margin: 1, width: 320 })
+    : null;
 
   return (
     <SiteShell>
+      {/* Status pembayaran datang dari notifikasi DOKU, bukan dari peramban,
+          jadi halaman menyegarkan dirinya sendiri selama masih menunggu. */}
+      {order.status === "pending" && <meta httpEquiv="refresh" content="15" />}
+
       <div className="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20">
         <p className="text-sm font-bold text-brand">Status pesanan</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{order.testName}</h1>
@@ -52,16 +64,42 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               Masa akses sampai {tanggal.format(order.accessExpiresAt)}.
             </p>
           )}
-
-          {checkoutHidup?.checkoutUrl && (
-            <a
-              href={checkoutHidup.checkoutUrl}
-              className="mt-6 inline-flex rounded-full bg-brand px-6 py-3.5 text-sm font-bold text-white transition hover:bg-brand-dark"
-            >
-              Lanjutkan pembayaran
-            </a>
-          )}
         </div>
+
+        {qrSvg && qris?.expiresAt && (
+          <div className="mt-6 rounded-3xl border border-brand/15 bg-mint/60 p-7 text-center">
+            <h2 className="text-lg font-semibold text-brand-dark">Bayar dengan QRIS</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-brand-dark/80">
+              Pindai kode ini dengan aplikasi bank atau dompet digital apa pun yang mendukung QRIS.
+              Nominalnya sudah terisi otomatis.
+            </p>
+
+            <div
+              aria-label="Kode QRIS pembayaran"
+              role="img"
+              className="mx-auto mt-6 w-[260px] max-w-full rounded-2xl bg-white p-4 [&>svg]:h-auto [&>svg]:w-full"
+              dangerouslySetInnerHTML={{ __html: qrSvg }}
+            />
+
+            <p className="mt-5 text-sm font-semibold text-brand-dark">
+              Berlaku sampai pukul {jam.format(qris.expiresAt)}
+            </p>
+            <p className="mt-2 text-xs leading-5 text-brand-dark/70">
+              Halaman ini memuat ulang sendiri. Setelah pembayaranmu terverifikasi, statusnya
+              berubah tanpa perlu kamu lakukan apa pun.
+            </p>
+          </div>
+        )}
+
+        {order.status === "pending" && !qrSvg && (
+          <p className="mt-6 rounded-3xl border border-dashed border-black/12 p-7 text-center text-sm leading-6 text-muted">
+            Kode QRIS untuk pesanan ini sudah kedaluwarsa.{" "}
+            <Link className="font-semibold hover:underline" href={`/tes/${order.testSlug}`}>
+              Mulai pembayaran baru
+            </Link>
+            .
+          </p>
+        )}
 
         <h2 className="mt-10 text-lg font-semibold">Percobaan pembayaran</h2>
         <ul className="mt-3 space-y-2">
@@ -80,8 +118,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         </ul>
 
         <p className="mt-8 text-sm leading-6 text-muted">
-          Halaman ini hanya menampilkan status yang tercatat di sistem kami. Kembali dari halaman
-          pembayaran tidak mengubah status apa pun.{" "}
+          Halaman ini hanya menampilkan status yang tercatat di sistem kami. Memindai QR tidak
+          langsung mengubah status; perubahan menunggu notifikasi resmi DOKU.{" "}
           <Link className="font-semibold hover:underline" href={`/tes/${order.testSlug}`}>
             Lihat detail tes
           </Link>

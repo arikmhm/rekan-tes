@@ -19,7 +19,7 @@ export function CheckoutButton({ slug }: { slug: string }) {
         disabled={pending}
         className="w-full rounded-full bg-brand px-6 py-3.5 text-sm font-bold text-white transition hover:bg-brand-dark disabled:opacity-60 sm:w-auto"
       >
-        {pending ? "Menyiapkan pembayaran…" : "Beli sesi ini"}
+        {pending ? "Menyiapkan QRIS…" : "Bayar dengan QRIS"}
       </button>
       {error && (
         <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">

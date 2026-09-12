@@ -70,12 +70,29 @@ test("migrasi gagal jelas ketika hanya ada endpoint pooled", () => {
   expect(() => parseMigrationEnv(minimal)).toThrowError(/neon@latest env pull/);
 });
 
+const doku = {
+  DOKU_CLIENT_ID: "MCH-0001",
+  DOKU_SECRET_KEY: "SK-1",
+  DOKU_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nabc\\n-----END PRIVATE KEY-----",
+  DOKU_MERCHANT_ID: "MALL-001",
+  DOKU_TERMINAL_ID: "TERM01",
+  DOKU_POSTAL_CODE: "10110",
+};
+
 test("kredensial DOKU hanya wajib saat checkout dipakai", () => {
   expect(() => parseEnv(minimal)).not.toThrow();
-  expect(() => parseDokuEnv(minimal)).toThrowError(/DOKU_CLIENT_ID/);
+  // Pesan menyebut seluruh variabel yang kurang, bukan hanya yang pertama.
+  expect(() => parseDokuEnv(minimal)).toThrowError(/DOKU_CLIENT_ID[\s\S]*DOKU_POSTAL_CODE/);
   expect(() => parseDokuEnv(minimal)).toThrowError(/DOKU Back Office/);
+  expect(() => parseDokuEnv({ ...minimal, ...doku, DOKU_TERMINAL_ID: undefined })).toThrowError(
+    /DOKU_TERMINAL_ID/,
+  );
+});
 
-  expect(
-    parseDokuEnv({ ...minimal, DOKU_CLIENT_ID: "MCH-0001", DOKU_SECRET_KEY: "SK-1" }),
-  ).toEqual({ clientId: "MCH-0001", secretKey: "SK-1", baseUrl: DOKU_SANDBOX_URL });
+test("private key satu baris dipulihkan baris barunya", () => {
+  const kredensial = parseDokuEnv({ ...minimal, ...doku });
+
+  expect(kredensial.privateKey).toBe("-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----");
+  expect(kredensial.baseUrl).toBe(DOKU_SANDBOX_URL);
+  expect(kredensial.merchantId).toBe("MALL-001");
 });

@@ -1,23 +1,46 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { requireAdmin } from "@/lib/authz";
 
+import { AdminShell } from "./_components/shell";
+
 export const metadata: Metadata = { title: "Admin" };
 
-/**
- * Landing admin. Pengelolaan kategori dan bank soal dibangun pada RT-005.
- * Halaman ini menegakkan batas otorisasi di server sejak sekarang.
- */
+const items = [
+  {
+    href: "/admin/kategori",
+    title: "Kategori soal",
+    description: "Kelola kategori seperti Numerik, Verbal, dan Pengetahuan Perbankan.",
+  },
+  {
+    href: "/admin/soal",
+    title: "Bank soal",
+    description: "Buat dan kelola soal pilihan ganda yang dapat dipakai ulang di banyak tes.",
+  },
+];
+
 export default async function AdminPage() {
   const admin = await requireAdmin();
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-5 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Panel admin</h1>
-      <p className="mt-3 text-sm leading-6 text-muted">
-        Masuk sebagai <strong className="text-ink">{admin.username ?? admin.name}</strong>.
-        Pengelolaan kategori, bank soal, subtes, dan produk tes dibangun pada RT-005 dan RT-006.
-      </p>
-    </main>
+    <AdminShell
+      title="Panel admin"
+      description={`Masuk sebagai ${admin.username ?? admin.name}. Subtes dan produk tes dibangun pada RT-006.`}
+    >
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {items.map((item) => (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              className="block rounded-2xl border border-black/8 bg-white p-6 transition hover:border-brand/30"
+            >
+              <h2 className="font-semibold">{item.title}</h2>
+              <p className="mt-2 text-sm leading-6 text-muted">{item.description}</p>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </AdminShell>
   );
 }

@@ -48,7 +48,9 @@ test("menolak secret yang terlalu pendek", () => {
 });
 
 test("BETTER_AUTH_URL wajib dan harus absolut", () => {
-  const { BETTER_AUTH_URL: _, ...tanpaUrl } = minimal;
+  const tanpaUrl: Record<string, string> = { ...minimal };
+  delete tanpaUrl.BETTER_AUTH_URL;
+
   expect(() => parseEnv(tanpaUrl)).toThrowError(/BETTER_AUTH_URL/);
   expect(() => parseEnv({ ...minimal, BETTER_AUTH_URL: "/api/auth" })).toThrowError(/URL absolut/);
 });

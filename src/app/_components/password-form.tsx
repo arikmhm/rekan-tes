@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
-import { fieldClass, labelClass, submitClass } from "./auth-form";
+import { fieldClass, labelClass, submitClass } from "./form";
 
 /**
  * Dua langkah pemulihan password. Token, kedaluwarsa, sifat sekali pakai, dan

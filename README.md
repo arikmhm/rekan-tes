@@ -73,7 +73,18 @@ Pengirim email masih memakai domain uji Resend (`onboarding@resend.dev`), yang h
 psql "$DATABASE_URL_UNPOOLED" -c "update \"user\" set role='admin' where username='ganti-username';"
 ```
 
-Otorisasi server memakai helper di `src/lib/authz.ts`. Gunakan `requireAdmin()` pada route admin dan `assertOwner()` untuk resource milik peserta; keduanya menolak di server, bukan hanya menyembunyikan UI.
+Otorisasi server memakai helper di `src/lib/authz.ts`. Gunakan `requireAdmin()` pada halaman admin, `requireAdminMutation()` di dalam Server Action, dan `assertOwner()` untuk resource milik peserta. Semuanya menolak di server, bukan hanya menyembunyikan UI.
+
+## Admin konten
+
+Setelah menjadi admin, kelola konten di `/admin`:
+
+- `/admin/kategori` — kategori soal. Kode ditulis huruf kapital dan harus unik.
+- `/admin/soal` — bank soal, dengan filter kategori, status, kesulitan, dan pencarian teks.
+
+Soal berdiri independen dari tes, sehingga satu soal dapat dipakai di banyak tes tanpa diduplikasi. Simpan sebagai `draft` kapan saja; syarat kelengkapan (minimal dua pilihan dan tepat satu kunci) baru berlaku saat status diubah ke `published`.
+
+Soal yang sudah pernah dikerjakan peserta hanya menerima koreksi pada pertanyaan dan pembahasan. Pilihan dan kunci jawaban dibekukan agar hasil attempt lama tetap sah; gunakan tombol duplikasi untuk perubahan substantif.
 
 ## Pemeriksaan sebelum commit
 

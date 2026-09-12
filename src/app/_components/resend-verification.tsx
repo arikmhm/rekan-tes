@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
-import { submitClass } from "./auth-form";
+import { submitClass } from "./form";
 
 export function ResendVerification({ email }: { email: string }) {
   const [state, setState] = useState<"idle" | "pending" | "sent" | "failed">("idle");

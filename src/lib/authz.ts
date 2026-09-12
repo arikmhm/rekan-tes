@@ -31,18 +31,38 @@ export async function requireUser() {
   return session.user;
 }
 
+/** Satu sumber pemeriksaan admin; dua pemanggil di bawah beda cara menolak. */
+async function adminOrNull() {
+  const session = await getSession();
+  return session?.user.role === ROLE_ADMIN ? session.user : null;
+}
+
 /**
- * User admin, atau ditolak di server. Bukan sekadar menyembunyikan UI:
- * non-admin ditolak sebelum data apa pun dibaca.
+ * User admin untuk halaman, atau ditolak di server. Bukan sekadar
+ * menyembunyikan UI: non-admin ditolak sebelum data apa pun dibaca.
  */
 export async function requireAdmin() {
-  const session = await getSession();
+  const user = await adminOrNull();
 
-  if (!session || session.user.role !== ROLE_ADMIN) {
+  if (!user) {
     notFound();
   }
 
-  return session.user;
+  return user;
+}
+
+/**
+ * Versi untuk Server Action. `notFound()` di dalam action menghasilkan 500,
+ * bukan penolakan yang bersih, jadi mutasi memakai error biasa.
+ */
+export async function requireAdminMutation() {
+  const user = await adminOrNull();
+
+  if (!user) {
+    throw new Error("Akses admin dibutuhkan.");
+  }
+
+  return user;
 }
 
 /**

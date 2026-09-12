@@ -22,8 +22,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 2 | RT-002 | Neon, Drizzle, schema, dan migrasi MVP | Done | RT-001 |
 | 3 | RT-003 | Better Auth dan otorisasi dasar | Done | RT-002 |
 | 4 | RT-004 | Verifikasi email dan reset password | Done | RT-003 |
-| 5 | RT-005 | Admin kategori dan bank soal | Next | RT-003 |
-| 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Queued | RT-005 |
+| 5 | RT-005 | Admin kategori dan bank soal | Done | RT-003 |
+| 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Next | RT-005 |
 | 7 | RT-007 | Katalog publik dan detail tes | Queued | RT-006 |
 | 8 | RT-008 | Dokumen legal minimum | Queued | RT-007 |
 | 9 | RT-009 | Order dan DOKU Checkout | Queued | RT-004, RT-007, RT-008 |
@@ -145,26 +145,29 @@ Catatan: pengirim masih memakai domain uji Resend. Verifikasi domain sendiri seb
 
 ### RT-005 — Admin kategori dan bank soal
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Memungkinkan admin mengelola soal single-choice reusable.
 
-Scope:
+Hasil implementasi:
 
-- CRUD kategori serta soal, pilihan, difficulty, explanation, dan status.
-- Filter bank soal berdasarkan kategori, status, dan difficulty.
-- Validasi publish: tepat satu jawaban benar dan pilihan valid.
-- Cegah perubahan substantif pada soal yang sudah pernah dikerjakan; sediakan alur duplikasi.
+- `src/lib/admin.ts` memuat Server Action dan query admin; `src/lib/question-input.ts` memuat pembacaan slot pilihan dan syarat publikasi sebagai fungsi murni yang dapat diuji.
+- Halaman `/admin/kategori`, `/admin/soal`, `/admin/soal/baru`, dan `/admin/soal/[id]`.
+- Tanpa Client Component untuk data: formulir memakai Server Action, filter memakai form GET biasa sehingga hasilnya dapat dibagikan lewat URL.
+- Lima slot pilihan tetap; slot kosong dibuang dan posisi dirapatkan, sehingga 2 sampai 5 pilihan dapat dibuat tanpa JavaScript tambahan.
+- Soal yang sudah dikerjakan: pertanyaan dan pembahasan tetap dapat dikoreksi, sedangkan pilihan dan kunci jawaban dibekukan di server. Tombol duplikasi membuat draft baru dan mengarsipkan versi lama.
 
 Acceptance criteria:
 
-- Non-admin ditolak pada seluruh mutasi server.
-- Soal draft tidak dapat digunakan untuk tes terbit.
-- Satu soal dapat digunakan kembali tanpa menyalin record soal.
+- Non-admin ditolak pada seluruh mutasi server. Diverifikasi: keempat route admin memberi 404 untuk anonim dan peserta. Setiap Server Action membuka dengan `requireAdminMutation`, dikunci oleh `src/lib/admin.guard.test.ts` agar action baru tanpa guard tidak lolos diam-diam.
+- Soal draft tidak dapat digunakan untuk tes terbit. Status dan filternya sudah ada; penegakannya berada pada validasi publikasi tes di RT-006.
+- Satu soal dapat digunakan kembali tanpa menyalin record soal. Diverifikasi: setelah duplikasi, assignment lama tetap menunjuk record soal asli.
+
+Catatan: `requireAdmin` memakai `notFound` yang cocok untuk halaman, tetapi menghasilkan 500 di dalam Server Action. Karena itu mutasi memakai `requireAdminMutation` yang melempar error biasa.
 
 ### RT-006 — Admin subtes, produk tes, dan publikasi
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Menyusun produk tes dari subtes dan assignment soal.
 

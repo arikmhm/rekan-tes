@@ -37,7 +37,9 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Otorisasi, deadline tes, scoring, dan aktivasi attempt selalu diverifikasi di server.
 - Environment server dibaca hanya melalui `env` dari `src/lib/env.ts`, bukan `process.env` langsung. Variabel baru ditambahkan ke schema dan `.env.example` pada issue yang benar-benar memakainya.
 - Akses database hanya melalui `db` dari `src/db/index.ts`. Driver yang dipakai `neon-serverless`, bukan `neon-http`, karena `neon-http` melempar error pada `transaction()` sementara RT-010 membutuhkan transaksi sungguhan.
-- Otorisasi server memakai helper di `src/lib/authz.ts`: `getSession`, `requireUser`, `requireAdmin`, dan `assertOwner`.
+- Otorisasi server memakai helper di `src/lib/authz.ts`: `getSession`, `requireUser`, `requireAdmin`, `requireAdminMutation`, dan `assertOwner`.
+- Halaman memakai `requireAdmin`, Server Action memakai `requireAdminMutation`. `notFound` di dalam action menghasilkan 500, bukan penolakan yang bersih.
+- Galat unique constraint dikenali lewat kode PostgreSQL `23505` pada rantai `cause`, bukan dengan mencocokkan teks pesan yang dibungkus Drizzle.
 - Penolakan otorisasi memakai `redirect` dan `notFound`, bukan `forbidden`/`unauthorized` dari Next.js, karena keduanya masih memerlukan flag eksperimental `authInterrupts`. Batas otorisasi tidak diletakkan di atas API eksperimental, dan `notFound` sekaligus tidak membocorkan keberadaan route admin.
 - Role admin diberikan lewat database oleh operator, bukan lewat UI. `role` adalah field server-owned; Better Auth menolak permintaan klien yang mencoba menyetelnya.
 - Email belum terverifikasi tidak memblokir login, hanya pembelian, sesuai PRD. Gunakan `requireVerifiedUser` pada jalur checkout.

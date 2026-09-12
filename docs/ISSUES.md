@@ -242,6 +242,7 @@ Catatan: kontak masih menunjuk domain uji Resend selama `EMAIL_FROM` belum digan
 Hasil implementasi:
 
 - `src/lib/doku.ts` membangun header bertanda tangan dan body DOKU Checkout non-SNAP. SDK resmi tidak dipasang karena integrasinya satu POST JSON. Kredensial diterima sebagai argumen seperti `email.ts`, sehingga tanda tangannya dapat diuji tanpa guard `server-only`.
+- Field request dicocokkan dengan dokumentasi resmi DOKU: `order.auto_redirect` wajib, invoice number memakai huruf dan angka saja agar lolos batas 30 karakter kanal kartu kredit sekaligus larangan simbol kanal KKI, dan total `line_items` sama dengan `order.amount`.
 - `src/lib/order.ts` memuat Server Action `startCheckout` dan query `getOrder`; tombol beli ada di detail tes dan status pesanan di `/order/[id]`.
 - Formulir hanya mengirim slug. Harga, identitas peserta, dan invoice ditentukan server, jadi nilai apa pun dari peramban tidak dapat memengaruhi order.
 - `DOKU_CLIENT_ID`, `DOKU_SECRET_KEY`, dan `DOKU_BASE_URL` opsional di `envSchema`; `parseDokuEnv` menuntutnya hanya pada jalur checkout, pola yang sama dengan `parseMigrationEnv`. Aplikasi tetap dapat dijalankan tanpa kredensial pembayaran.
@@ -255,7 +256,9 @@ Acceptance criteria:
 - Request DOKU ditandatangani di server dan `request_id` idempotent. Komponen tanda tangan dikunci `src/lib/doku.test.ts` terhadap contoh pada dokumentasi DOKU, termasuk urutan baris dan tidak adanya baris baru di akhir. Setiap percobaan pembayaran menyimpan `request_id` dan invoice sendiri sebelum DOKU dipanggil, dijaga unique index `payments_provider_request_id_key`.
 - Redirect DOKU hanya menampilkan status; tidak pernah mengaktifkan order. `callback_url` menunjuk `/order/[id]` yang murni membaca database. Diverifikasi: halaman itu 404 untuk order milik peserta lain, 307 ke `/masuk` untuk anonim, dan tidak memiliki jalur mutasi apa pun.
 
-Catatan: pengujian terhadap DOKU Sandbox belum dijalankan karena `DOKU_CLIENT_ID` dan `DOKU_SECRET_KEY` belum tersedia. Tanpa kredensial, checkout gagal dengan pesan netral di UI dan pesan yang menyebut variabelnya di log server; itulah jalur yang diverifikasi. Smoke test DOKU Sandbox tetap menjadi bagian RT-016.
+Catatan: signature pada `response.headers` milik DOKU tidak diverifikasi. Balasan itu hanya dibaca untuk mengambil URL pembayaran dan jalurnya sudah dilindungi TLS; validasi tanda tangan yang menentukan uang berada di notifikasi RT-010. Kanal paylater dan KKI membutuhkan field `line_items` tambahan yang belum dikirim; tambahkan ketika kanal tersebut diaktifkan di DOKU Back Office.
+
+Pengujian terhadap DOKU Sandbox belum dijalankan karena `DOKU_CLIENT_ID` dan `DOKU_SECRET_KEY` belum tersedia. Tanpa kredensial, checkout gagal dengan pesan netral di UI dan pesan yang menyebut variabelnya di log server; itulah jalur yang diverifikasi. Smoke test DOKU Sandbox tetap menjadi bagian RT-016.
 
 ### RT-010 — Webhook DOKU dan pemberian attempt
 

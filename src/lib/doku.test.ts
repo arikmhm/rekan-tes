@@ -59,10 +59,11 @@ test("nama pelanggan dibersihkan ke huruf dan spasi", () => {
   expect(customerName("777")).toBe("Peserta");
 });
 
-test("invoice number muat pada batas terketat DOKU", () => {
+test("invoice number muat pada batas terketat DOKU dan bebas simbol", () => {
   const invoice = invoiceNumber();
+  // 30 karakter bila kartu kredit aktif; tanpa simbol bila KKI aktif.
   expect(invoice.length).toBeLessThanOrEqual(30);
-  expect(invoice).toMatch(/^RT-[0-9A-Z]+-[0-9A-F]{6}$/);
+  expect(invoice).toMatch(/^RT[0-9A-Z]+$/);
   expect(invoiceNumber()).not.toBe(invoice);
 });
 
@@ -74,7 +75,7 @@ test("expired_date DOKU dibaca sebagai waktu WIB", () => {
 test("body checkout memuat field wajib DOKU", () => {
   const body = checkoutBody({
     requestId: "r1",
-    invoiceNumber: "RT-1-ABCDEF",
+    invoiceNumber: "RT1ABCDEF",
     amount: 79000,
     callbackUrl: "http://localhost:3000/order/o1",
     itemName: "Simulasi",
@@ -83,10 +84,13 @@ test("body checkout memuat field wajib DOKU", () => {
 
   expect(body.order).toMatchObject({
     amount: 79000,
-    invoice_number: "RT-1-ABCDEF",
+    invoice_number: "RT1ABCDEF",
     currency: "IDR",
     auto_redirect: true,
   });
   expect(body.payment.payment_due_date).toBe(60);
+  // Total baris item wajib sama dengan order.amount.
+  const items = body.order.line_items;
+  expect(items.reduce((n, i) => n + i.price * i.quantity, 0)).toBe(body.order.amount);
   expect(body.customer.name).toBe("Arik");
 });

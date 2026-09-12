@@ -85,11 +85,15 @@ export function customerName(name: string) {
   return bersih || "Peserta";
 }
 
-/** Invoice number pendek dan unik; batas terketat DOKU adalah 30 karakter. */
+/**
+ * Invoice number pendek dan unik. Dua batas DOKU sekaligus: maksimal 30
+ * karakter bila kanal kartu kredit aktif, dan tanpa simbol sama sekali bila
+ * kanal KKI aktif. Karena itu huruf dan angka saja, tanpa tanda hubung.
+ */
 export function invoiceNumber(now = new Date()) {
   const waktu = now.getTime().toString(36).toUpperCase();
   const acak = crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase();
-  return `RT-${waktu}-${acak}`;
+  return `RT${waktu}${acak}`;
 }
 
 export type CheckoutRequest = {
@@ -119,8 +123,21 @@ export function checkoutBody(request: CheckoutRequest) {
       invoice_number: request.invoiceNumber,
       currency: "IDR",
       callback_url: request.callbackUrl,
+      // Mandatory menurut dokumentasi: menentukan ke mana peserta dikembalikan.
       auto_redirect: true,
-      line_items: [{ name: request.itemName, price: request.amount, quantity: 1 }],
+      // Satu baris item senilai penuh; DOKU mensyaratkan total baris sama
+      // dengan `amount`.
+      // ponytail: hanya id, nama, harga, dan jumlah. Kanal paylater
+      // (Kredivo, Indodana, Akulaku) dan KKI menuntut sku, category, url, dan
+      // image_url; tambahkan saat kanal itu benar-benar diaktifkan.
+      line_items: [
+        {
+          id: request.invoiceNumber,
+          name: request.itemName,
+          price: request.amount,
+          quantity: 1,
+        },
+      ],
     },
     payment: { payment_due_date: request.dueMinutes ?? 60 },
     customer: {
@@ -177,6 +194,9 @@ export async function createCheckout(
     throw new Error("DOKU membalas tanpa URL pembayaran.");
   }
 
+  // ponytail: signature pada `response.headers` tidak diverifikasi. Balasan ini
+  // hanya dibaca untuk mengambil URL, dan jalurnya sudah dilindungi TLS.
+  // Validasi tanda tangan yang menentukan uang berada di notifikasi (RT-010).
   return {
     url: payment.url,
     tokenId: payment.token_id ?? "",

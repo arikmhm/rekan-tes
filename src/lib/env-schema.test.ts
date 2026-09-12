@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { parseEnv, parseMigrationEnv } from "./env-schema";
+import { DOKU_SANDBOX_URL, parseDokuEnv, parseEnv, parseMigrationEnv } from "./env-schema";
 
 const pooled = "postgresql://u:p@host-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
 const direct = "postgresql://u:p@host.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
@@ -68,4 +68,14 @@ test("migrasi memakai endpoint direct, bukan pooled", () => {
 test("migrasi gagal jelas ketika hanya ada endpoint pooled", () => {
   expect(() => parseMigrationEnv(minimal)).toThrowError(/DATABASE_URL_UNPOOLED/);
   expect(() => parseMigrationEnv(minimal)).toThrowError(/neon@latest env pull/);
+});
+
+test("kredensial DOKU hanya wajib saat checkout dipakai", () => {
+  expect(() => parseEnv(minimal)).not.toThrow();
+  expect(() => parseDokuEnv(minimal)).toThrowError(/DOKU_CLIENT_ID/);
+  expect(() => parseDokuEnv(minimal)).toThrowError(/DOKU Back Office/);
+
+  expect(
+    parseDokuEnv({ ...minimal, DOKU_CLIENT_ID: "MCH-0001", DOKU_SECRET_KEY: "SK-1" }),
+  ).toEqual({ clientId: "MCH-0001", secretKey: "SK-1", baseUrl: DOKU_SANDBOX_URL });
 });

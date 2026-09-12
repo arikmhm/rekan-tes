@@ -29,6 +29,15 @@ const envSchema = z.object({
    * yang sudah terverifikasi sebelum rilis.
    */
   EMAIL_FROM: z.string().default("Rekan Tes <onboarding@resend.dev>"),
+  /**
+   * Kredensial DOKU Checkout. Dibiarkan opsional agar aplikasi tetap dapat
+   * dijalankan tanpa pembayaran; `parseDokuEnv` menuntutnya pada saat checkout
+   * benar-benar dipakai, dengan pesan yang menyebut variabel yang kurang.
+   */
+  DOKU_CLIENT_ID: z.string().optional(),
+  DOKU_SECRET_KEY: z.string().optional(),
+  /** Basis API DOKU. Kosong berarti sandbox. */
+  DOKU_BASE_URL: z.string().url("harus berupa URL absolut").optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -72,4 +81,33 @@ export function parseMigrationEnv(source: Record<string, string | undefined>): {
   }
 
   return { url: env.DATABASE_URL_UNPOOLED };
+}
+
+/** Sandbox dipakai selama `DOKU_BASE_URL` belum disetel. */
+export const DOKU_SANDBOX_URL = "https://api-sandbox.doku.com";
+
+/**
+ * Kredensial DOKU untuk jalur pembayaran. Dipisah dari `parseEnv` dengan alasan
+ * yang sama seperti `parseMigrationEnv`: variabel ini hanya wajib bagi bagian
+ * aplikasi yang memakainya.
+ */
+export function parseDokuEnv(source: Record<string, string | undefined>): {
+  clientId: string;
+  secretKey: string;
+  baseUrl: string;
+} {
+  const env = parseEnv(source);
+
+  if (!env.DOKU_CLIENT_ID || !env.DOKU_SECRET_KEY) {
+    throw new Error(
+      "DOKU_CLIENT_ID dan DOKU_SECRET_KEY wajib untuk membuat checkout.\n" +
+        "Ambil keduanya dari DOKU Back Office lalu isi di .env.local.",
+    );
+  }
+
+  return {
+    clientId: env.DOKU_CLIENT_ID,
+    secretKey: env.DOKU_SECRET_KEY,
+    baseUrl: env.DOKU_BASE_URL ?? DOKU_SANDBOX_URL,
+  };
 }

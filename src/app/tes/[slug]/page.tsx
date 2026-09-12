@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ACCESS_DAYS, getPublishedTest } from "@/lib/catalog";
 import { formatDuration, formatPrice } from "@/lib/format";
 
+import { CheckoutButton } from "../../_components/checkout-button";
 import { SiteShell } from "../../_components/site-shell";
 
 export async function generateMetadata({
@@ -81,11 +82,14 @@ export default async function TesDetailPage({ params }: { params: Promise<{ slug
         </ol>
 
         <div className="mt-10 rounded-3xl border border-brand/15 bg-mint/60 p-7">
-          <h2 className="text-lg font-semibold text-brand-dark">Pembelian belum dibuka</h2>
+          <h2 className="text-lg font-semibold text-brand-dark">Beli sesi</h2>
           <p className="mt-2 text-sm leading-6 text-brand-dark/80">
-            Checkout dan pembayaran sedang dikerjakan. Harga di atas adalah harga sesi tunggal
-            dengan masa akses {ACCESS_DAYS} hari sejak pembayaran berhasil.
+            Satu pembelian memberi satu kali pengerjaan, dengan masa akses {ACCESS_DAYS} hari sejak
+            pembayaran berhasil. Pembayaran diproses DOKU.
           </p>
+          <div className="mt-5">
+            <CheckoutButton slug={tes.slug} />
+          </div>
           <p className="mt-4 text-sm leading-6 text-brand-dark/80">
             Sebelum membeli, baca{" "}
             <Link className="font-semibold underline" href="/syarat">

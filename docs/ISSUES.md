@@ -26,8 +26,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Done | RT-005 |
 | 7 | RT-007 | Katalog publik dan detail tes | Done | RT-006 |
 | 8 | RT-008 | Dokumen legal minimum | Done | RT-007 |
-| 9 | RT-009 | Order dan DOKU Checkout | Next | RT-004, RT-007, RT-008 |
-| 10 | RT-010 | Webhook DOKU dan pemberian attempt | Queued | RT-009 |
+| 9 | RT-009 | Order dan DOKU Checkout | Done | RT-004, RT-007, RT-008 |
+| 10 | RT-010 | Webhook DOKU dan pemberian attempt | Next | RT-009 |
 | 11 | RT-011 | Memulai attempt dan urutan subtes | Queued | RT-010 |
 | 12 | RT-012 | Test engine, timer server, dan submit | Queued | RT-011 |
 | 13 | RT-013 | Autosave dan pemulihan progres | Queued | RT-012 |
@@ -235,20 +235,31 @@ Catatan: kontak masih menunjuk domain uji Resend selama `EMAIL_FROM` belum digan
 
 ### RT-009 — Order dan DOKU Checkout
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Membuat checkout per sesi tanpa mempercayai harga atau identitas dari browser.
 
+Hasil implementasi:
+
+- `src/lib/doku.ts` membangun header bertanda tangan dan body DOKU Checkout non-SNAP. SDK resmi tidak dipasang karena integrasinya satu POST JSON. Kredensial diterima sebagai argumen seperti `email.ts`, sehingga tanda tangannya dapat diuji tanpa guard `server-only`.
+- `src/lib/order.ts` memuat Server Action `startCheckout` dan query `getOrder`; tombol beli ada di detail tes dan status pesanan di `/order/[id]`.
+- Formulir hanya mengirim slug. Harga, identitas peserta, dan invoice ditentukan server, jadi nilai apa pun dari peramban tidak dapat memengaruhi order.
+- `DOKU_CLIENT_ID`, `DOKU_SECRET_KEY`, dan `DOKU_BASE_URL` opsional di `envSchema`; `parseDokuEnv` menuntutnya hanya pada jalur checkout, pola yang sama dengan `parseMigrationEnv`. Aplikasi tetap dapat dijalankan tanpa kredensial pembayaran.
+- Order pending milik peserta dipakai ulang, dan checkout yang masih hidup langsung dibuka kembali, sehingga satu peserta tidak menumpuk order untuk tes yang sama.
+- Galat dari DOKU dicatat di log server, sementara peserta menerima pesan netral. Pesan asli memuat detail konfigurasi yang tidak layak tampil di peramban.
+
 Acceptance criteria:
 
-- Hanya peserta terautentikasi dan terverifikasi yang dapat checkout.
-- Order menyimpan snapshot harga server-side dan masa akses 30 hari setelah pembayaran.
-- Request DOKU ditandatangani di server dan `request_id` idempotent.
-- Redirect DOKU hanya menampilkan status; tidak pernah mengaktifkan order.
+- Hanya peserta terautentikasi dan terverifikasi yang dapat checkout. Diverifikasi di dev server: anonim diarahkan ke `/masuk`, peserta yang belum memverifikasi email diarahkan ke `/verifikasi-dibutuhkan`, dan tidak ada order maupun payment yang terbentuk pada kedua kasus tersebut.
+- Order menyimpan snapshot harga server-side dan masa akses 30 hari setelah pembayaran. Diverifikasi: order tercatat `amount` 25000; setelah harga katalog dinaikkan ke 99000, percobaan pembayaran berikutnya pada order yang sama tetap 25000. `access_expires_at` sengaja tetap null sampai pembayaran berhasil; pengisiannya berada di RT-010 bersama transisi status `paid`.
+- Request DOKU ditandatangani di server dan `request_id` idempotent. Komponen tanda tangan dikunci `src/lib/doku.test.ts` terhadap contoh pada dokumentasi DOKU, termasuk urutan baris dan tidak adanya baris baru di akhir. Setiap percobaan pembayaran menyimpan `request_id` dan invoice sendiri sebelum DOKU dipanggil, dijaga unique index `payments_provider_request_id_key`.
+- Redirect DOKU hanya menampilkan status; tidak pernah mengaktifkan order. `callback_url` menunjuk `/order/[id]` yang murni membaca database. Diverifikasi: halaman itu 404 untuk order milik peserta lain, 307 ke `/masuk` untuk anonim, dan tidak memiliki jalur mutasi apa pun.
+
+Catatan: pengujian terhadap DOKU Sandbox belum dijalankan karena `DOKU_CLIENT_ID` dan `DOKU_SECRET_KEY` belum tersedia. Tanpa kredensial, checkout gagal dengan pesan netral di UI dan pesan yang menyebut variabelnya di log server; itulah jalur yang diverifikasi. Smoke test DOKU Sandbox tetap menjadi bagian RT-016.
 
 ### RT-010 — Webhook DOKU dan pemberian attempt
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Mengaktifkan satu attempt secara aman setelah notifikasi pembayaran valid.
 

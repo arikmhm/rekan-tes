@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ACCESS_DAYS, getPublishedTest } from "@/lib/catalog";
@@ -84,6 +85,21 @@ export default async function TesDetailPage({ params }: { params: Promise<{ slug
           <p className="mt-2 text-sm leading-6 text-brand-dark/80">
             Checkout dan pembayaran sedang dikerjakan. Harga di atas adalah harga sesi tunggal
             dengan masa akses {ACCESS_DAYS} hari sejak pembayaran berhasil.
+          </p>
+          <p className="mt-4 text-sm leading-6 text-brand-dark/80">
+            Sebelum membeli, baca{" "}
+            <Link className="font-semibold underline" href="/syarat">
+              syarat layanan
+            </Link>
+            ,{" "}
+            <Link className="font-semibold underline" href="/refund">
+              kebijakan refund
+            </Link>
+            , dan{" "}
+            <Link className="font-semibold underline" href="/privasi">
+              kebijakan privasi
+            </Link>
+            .
           </p>
         </div>
       </div>

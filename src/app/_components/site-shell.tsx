@@ -1,6 +1,15 @@
 import Link from "next/link";
 
+import { emailAddress } from "@/lib/email";
+import { env } from "@/lib/env";
+
 import { AccountNav } from "./account-nav";
+
+/** Tanggal berlaku dokumen legal. Perbarui bersama isi dokumennya. */
+export const TERAKHIR_DIPERBARUI = "13 September 2026";
+
+/** Kontak resmi: alamat pengirim email layanan, satu sumber untuk semua halaman. */
+export const KONTAK = emailAddress(env.EMAIL_FROM);
 
 /**
  * Kerangka halaman publik selain landing page. Disclaimer independensi berada
@@ -37,9 +46,51 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             Rekan Tes adalah platform latihan independen, bukan penyelenggara atau mitra resmi
             rekrutmen bank. Pembayaran hanya untuk sesi simulasi dan tidak menjamin kelulusan.
           </p>
+          <LegalLinks />
           <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
         </div>
       </footer>
     </>
+  );
+}
+
+/** Dokumen legal wajib. Dipakai footer publik dan footer landing page. */
+export function LegalLinks() {
+  return (
+    <p className="flex flex-wrap gap-x-5 gap-y-1">
+      <Link className="font-semibold transition hover:text-ink" href="/privasi">
+        Kebijakan privasi
+      </Link>
+      <Link className="font-semibold transition hover:text-ink" href="/syarat">
+        Syarat layanan
+      </Link>
+      <Link className="font-semibold transition hover:text-ink" href="/refund">
+        Kebijakan refund
+      </Link>
+    </p>
+  );
+}
+
+/**
+ * Kerangka satu dokumen legal. Gaya heading dan daftar diatur sekali di sini
+ * agar isi halaman tetap berupa teks, bukan tumpukan class.
+ */
+export function LegalDoc({
+  title,
+  updated,
+  children,
+}: {
+  title: string;
+  updated: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <SiteShell>
+      <article className="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20 [&_h2]:mt-10 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_li]:mt-2 [&_p]:mt-4 [&_p]:leading-7 [&_p]:text-muted [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:leading-7 [&_ul]:text-muted">
+        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{title}</h1>
+        <p className="mt-4 text-sm text-muted">Terakhir diperbarui {updated}.</p>
+        {children}
+      </article>
+    </SiteShell>
   );
 }

@@ -21,6 +21,7 @@ Dokumen di direktori ini adalah sumber keputusan produk dan teknis untuk MVP Rek
 - Verifikasi email dan reset password sudah berjalan lewat Resend.
 - Admin kategori, bank soal, subtes, dan produk tes sudah tersedia di `/admin`, termasuk validasi publikasi tes.
 - Katalog publik `/tes` dan detail tes sudah tersedia untuk produk berstatus `published`.
-- Dokumen legal, DOKU, dan test engine belum diimplementasikan.
+- Kebijakan privasi, syarat layanan, dan kebijakan refund tersedia di `/privasi`, `/syarat`, dan `/refund`.
+- DOKU dan test engine belum diimplementasikan.
 
 Mulai pekerjaan berikutnya dari issue berstatus `Next` di [ISSUES.md](./ISSUES.md). Jika keputusan produk, database, atau stack berubah, perbarui dokumen sumber dan backlog dalam perubahan yang sama.

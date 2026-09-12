@@ -25,8 +25,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 5 | RT-005 | Admin kategori dan bank soal | Done | RT-003 |
 | 6 | RT-006 | Admin subtes, produk tes, dan publikasi | Done | RT-005 |
 | 7 | RT-007 | Katalog publik dan detail tes | Done | RT-006 |
-| 8 | RT-008 | Dokumen legal minimum | Next | RT-007 |
-| 9 | RT-009 | Order dan DOKU Checkout | Queued | RT-004, RT-007, RT-008 |
+| 8 | RT-008 | Dokumen legal minimum | Done | RT-007 |
+| 9 | RT-009 | Order dan DOKU Checkout | Next | RT-004, RT-007, RT-008 |
 | 10 | RT-010 | Webhook DOKU dan pemberian attempt | Queued | RT-009 |
 | 11 | RT-011 | Memulai attempt dan urutan subtes | Queued | RT-010 |
 | 12 | RT-012 | Test engine, timer server, dan submit | Queued | RT-011 |
@@ -214,23 +214,28 @@ Catatan: tombol pembelian belum ada. Detail tes menutup dengan keterangan bahwa 
 
 ### RT-008 — Dokumen legal minimum
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Menyediakan informasi wajib sebelum transaksi dibuka.
 
-Scope:
+Hasil implementasi:
 
-- Halaman kebijakan privasi, syarat layanan, dan kebijakan refund.
-- Tautkan ketiganya dari detail tes, checkout, dan footer.
+- Halaman `/privasi`, `/syarat`, dan `/refund`, memakai `LegalDoc` di `src/app/_components/site-shell.tsx`. Gaya heading dan daftar diatur sekali di kerangka itu agar isi halaman tetap berupa teks.
+- `LegalLinks` dipakai footer kerangka publik dan footer landing page, sehingga ketiganya dapat dibuka dari mana saja termasuk halaman detail tes dan halaman 404.
+- Detail tes menautkan ketiganya sekali lagi tepat di blok pembelian, yaitu titik keputusan sebelum order dibuat. Checkout RT-009 memakai tautan yang sama.
+- Masa akses pada syarat layanan dan kebijakan refund dibaca dari `ACCESS_DAYS`, bukan diketik ulang, sehingga angka di dokumen legal tidak dapat berbeda dari angka di produk.
+- Kontak resmi diturunkan dari `EMAIL_FROM` lewat `emailAddress()` di `src/lib/email.ts`, dikunci `src/lib/email.test.ts`. Mengganti domain pengirim sekaligus mengganti kontak di seluruh dokumen legal.
 
 Acceptance criteria:
 
-- Pengguna dapat membaca kebijakan sebelum membuat order.
-- Dokumen menjelaskan produk latihan independen, data yang dikumpulkan, masa akses, dan proses refund/penggantian akses.
+- Pengguna dapat membaca kebijakan sebelum membuat order. Diverifikasi: `/privasi`, `/syarat`, dan `/refund` memberi 200, dan tautan ketiganya muncul di footer landing page maupun footer katalog dan detail tes.
+- Dokumen menjelaskan produk latihan independen, data yang dikumpulkan, masa akses, dan proses refund/penggantian akses. Syarat layanan menegaskan Rekan Tes bukan penyelenggara atau mitra rekrutmen dan tidak menjamin kelulusan; kebijakan privasi merinci data akun, pengerjaan, transaksi, dan teknis beserta pihak ketiga pemrosesnya; kebijakan refund memisahkan pengembalian dana penuh, hal yang tidak dikembalikan, dan penggantian akses setelah verifikasi admin sesuai PRD.
+
+Catatan: kontak masih menunjuk domain uji Resend selama `EMAIL_FROM` belum diganti, dan alamat itu tidak menerima balasan. Ganti `EMAIL_FROM` ke domain sendiri sebelum rilis, seperti sudah dicatat pada RT-004. Dokumen ini adalah kelengkapan minimum MVP, bukan hasil telaah penasihat hukum; tinjau ulang bersama penasihat sebelum transaksi produksi dibuka.
 
 ### RT-009 — Order dan DOKU Checkout
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Membuat checkout per sesi tanpa mempercayai harga atau identitas dari browser.
 

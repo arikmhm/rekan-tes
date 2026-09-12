@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 
-import { sendEmail } from "./email";
+import { emailAddress, sendEmail } from "./email";
 
 const pesan = {
   apiKey: "re_kunci_uji",
@@ -48,4 +48,9 @@ test("pesan error tidak memuat alamat penerima", async () => {
   expect(error).toBeInstanceOf(Error);
   expect((error as Error).message).toContain("500");
   expect((error as Error).message).not.toContain("rahasia@contoh.test");
+});
+
+test("alamat kontak diambil dari EMAIL_FROM", () => {
+  expect(emailAddress("Rekan Tes <onboarding@resend.dev>")).toBe("onboarding@resend.dev");
+  expect(emailAddress("  halo@rekantes.id  ")).toBe("halo@rekantes.id");
 });

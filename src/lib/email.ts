@@ -28,3 +28,12 @@ export async function sendEmail(message: {
     throw new Error(`Resend menolak pengiriman (${response.status}): ${await response.text()}`);
   }
 }
+
+/**
+ * Alamat saja dari `EMAIL_FROM` yang berbentuk `Nama <alamat@domain>`. Halaman
+ * legal memakainya sebagai kontak, sehingga kontak ikut berubah begitu domain
+ * pengirim diganti dan tidak ada alamat kedua yang perlu dijaga.
+ */
+export function emailAddress(from: string) {
+  return from.match(/<([^>]+)>/)?.[1].trim() ?? from.trim();
+}

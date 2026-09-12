@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AccountNav } from "./_components/account-nav";
+import { LegalLinks } from "./_components/site-shell";
 
 const categories = [
   "Numerik",
@@ -199,9 +200,12 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-black/8 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
-          <p>Fokus awal: simulasi tes masuk kerja perbankan.</p>
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 text-muted sm:px-8">
+          <LegalLinks />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
+            <p>Fokus awal: simulasi tes masuk kerja perbankan.</p>
+          </div>
         </div>
       </footer>
     </div>

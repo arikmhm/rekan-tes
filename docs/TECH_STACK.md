@@ -74,8 +74,8 @@ pernah meninggalkan aplikasi, dan tidak ada halaman pemilihan kanal.
 2. Server mengambil access token B2B dengan tanda tangan asimetris `SHA256withRSA(privateKey, clientId|timestamp)`.
 3. Server memanggil `/snap-adapter/b2b/v1.0/qr/qr-mpm-generate` dengan tanda tangan simetris `HMAC-SHA512(clientSecret, METHOD:path:token:sha256hex(body):timestamp)`.
 4. `qrContent` disimpan pada payment attempt dan dirender menjadi QR di halaman pesanan.
-5. Hanya HTTP Notification DOKU dengan signature valid yang boleh mengubah status pembayaran.
-6. Status sukses menandai order `paid` dan membuat maksimal satu attempt dalam transaksi yang idempotent.
+5. Hanya HTTP Notification DOKU dengan signature valid yang boleh mengubah status pembayaran. Notifikasi memakai skema signature non-SNAP (`Client-Id/Request-Id/Request-Timestamp/Request-Target/Digest` di-HMAC-SHA256 dengan secret key yang sama), berbeda dari skema SNAP pada langkah 2–3.
+6. Status sukses menandai order `paid` dan membuat maksimal satu attempt dalam transaksi yang idempotent, dijaga `UPDATE ... WHERE status <> 'paid'` di dalam `db.transaction` — kunci baris Postgres, bukan pemeriksaan aplikasi.
 7. Memindai QR tidak mengubah apa pun di sisi kami; halaman pesanan hanya membaca status.
 
 ## Status repository

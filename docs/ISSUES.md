@@ -27,8 +27,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 7 | RT-007 | Katalog publik dan detail tes | Done | RT-006 |
 | 8 | RT-008 | Dokumen legal minimum | Done | RT-007 |
 | 9 | RT-009 | Order dan pembayaran QRIS | Done | RT-004, RT-007, RT-008 |
-| 10 | RT-010 | Webhook DOKU dan pemberian attempt | Next | RT-009 |
-| 11 | RT-011 | Memulai attempt dan urutan subtes | Queued | RT-010 |
+| 10 | RT-010 | Webhook DOKU dan pemberian attempt | Done | RT-009 |
+| 11 | RT-011 | Memulai attempt dan urutan subtes | Next | RT-010 |
 | 12 | RT-012 | Test engine, timer server, dan submit | Queued | RT-011 |
 | 13 | RT-013 | Autosave dan pemulihan progres | Queued | RT-012 |
 | 14 | RT-014 | Scoring, hasil, dan pembahasan | Queued | RT-013 |
@@ -270,21 +270,32 @@ Keputusan terbuka: DOKU menandatangani balasannya sendiri, dan tanda tangan itu 
 
 ### RT-010 — Webhook DOKU dan pemberian attempt
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Mengaktifkan satu attempt secara aman setelah notifikasi pembayaran valid.
 
+Hasil implementasi:
+
+- Notifikasi QRIS memakai skema signature non-SNAP, berbeda dari skema SNAP yang dipakai generate QRIS di RT-009: `Client-Id/Request-Id/Request-Timestamp/Request-Target/Digest` digabung satu baris per komponen lalu di-HMAC-SHA256 dengan secret key yang sama (`DOKU_SECRET_KEY`). Tidak ada variabel environment baru.
+- `src/lib/doku.ts` bertambah `verifyNotificationSignature` dan `parseQrisNotification`, keduanya fungsi murni sehingga dapat diuji tanpa memanggil DOKU. Perbandingan signature memakai `timingSafeEqual` agar waktu respons tidak membocorkan seberapa dekat tebakan penyerang.
+- `src/lib/webhook.ts` (baru, bukan `"use server"`) memuat `activatePayment`: transisi payment dan order ke `paid`, mengisi `access_expires_at` dari `ACCESS_DAYS`, lalu membuat satu `test_attempts`. Sengaja bukan Server Action — fungsi yang menerima body dan header mentah tidak boleh ikut jadi RPC yang dapat dipanggil langsung dari klien.
+- Guard idempotency memakai `UPDATE ... WHERE status <> 'paid'` di dalam transaksi database, bukan tabel log terpisah. Baris hanya berubah sekali; kunci baris Postgres saat `UPDATE` membuat notifikasi yang datang bersamaan tetap aman tanpa perlu lock aplikasi.
+- Route Handler `src/app/api/doku/notifications/route.ts` menerima notifikasi. Path-nya (`NOTIFICATION_PATH` di `doku.ts`) harus didaftarkan sama persis sebagai Notification URL di DOKU Back Office, karena path itu ikut ditandatangani sebagai `Request-Target`.
+- Ditambahkan konfigurasi `rekan-tes-verify` (port 3099) di `.claude/launch.json` untuk menjalankan dev server verifikasi tanpa mengganggu server pengembangan yang sudah dipakai di port 3000.
+
 Acceptance criteria:
 
-- Signature dan payload notifikasi divalidasi sebelum perubahan data.
-- Notifikasi `SUCCESS` mengubah payment/order menjadi paid dan membuat maksimal satu attempt.
-- Webhook duplikat menghasilkan state akhir yang sama tanpa attempt tambahan.
-- Nominal atau invoice yang tidak cocok ditolak dan tercatat untuk investigasi.
-- Transaksi database atau guard setara mencegah state paid tanpa hak akses.
+- Signature dan payload notifikasi divalidasi sebelum perubahan data. Diverifikasi terhadap route yang berjalan sungguhan: signature yang dipalsukan ditolak 401 tanpa menyentuh database; payload tanpa `order.invoice_number`/`transaction.status` ditolak sebelum lookup apa pun.
+- Notifikasi `SUCCESS` mengubah payment/order menjadi paid dan membuat maksimal satu attempt. Diverifikasi terhadap Neon dengan notifikasi bertanda tangan asli (kredensial sandbox DOKU): payment `paid`, order `paid` dengan `access_expires_at` 30 hari ke depan, tepat satu baris `test_attempts`.
+- Webhook duplikat menghasilkan state akhir yang sama tanpa attempt tambahan. Diverifikasi: notifikasi sukses yang sama dikirim ulang, `paid_at` dan id attempt tidak berubah. Dua notifikasi sukses untuk order yang sama dikirim bersamaan (`Promise.all`) juga hanya menghasilkan satu attempt.
+- Nominal atau invoice yang tidak cocok ditolak dan tercatat untuk investigasi. Diverifikasi: nominal yang tidak cocok memberi `400 amount_mismatch`, invoice yang tidak dikenal memberi `400 not_found`, keduanya dicatat lewat `console.error` dan order/payment tetap `pending`.
+- Transaksi database atau guard setara mencegah state paid tanpa hak akses. Seluruh transisi berada dalam satu `db.transaction`; guard `WHERE status <> 'paid'` adalah kunci baris Postgres, bukan pemeriksaan aplikasi yang bisa kalah start dalam race.
+
+Catatan: signature pada balasan DOKU dari RT-009 (`generateQris`) masih belum diverifikasi, sebagaimana dicatat di sana; RT-010 ini menutup bagian yang sebenarnya menentukan uang, yaitu notifikasi pembayaran. Status `FAILED`/lainnya diakui dengan 200 tanpa mengubah apa pun, mengikuti panduan resmi DOKU bahwa integrasi Checkout/QRIS tidak boleh bereaksi terhadap status gagal.
 
 ### RT-011 — Memulai attempt dan urutan subtes
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Mengubah hak akses berbayar menjadi sesi pengerjaan yang terkontrol.
 

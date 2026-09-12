@@ -23,6 +23,7 @@ Dokumen di direktori ini adalah sumber keputusan produk dan teknis untuk MVP Rek
 - Katalog publik `/tes` dan detail tes sudah tersedia untuk produk berstatus `published`.
 - Kebijakan privasi, syarat layanan, dan kebijakan refund tersedia di `/privasi`, `/syarat`, dan `/refund`.
 - Order dan pembayaran QRIS lewat DOKU SNAP sudah tersedia; kredensialnya diisi lewat variabel `DOKU_*` di `.env.local`.
-- Webhook DOKU, pemberian attempt, dan test engine belum diimplementasikan.
+- Webhook DOKU sudah mengaktifkan order dan memberi satu attempt setelah notifikasi QRIS valid.
+- Test engine belum diimplementasikan.
 
 Mulai pekerjaan berikutnya dari issue berstatus `Next` di [ISSUES.md](./ISSUES.md). Jika keputusan produk, database, atau stack berubah, perbarui dokumen sumber dan backlog dalam perubahan yang sama.

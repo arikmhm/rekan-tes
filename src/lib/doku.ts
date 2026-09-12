@@ -1,4 +1,4 @@
-import { createHash, createHmac, createSign } from "node:crypto";
+import { createHash, createHmac, createSign, timingSafeEqual } from "node:crypto";
 
 /**
  * Klien DOKU SNAP untuk QRIS (Merchant Presented Mode).
@@ -15,6 +15,8 @@ import { createHash, createHmac, createSign } from "node:crypto";
 
 export const TOKEN_PATH = "/authorization/v1/access-token/b2b";
 export const QRIS_GENERATE_PATH = "/snap-adapter/b2b/v1.0/qr/qr-mpm-generate";
+/** Route Handler kita sendiri. Harus sama persis dengan Notification URL yang didaftarkan di DOKU Back Office. */
+export const NOTIFICATION_PATH = "/api/doku/notifications";
 
 /** QRIS dijalankan host-to-host. */
 const CHANNEL_ID = "H2H";
@@ -240,4 +242,90 @@ export async function generateQris(
       parseSnapTimestamp(data.additionalInfo?.validityPeriod) ??
       new Date(now.getTime() + request.validMinutes * 60_000),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Notifikasi (HTTP Notification, skema non-SNAP)
+// ---------------------------------------------------------------------------
+//
+// QRIS yang dibuat lewat SNAP dinotifikasikan lewat skema signature non-SNAP:
+// Client-Id/Request-Id/Request-Timestamp/Request-Target/Digest digabung satu
+// baris per komponen, di-HMAC-SHA256 dengan secret key. Ini skema berbeda dari
+// tanda tangan token dan generate QRIS di atas.
+// Acuan: https://developers.doku.com/get-started-with-doku-api/notification/best-practice
+
+/** Digest = SHA256 base64 dari body notifikasi mentah, sebelum di-parse. */
+export function notificationDigest(rawBody: string) {
+  return createHash("sha256").update(rawBody, "utf8").digest("base64");
+}
+
+export function notificationSignatureComponent(parts: {
+  clientId: string;
+  requestId: string;
+  timestamp: string;
+  target: string;
+  digest: string;
+}) {
+  return [
+    `Client-Id:${parts.clientId}`,
+    `Request-Id:${parts.requestId}`,
+    `Request-Timestamp:${parts.timestamp}`,
+    `Request-Target:${parts.target}`,
+    `Digest:${parts.digest}`,
+  ].join("\n");
+}
+
+/**
+ * Benar hanya bila header `Signature` cocok dengan HMAC-SHA256 milik secret
+ * key kita atas komponen di atas. Perbandingan memakai `timingSafeEqual` agar
+ * waktu respons tidak membocorkan seberapa dekat tebakan penyerang.
+ */
+export function verifyNotificationSignature(
+  secretKey: string,
+  parts: { clientId: string; requestId: string; timestamp: string; target: string; rawBody: string },
+  signatureHeader: string | null,
+): boolean {
+  if (!signatureHeader?.startsWith("HMACSHA256=")) return false;
+
+  const harapan = createHmac("sha256", secretKey)
+    .update(
+      notificationSignatureComponent({ ...parts, digest: notificationDigest(parts.rawBody) }),
+      "utf8",
+    )
+    .digest("base64");
+  const diterima = signatureHeader.slice("HMACSHA256=".length);
+
+  const a = Buffer.from(harapan);
+  const b = Buffer.from(diterima);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+export type QrisNotification = {
+  status: string;
+  /** = `partnerReferenceNo` yang kita kirim saat generate; kolom `payments.external_id`. */
+  invoiceNumber: string;
+  /** Dibulatkan ke rupiah penuh; DOKU mengirim `order.amount` dengan dua desimal. */
+  amount: number;
+};
+
+/**
+ * Membaca field yang kita butuhkan dari body notifikasi QRIS. Sengaja tidak
+ * strict terhadap field lain: DOKU dapat menambah field baru kapan saja.
+ */
+export function parseQrisNotification(body: unknown): QrisNotification | null {
+  if (typeof body !== "object" || body === null) return null;
+  const b = body as Record<string, unknown>;
+
+  const order = b.order as Record<string, unknown> | undefined;
+  const transaction = b.transaction as Record<string, unknown> | undefined;
+
+  const invoiceNumber = order?.invoice_number;
+  const amount = Number(order?.amount);
+  const status = transaction?.status;
+
+  if (typeof invoiceNumber !== "string" || typeof status !== "string" || !Number.isFinite(amount)) {
+    return null;
+  }
+
+  return { status, invoiceNumber, amount: Math.round(amount) };
 }

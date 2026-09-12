@@ -8,6 +8,7 @@ import {
   qrisBody,
   qrisHeaders,
   QRIS_GENERATE_PATH,
+  parseSnapTimestamp,
   snapAmount,
   snapTimestamp,
   tokenSignature,
@@ -135,4 +136,12 @@ test("header QRIS membawa token, partner id, dan channel H2H", () => {
       }),
     ),
   );
+});
+
+test("masa berlaku dari DOKU dibaca kembali sebagai waktu yang sama", () => {
+  const dikirim = snapTimestamp(new Date("2026-09-13T01:00:00Z"));
+
+  expect(parseSnapTimestamp(dikirim)?.toISOString()).toBe("2026-09-13T01:00:00.000Z");
+  expect(parseSnapTimestamp("bukan tanggal")).toBeNull();
+  expect(parseSnapTimestamp(undefined)).toBeNull();
 });

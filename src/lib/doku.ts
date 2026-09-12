@@ -132,6 +132,13 @@ export async function accessToken(credentials: DokuCredentials, now = new Date()
   return data.accessToken;
 }
 
+/** Kebalikan `snapTimestamp`. Mengembalikan null bila formatnya tidak dikenali. */
+export function parseSnapTimestamp(value: string | undefined) {
+  if (!value) return null;
+  const waktu = new Date(value);
+  return Number.isNaN(waktu.getTime()) ? null : waktu;
+}
+
 export type QrisRequest = {
   /** Invoice kami; dikembalikan DOKU pada notifikasi pembayaran. */
   partnerReferenceNo: string;
@@ -215,6 +222,7 @@ export async function generateQris(
     responseCode?: string;
     qrContent?: string;
     referenceNo?: string;
+    additionalInfo?: { validityPeriod?: string };
   };
 
   // SNAP membalas 200 dengan responseCode yang menjelaskan hasilnya, jadi
@@ -226,6 +234,10 @@ export async function generateQris(
   return {
     qrContent: data.qrContent,
     referenceNo: data.referenceNo ?? "",
-    expiresAt: new Date(now.getTime() + request.validMinutes * 60_000),
+    // DOKU mengembalikan masa berlaku yang benar-benar dipakai; nilai itu yang
+    // dipegang agar QR tidak pernah dianggap hidup lebih lama daripada aslinya.
+    expiresAt:
+      parseSnapTimestamp(data.additionalInfo?.validityPeriod) ??
+      new Date(now.getTime() + request.validMinutes * 60_000),
   };
 }

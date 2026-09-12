@@ -18,8 +18,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | Urutan | ID | Pekerjaan | Status | Dependensi |
 |---:|---|---|---|---|
 | 0 | RT-000 | Fondasi App Router dan shell produk | Done | — |
-| 1 | RT-001 | Environment, validasi, dan test runner | Next | RT-000 |
-| 2 | RT-002 | Neon, Drizzle, schema, dan migrasi MVP | Queued | RT-001 |
+| 1 | RT-001 | Environment, validasi, dan test runner | Done | RT-000 |
+| 2 | RT-002 | Neon, Drizzle, schema, dan migrasi MVP | Next | RT-001 |
 | 3 | RT-003 | Better Auth dan otorisasi dasar | Queued | RT-002 |
 | 4 | RT-004 | Verifikasi email dan reset password | Blocked | RT-003, provider email |
 | 5 | RT-005 | Admin kategori dan bank soal | Queued | RT-003 |
@@ -52,33 +52,37 @@ Acceptance criteria:
 
 ### RT-001 — Environment, validasi, dan test runner
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Menyiapkan batas minimum agar fitur server berikutnya dapat dikembangkan dan diperiksa.
 
-Scope:
+Hasil implementasi:
 
-- Tambahkan Zod dan Vitest.
-- Sediakan `.env.example` tanpa secret serta validasi environment server.
-- Tambahkan script test minimum dan satu smoke test konfigurasi.
-- Dokumentasikan cara menyiapkan environment lokal.
+- Zod 4 dan Vitest 5 terpasang; script `pnpm test` dan `pnpm test:watch` tersedia.
+- `src/lib/env-schema.ts` memvalidasi environment server dan melempar pesan yang menyebut variabel bermasalah serta cara memperbaikinya.
+- `src/lib/env.ts` mengekspor singleton `env` dan dijaga paket `server-only`.
+- `.env.example` berisi template tanpa secret; `.gitignore` diberi `!.env.example` agar template ikut ter-commit sementara `.env*` lain tetap diabaikan.
+- `src/lib/env-schema.test.ts` mencakup environment valid, variabel hilang, nilai kosong, dan connection string non-PostgreSQL.
 
 Acceptance criteria:
 
-- Aplikasi gagal lebih awal dengan pesan jelas ketika environment wajib tidak tersedia.
+- Aplikasi gagal lebih awal dengan pesan jelas ketika environment wajib tidak tersedia. Validasi berjalan saat modul server pertama mengimpor `env`, dimulai pada RT-002.
 - `pnpm lint`, `pnpm test`, dan `pnpm build` dapat dijalankan lokal.
-- Secret tidak pernah terekspos ke Client Component atau masuk version control.
+- Secret tidak pernah terekspos ke Client Component atau masuk version control. Diverifikasi dengan Client Component percobaan yang mengimpor `env`; `pnpm build` gagal dengan exit code bukan nol.
+
+Catatan: schema hanya memuat `DATABASE_URL`. Variabel Better Auth, email, dan DOKU ditambahkan pada issue yang benar-benar memakainya, bukan lebih awal.
 
 ### RT-002 — Neon, Drizzle, schema, dan migrasi MVP
 
-**Status:** Queued
+**Status:** Next
 
 **Tujuan:** Membuat sumber data server sesuai `DATABASE_DESIGN.md`.
 
 Scope:
 
 - Pasang Drizzle ORM, Drizzle Kit, dan Neon serverless driver.
-- Putuskan tipe ID dan `weight`, lalu catat di `DATABASE_DESIGN.md`.
+- Pakai tipe ID dan `weight` yang sudah ditetapkan di `DATABASE_DESIGN.md`: primary key `text` berisi UUID v4 dan `weight` integer default `1`.
+- Muat `.env*` di luar runtime Next.js untuk konfigurasi Drizzle Kit menggunakan `@next/env`.
 - Implementasikan enum/status, tabel domain, foreign key, unique constraint, check constraint, dan index minimum.
 - Buat migrasi awal serta perintah generate/migrate.
 
@@ -305,7 +309,6 @@ Acceptance criteria:
 | Keputusan | Dibutuhkan sebelum | Pemilik keputusan |
 |---|---|---|
 | Provider transactional email | RT-004 | Produk/engineering |
-| Tipe ID dan `weight` final | RT-002 | Engineering |
 | Blueprint jumlah soal dan durasi produk pertama | RT-006 | Produk/penyusun konten |
 | Harga produk pertama | RT-007/RT-009 | Produk/bisnis |
 | Object storage gambar figural | Saat soal bergambar pertama dibuat | Engineering |

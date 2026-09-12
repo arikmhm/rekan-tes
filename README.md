@@ -4,7 +4,7 @@ Platform B2C untuk simulasi tes masuk kerja, dengan fokus awal perbankan dan pem
 
 ## Status
 
-Fondasi aplikasi sudah menggunakan Next.js App Router dan Tailwind CSS. Halaman publik awal sudah diselaraskan dengan positioning produk, sedangkan fitur akun, bank soal, pembayaran, test engine, dan hasil masih berada dalam backlog.
+Fondasi aplikasi sudah menggunakan Next.js App Router dan Tailwind CSS. Halaman publik awal sudah diselaraskan dengan positioning produk, serta validasi environment server dan test runner sudah tersedia. Fitur akun, bank soal, pembayaran, test engine, dan hasil masih berada dalam backlog.
 
 Urutan implementasi tersedia di [docs/ISSUES.md](./docs/ISSUES.md).
 
@@ -18,8 +18,20 @@ Urutan implementasi tersedia di [docs/ISSUES.md](./docs/ISSUES.md).
 
 ## Development
 
+Siapkan dependency dan environment lokal:
+
 ```bash
 pnpm install
+cp .env.example .env.local
+```
+
+Isi `.env.local` dengan nilai pengembangan Anda. File `.env.local` tidak pernah masuk version control; hanya `.env.example` yang ikut ter-commit dan isinya tidak boleh berupa secret sebenarnya.
+
+Environment server dibaca melalui `env` dari `src/lib/env.ts`, bukan `process.env` langsung. Modul itu dijaga paket `server-only` sehingga build gagal jika terbawa ke Client Component. Ketika ada variabel wajib yang belum terisi, aplikasi berhenti lebih awal dengan pesan yang menyebut variabel tersebut.
+
+Jalankan server pengembangan:
+
+```bash
 pnpm dev
 ```
 
@@ -28,6 +40,5 @@ Buka [http://localhost:3000](http://localhost:3000).
 Pemeriksaan sebelum commit:
 
 ```bash
-pnpm lint
-pnpm build
+pnpm lint && pnpm test && pnpm build
 ```

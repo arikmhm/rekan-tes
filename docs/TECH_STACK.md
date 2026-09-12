@@ -3,7 +3,7 @@
 | Atribut | Nilai |
 |---|---|
 | Status | Disepakati untuk MVP |
-| Tanggal | 20 Agustus 2026 |
+| Tanggal | 12 September 2026 |
 | Dokumen produk | [PRD.md](./PRD.md) |
 | Rancangan database | [DATABASE_DESIGN.md](./DATABASE_DESIGN.md) |
 
@@ -34,6 +34,7 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Server Component menjadi default; Client Component hanya untuk interaksi browser seperti test engine dan timer.
 - Server Action digunakan untuk mutasi dari UI. Route Handler digunakan untuk Better Auth, autosave, dan webhook DOKU.
 - Otorisasi, deadline tes, scoring, dan aktivasi attempt selalu diverifikasi di server.
+- Environment server dibaca hanya melalui `env` dari `src/lib/env.ts`, bukan `process.env` langsung. Variabel baru ditambahkan ke schema dan `.env.example` pada issue yang benar-benar memakainya.
 - Tidak ada backend terpisah, microservice, Redis, message queue, atau WebSocket pada MVP.
 
 ## Akun pengguna
@@ -58,7 +59,8 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Tailwind CSS 4 sudah terpasang melalui `@tailwindcss/postcss` dan diimpor dari root layout.
 - Shell halaman publik dan metadata dasar sudah menggunakan identitas Rekan Tes.
 - shadcn/ui belum dipasang; tambahkan hanya saat komponen pertama benar-benar membutuhkannya.
-- Better Auth, Drizzle, Neon driver, Zod, dan Vitest belum tercatat di `package.json`.
+- Zod dan Vitest sudah terpasang. Validasi environment server ada di `src/lib/env-schema.ts`, dan singleton `src/lib/env.ts` dijaga paket `server-only`.
+- Better Auth, Drizzle, dan Neon driver belum tercatat di `package.json`.
 - Urutan pekerjaan terperinci dan statusnya dicatat di [ISSUES.md](./ISSUES.md).
 
 ## Urutan implementasi awal

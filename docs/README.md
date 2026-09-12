@@ -15,6 +15,7 @@ Dokumen di direktori ini adalah sumber keputusan produk dan teknis untuk MVP Rek
 - App Router aktif di `src/app`.
 - Tailwind CSS 4 sudah terpasang dan dikonfigurasi.
 - Shell halaman publik dan metadata sudah memakai identitas Rekan Tes.
-- Better Auth, Drizzle, Neon driver, Zod, Vitest, DOKU, serta fitur produk belum diimplementasikan.
+- Zod, Vitest, validasi environment server, dan `.env.example` sudah tersedia.
+- Better Auth, Drizzle, Neon driver, DOKU, serta fitur produk belum diimplementasikan.
 
 Mulai pekerjaan berikutnya dari issue berstatus `Next` di [ISSUES.md](./ISSUES.md). Jika keputusan produk, database, atau stack berubah, perbarui dokumen sumber dan backlog dalam perubahan yang sama.

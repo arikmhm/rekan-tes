@@ -1,80 +1,154 @@
+import { ArrowRight, BookOpen, ListChecks, Package, Tags } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { requireAdmin } from "@/lib/authz";
+import { Separator } from "@/components/ui/separator";
+import { adminStats } from "@/lib/admin";
 
-import { AdminShell } from "./_components/shell";
+import { AdminShell, EmptyState } from "./_components/shell";
 
-export const metadata: Metadata = { title: "Admin" };
-
-const items = [
-  {
-    href: "/admin/kategori",
-    title: "Kategori soal",
-    description: "Kelola kategori seperti Numerik, Verbal, dan Pengetahuan Perbankan.",
-  },
-  {
-    href: "/admin/soal",
-    title: "Bank soal",
-    description: "Buat dan kelola soal pilihan ganda yang dapat dipakai ulang di banyak tes.",
-  },
-  {
-    href: "/admin/subtes",
-    title: "Subtes",
-    description: "Tentukan jenis subtes beserta kategori soal yang boleh mengisinya.",
-  },
-  {
-    href: "/admin/tes",
-    title: "Produk tes",
-    description: "Susun subtes menjadi produk tes, atur durasi dan soalnya, lalu terbitkan.",
-  },
-];
-
-/** Urutan penyusunan konten, supaya admin baru tahu harus mulai dari mana. */
-const urutan = ["Kategori", "Soal", "Subtes", "Produk tes", "Terbitkan"];
+export const metadata: Metadata = { title: "Dasbor admin" };
 
 export default async function AdminPage() {
-  const admin = await requireAdmin();
+  const stat = await adminStats();
+
+  const kartu = [
+    {
+      href: "/admin/kategori",
+      label: "Kategori soal",
+      icon: Tags,
+      nilai: stat.kategori,
+      catatan: "kategori terdaftar",
+    },
+    {
+      href: "/admin/soal",
+      label: "Bank soal",
+      icon: BookOpen,
+      nilai: stat.soal,
+      catatan: `${stat.soalTerbit} terbit`,
+    },
+    {
+      href: "/admin/subtes",
+      label: "Subtes",
+      icon: ListChecks,
+      nilai: stat.subtes,
+      catatan: "jenis subtes",
+    },
+    {
+      href: "/admin/tes",
+      label: "Produk tes",
+      icon: Package,
+      nilai: stat.tes,
+      catatan: `${stat.tesTerbit} terbit`,
+    },
+  ];
 
   return (
     <AdminShell
-      title="Ringkasan"
-      description={`Masuk sebagai ${admin.username ?? admin.name}.`}
+      title="Dasbor"
+      description="Ringkasan isi bank konten dan hal yang masih menghalangi publikasi tes."
     >
-      <Card className="bg-muted/40">
-        <CardHeader>
-          <CardTitle className="text-base">Alur penyusunan tes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ol className="flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
-            {urutan.map((langkah, i) => (
-              <li key={langkah} className="flex items-center gap-2">
-                <span className="bg-background rounded-md border px-2.5 py-1 font-medium">
-                  {langkah}
-                </span>
-                {i < urutan.length - 1 && <span className="text-muted-foreground">→</span>}
-              </li>
-            ))}
-          </ol>
-        </CardContent>
-      </Card>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {items.map((item) => (
-          <Link key={item.href} href={item.href} className="group">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {kartu.map((k) => (
+          <Link key={k.href} href={k.href} className="group">
             <Card className="hover:border-primary/40 h-full transition">
-              <CardHeader>
-                <CardTitle className="group-hover:text-primary text-base transition">
-                  {item.title}
+              <CardHeader className="pb-2">
+                <CardTitle className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+                  <k.icon className="size-4" />
+                  {k.label}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-muted-foreground text-sm leading-6">
-                {item.description}
+              <CardContent>
+                <p className="text-3xl font-semibold tracking-tight tabular-nums">{k.nilai}</p>
+                <p className="text-muted-foreground mt-1 text-xs">{k.catatan}</p>
               </CardContent>
             </Card>
           </Link>
         ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Perlu dilengkapi</CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Subtes yang jumlah soalnya belum memenuhi target. Selama ini ada, tes tidak dapat
+              diterbitkan.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {stat.kurang.length === 0 ? (
+              <EmptyState>
+                Semua subtes sudah memenuhi target soalnya. Tidak ada yang menghalangi publikasi.
+              </EmptyState>
+            ) : (
+              <ul className="divide-y">
+                {stat.kurang.map((k, i) => (
+                  <li
+                    key={`${k.testId}-${i}`}
+                    className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/admin/tes/${k.testId}`}
+                        className="font-medium hover:underline"
+                      >
+                        {k.testName}
+                      </Link>
+                      <p className="text-muted-foreground truncate text-sm">{k.subtestName}</p>
+                    </div>
+                    <Badge variant={k.testStatus === "published" ? "destructive" : "outline"}>
+                      {k.assigned}/{k.questionLimit} soal
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Alur penyusunan</CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Urutan kerja dari konten mentah sampai produk siap jual.
+            </p>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            {[
+              { href: "/admin/kategori", label: "Buat kategori soal" },
+              { href: "/admin/soal", label: "Isi bank soal lalu terbitkan" },
+              { href: "/admin/subtes", label: "Tentukan subtes per kategori" },
+              { href: "/admin/tes", label: "Susun produk tes dan terbitkan" },
+            ].map((l, i) => (
+              <div key={l.href}>
+                {i > 0 && <Separator className="mb-3" />}
+                <Link
+                  href={l.href}
+                  className="group flex items-center gap-3 text-sm hover:text-primary"
+                >
+                  <span className="bg-muted grid size-6 shrink-0 place-items-center rounded-md font-mono text-xs font-semibold">
+                    {i + 1}
+                  </span>
+                  <span className="flex-1">{l.label}</span>
+                  <ArrowRight className="text-muted-foreground size-4 transition group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+            ))}
+            <Separator />
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/tes" />}
+              className="w-full"
+            >
+              Lihat katalog publik
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </AdminShell>
   );

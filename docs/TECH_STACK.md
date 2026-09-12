@@ -60,7 +60,10 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 - Palet Rekan Tes dipetakan ke token shadcn di `globals.css` (`--primary`, `--muted-foreground`, `--accent`, `--background`), bukan sebaliknya. Komponen bawaan otomatis berwarna merek tanpa override per komponen.
 - `shadcn init` menimpa `globals.css`. Dua hal yang harus diperiksa ulang setelah menjalankannya: `--font-sans` wajib memakai nama font literal karena `@theme inline` menyelesaikan variabel saat parse, dan token kustom tidak boleh memakai nama milik shadcn. Token lama `--color-muted` bertabrakan dengan permukaan `bg-muted` milik shadcn, sehingga diganti `text-muted-foreground` di seluruh aplikasi.
 - Dropdown memakai `SelectNative`, yaitu `select` bawaan peramban bergaya `Input`. Seluruh formulir admin dikirim sebagai form biasa ke Server Action, sehingga elemen native ikut terkirim tanpa JavaScript dan tetap bekerja pada form GET.
-- Halaman admin memakai Card, Table, Badge, dan Alert; halaman publik belum ikut dimigrasikan.
+- Panel admin memakai kerangka dasbor shadcn: `SidebarProvider` di `src/app/admin/layout.tsx`, sidebar yang dapat diciutkan, breadcrumb dari URL, dan halaman berisi Card, Table, Badge, serta Alert. Halaman publik belum ikut dimigrasikan.
+- Guard admin dipasang di layout dan tetap dipertahankan di setiap halaman serta Server Action; layout bukan pengganti guard per-route.
+- Tema terang saja. Blok `.dark` bawaan shadcn dibiarkan ada tetapi tidak pernah diaktifkan karena tidak ada kelas `dark` yang dipasang.
+- `src/hooks/use-mobile.ts` ditulis ulang memakai `useSyncExternalStore`. Versi bawaan shadcn memanggil `setState` langsung di dalam efek dan ditolak lint React compiler.
 
 ## Pembayaran DOKU
 

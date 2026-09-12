@@ -1,11 +1,11 @@
-import Link from "next/link";
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
-import { AdminNav } from "./nav";
-
+/**
+ * Kepala halaman admin. Kerangka aplikasinya sendiri (sidebar dan header)
+ * berada di `src/app/admin/layout.tsx`, sehingga bagian ini hanya mengurus
+ * judul, penjelasan, dan aksi utama halaman.
+ */
 export function AdminShell({
   title,
   description,
@@ -18,43 +18,20 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen">
-      <header className="border-b bg-card">
-        <div className="mx-auto w-full max-w-6xl px-5 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link href="/admin" className="flex items-center gap-2.5 font-semibold">
-              <span className="bg-primary text-primary-foreground grid size-8 place-items-center rounded-lg text-xs font-bold">
-                RT
-              </span>
-              <span>Panel admin</span>
-            </Link>
-            <Link
-              href="/"
-              className="text-muted-foreground text-sm transition hover:text-foreground"
-            >
-              Lihat situs
-            </Link>
-          </div>
-          <AdminNav />
+    <div className="flex flex-1 flex-col gap-6 p-4 pt-2 sm:p-6 sm:pt-3">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          {description && (
+            <p className="text-muted-foreground mt-1.5 max-w-2xl text-sm leading-6">
+              {description}
+            </p>
+          )}
         </div>
-      </header>
+        {action}
+      </div>
 
-      <main className="mx-auto w-full max-w-6xl px-5 py-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-            {description && (
-              <p className="text-muted-foreground mt-1.5 max-w-2xl text-sm leading-6">
-                {description}
-              </p>
-            )}
-          </div>
-          {action}
-        </div>
-
-        <Separator className="my-6" />
-        {children}
-      </main>
+      {children}
     </div>
   );
 }

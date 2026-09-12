@@ -1,0 +1,155 @@
+"use client";
+
+import {
+  BookOpen,
+  ExternalLink,
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  Package,
+  Tags,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import { authClient } from "@/lib/auth-client";
+
+const grup = [
+  {
+    label: "Ringkasan",
+    items: [{ href: "/admin", label: "Dasbor", icon: LayoutDashboard }],
+  },
+  {
+    label: "Bank konten",
+    items: [
+      { href: "/admin/kategori", label: "Kategori soal", icon: Tags },
+      { href: "/admin/soal", label: "Bank soal", icon: BookOpen },
+      { href: "/admin/subtes", label: "Subtes", icon: ListChecks },
+    ],
+  },
+  {
+    label: "Produk",
+    items: [{ href: "/admin/tes", label: "Produk tes", icon: Package }],
+  },
+];
+
+export function AppSidebar({ nama }: { nama: string }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [keluar, setKeluar] = useState(false);
+
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" render={<Link href="/admin" />}>
+              <span className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg text-xs font-bold">
+                RT
+              </span>
+              <span className="grid flex-1 text-left leading-tight">
+                <span className="truncate font-semibold">Rekan Tes</span>
+                <span className="text-muted-foreground truncate text-xs">Panel admin</span>
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent>
+        {grup.map((g) => (
+          <SidebarGroup key={g.label}>
+            <SidebarGroupLabel>{g.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {g.items.map((item) => {
+                  const aktif =
+                    item.href === "/admin"
+                      ? pathname === item.href
+                      : pathname.startsWith(item.href);
+
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        isActive={aktif}
+                        tooltip={item.label}
+                        render={<Link href={item.href} />}
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <SidebarMenuButton size="lg" tooltip={nama}>
+                    <span className="bg-muted text-foreground flex aspect-square size-8 items-center justify-center rounded-lg text-xs font-semibold uppercase">
+                      {nama.slice(0, 2)}
+                    </span>
+                    <span className="grid flex-1 text-left leading-tight">
+                      <span className="truncate font-medium">{nama}</span>
+                      <span className="text-muted-foreground truncate text-xs">Administrator</span>
+                    </span>
+                  </SidebarMenuButton>
+                }
+              />
+              <DropdownMenuContent side="top" align="start" className="w-56">
+                <DropdownMenuItem render={<Link href="/" />}>
+                  <ExternalLink />
+                  Lihat situs
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  disabled={keluar}
+                  onClick={async () => {
+                    setKeluar(true);
+                    await authClient.signOut();
+                    router.push("/");
+                    router.refresh();
+                  }}
+                >
+                  <LogOut />
+                  {keluar ? "Keluar…" : "Keluar"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
+  );
+}

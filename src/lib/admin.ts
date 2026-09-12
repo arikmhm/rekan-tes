@@ -782,3 +782,58 @@ function posisiBerikutnya(
 ) {
   return sql<number>`(select coalesce(max(${position}), 0) + 1 from ${table} where ${parent} = ${parentId})`;
 }
+
+// ---------------------------------------------------------------------------
+// Dasbor
+// ---------------------------------------------------------------------------
+
+/**
+ * Angka ringkas untuk dasbor admin beserta daftar tes yang belum siap terbit.
+ * Dihitung database agar halaman tidak perlu menarik seluruh baris.
+ */
+export async function adminStats() {
+  await requireAdmin();
+
+  const [ringkasan] = await db
+    .select({
+      kategori: sql<number>`(select count(*) from ${schema.questionCategories})::int`,
+      soal: sql<number>`(select count(*) from ${schema.questions})::int`,
+      soalTerbit: sql<number>`(select count(*) from ${schema.questions} where status = 'published')::int`,
+      subtes: sql<number>`(select count(*) from ${schema.subtests})::int`,
+      tes: sql<number>`(select count(*) from ${schema.tests})::int`,
+      tesTerbit: sql<number>`(select count(*) from ${schema.tests} where status = 'published')::int`,
+    })
+    .from(sql`(select 1) as x`);
+
+  // Subtes yang jumlah assignment-nya belum memenuhi question limit. Inilah
+  // yang menghalangi publikasi, jadi ditampilkan sebagai daftar tindakan.
+  const kurang = await db
+    .select({
+      testId: schema.tests.id,
+      testName: schema.tests.name,
+      testStatus: schema.tests.status,
+      subtestName: schema.subtests.name,
+      questionLimit: schema.testSubtests.questionLimit,
+      assigned: count(schema.testSubtestQuestions.id),
+    })
+    .from(schema.testSubtests)
+    .innerJoin(schema.tests, eq(schema.tests.id, schema.testSubtests.testId))
+    .innerJoin(schema.subtests, eq(schema.subtests.id, schema.testSubtests.subtestId))
+    .leftJoin(
+      schema.testSubtestQuestions,
+      eq(schema.testSubtestQuestions.testSubtestId, schema.testSubtests.id),
+    )
+    .groupBy(
+      schema.testSubtests.id,
+      schema.tests.id,
+      schema.tests.name,
+      schema.tests.status,
+      schema.subtests.name,
+      schema.testSubtests.questionLimit,
+    )
+    .having(sql`count(${schema.testSubtestQuestions.id}) < ${schema.testSubtests.questionLimit}`)
+    .orderBy(asc(schema.tests.name))
+    .limit(20);
+
+  return { ...ringkasan, kurang };
+}

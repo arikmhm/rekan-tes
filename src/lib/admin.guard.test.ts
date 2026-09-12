@@ -31,6 +31,7 @@ const READS = [
   "listSubtests",
   "listTests",
   "getTest",
+  "adminStats",
 ];
 
 function badanFungsi(nama: string) {

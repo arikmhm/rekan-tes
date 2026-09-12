@@ -22,7 +22,7 @@ export default async function KatalogPage() {
     <SiteShell>
       <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Katalog simulasi</h1>
-        <p className="mt-4 max-w-2xl text-lg leading-8 text-muted">
+        <p className="mt-4 max-w-2xl text-lg leading-8 text-muted-foreground">
           Setiap simulasi menampilkan subtes, jumlah soal, durasi, dan harga secara terbuka sebelum
           kamu membayar.
         </p>
@@ -30,7 +30,7 @@ export default async function KatalogPage() {
         {tes.length === 0 ? (
           <div className="mt-12 rounded-3xl border border-dashed border-black/12 bg-white p-10 text-center">
             <h2 className="text-xl font-semibold">Belum ada simulasi yang terbit.</h2>
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted">
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
               Produk pertama sedang disusun. Simpan halaman ini dan periksa kembali nanti.
             </p>
           </div>
@@ -43,19 +43,19 @@ export default async function KatalogPage() {
                   className="flex h-full flex-col rounded-3xl border border-black/8 bg-white p-7 transition hover:border-brand/30"
                 >
                   <h2 className="text-2xl font-semibold tracking-tight">{t.name}</h2>
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">{t.description}</p>
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{t.description}</p>
 
                   <dl className="mt-6 grid grid-cols-3 gap-3 text-sm">
                     <div className="rounded-2xl bg-cream p-3">
-                      <dt className="text-xs text-muted">Subtes</dt>
+                      <dt className="text-xs text-muted-foreground">Subtes</dt>
                       <dd className="mt-1 font-semibold">{t.subtestCount}</dd>
                     </div>
                     <div className="rounded-2xl bg-cream p-3">
-                      <dt className="text-xs text-muted">Soal</dt>
+                      <dt className="text-xs text-muted-foreground">Soal</dt>
                       <dd className="mt-1 font-semibold">{t.questionCount}</dd>
                     </div>
                     <div className="rounded-2xl bg-cream p-3">
-                      <dt className="text-xs text-muted">Durasi</dt>
+                      <dt className="text-xs text-muted-foreground">Durasi</dt>
                       <dd className="mt-1 font-semibold">{formatDuration(t.durationSeconds)}</dd>
                     </div>
                   </dl>

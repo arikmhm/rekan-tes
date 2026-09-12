@@ -2,13 +2,13 @@
 
 import { useActionState } from "react";
 
-import { buttonClass, fieldClass } from "@/app/_components/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SelectNative } from "@/components/ui/select-native";
 import { addAssignment, addTestSubtest, updateTestSubtest } from "@/lib/admin";
 
 import { FormError } from "./shell";
-
-const smallField = `${fieldClass} mt-1 py-2`;
-const smallLabel = "text-xs font-semibold text-muted";
 
 /** Memasukkan satu subtes ke dalam tes. Posisi ditentukan server di urutan akhir. */
 export function AddSubtestForm({
@@ -21,12 +21,12 @@ export function AddSubtestForm({
   const [error, action, pending] = useActionState(addTestSubtest, null);
 
   return (
-    <form action={action} className="space-y-3">
+    <form action={action} className="grid gap-3">
       <input type="hidden" name="testId" value={testId} />
       <div className="flex flex-wrap items-end gap-3">
-        <label className="min-w-55 flex-1">
-          <span className={smallLabel}>Subtes</span>
-          <select name="subtestId" required defaultValue="" className={smallField}>
+        <div className="grid min-w-56 flex-1 gap-2">
+          <Label htmlFor={`add-sub-${testId}`}>Subtes</Label>
+          <SelectNative id={`add-sub-${testId}`} name="subtestId" required defaultValue="">
             <option value="" disabled>
               Pilih subtes
             </option>
@@ -35,33 +35,19 @@ export function AddSubtestForm({
                 {s.code} — {s.name}
               </option>
             ))}
-          </select>
-        </label>
-        <label>
-          <span className={smallLabel}>Durasi (menit)</span>
-          <input
-            name="durationMinutes"
-            type="number"
-            min={1}
-            defaultValue={30}
-            required
-            className={`${smallField} w-32`}
-          />
-        </label>
-        <label>
-          <span className={smallLabel}>Jumlah soal</span>
-          <input
-            name="questionLimit"
-            type="number"
-            min={1}
-            defaultValue={10}
-            required
-            className={`${smallField} w-32`}
-          />
-        </label>
-        <button type="submit" disabled={pending} className={buttonClass}>
+          </SelectNative>
+        </div>
+        <div className="grid w-32 gap-2">
+          <Label htmlFor={`add-dur-${testId}`}>Durasi (menit)</Label>
+          <Input id={`add-dur-${testId}`} name="durationMinutes" type="number" min={1} defaultValue={30} required />
+        </div>
+        <div className="grid w-32 gap-2">
+          <Label htmlFor={`add-lim-${testId}`}>Jumlah soal</Label>
+          <Input id={`add-lim-${testId}`} name="questionLimit" type="number" min={1} defaultValue={10} required />
+        </div>
+        <Button type="submit" disabled={pending}>
           {pending ? "Menambahkan…" : "Tambah subtes"}
-        </button>
+        </Button>
       </div>
       <FormError message={error} />
     </form>
@@ -81,34 +67,34 @@ export function SubtestConfigForm({
   const [error, action, pending] = useActionState(updateTestSubtest, null);
 
   return (
-    <form action={action} className="space-y-3">
+    <form action={action} className="grid gap-3">
       <input type="hidden" name="id" value={id} />
       <div className="flex flex-wrap items-end gap-3">
-        <label>
-          <span className={smallLabel}>Durasi (menit)</span>
-          <input
+        <div className="grid w-32 gap-2">
+          <Label htmlFor={`dur-${id}`}>Durasi (menit)</Label>
+          <Input
+            id={`dur-${id}`}
             name="durationMinutes"
             type="number"
             min={1}
             defaultValue={Math.round(durationSeconds / 60)}
             required
-            className={`${smallField} w-32`}
           />
-        </label>
-        <label>
-          <span className={smallLabel}>Jumlah soal</span>
-          <input
+        </div>
+        <div className="grid w-32 gap-2">
+          <Label htmlFor={`lim-${id}`}>Jumlah soal</Label>
+          <Input
+            id={`lim-${id}`}
             name="questionLimit"
             type="number"
             min={1}
             defaultValue={questionLimit}
             required
-            className={`${smallField} w-32`}
           />
-        </label>
-        <button type="submit" disabled={pending} className={buttonClass}>
+        </div>
+        <Button type="submit" variant="outline" disabled={pending}>
           {pending ? "Menyimpan…" : "Simpan konfigurasi"}
-        </button>
+        </Button>
       </div>
       <FormError message={error} />
     </form>
@@ -130,19 +116,19 @@ export function AddAssignmentForm({
 
   if (candidates.length === 0) {
     return (
-      <p className="text-sm text-muted">
+      <p className="text-muted-foreground text-sm">
         Tidak ada soal terbit lain pada kategori subtes ini. Terbitkan soal baru di bank soal.
       </p>
     );
   }
 
   return (
-    <form action={action} className="space-y-3">
+    <form action={action} className="grid gap-3">
       <input type="hidden" name="testSubtestId" value={testSubtestId} />
       <div className="flex flex-wrap items-end gap-3">
-        <label className="min-w-55 flex-1">
-          <span className={smallLabel}>Soal</span>
-          <select name="questionId" required defaultValue="" className={smallField}>
+        <div className="grid min-w-56 flex-1 gap-2">
+          <Label htmlFor={`q-${testSubtestId}`}>Soal</Label>
+          <SelectNative id={`q-${testSubtestId}`} name="questionId" required defaultValue="">
             <option value="" disabled>
               Pilih soal
             </option>
@@ -151,22 +137,15 @@ export function AddAssignmentForm({
                 {q.prompt.length > 80 ? `${q.prompt.slice(0, 80)}…` : q.prompt}
               </option>
             ))}
-          </select>
-        </label>
-        <label>
-          <span className={smallLabel}>Bobot</span>
-          <input
-            name="weight"
-            type="number"
-            min={1}
-            defaultValue={1}
-            required
-            className={`${smallField} w-24`}
-          />
-        </label>
-        <button type="submit" disabled={pending} className={buttonClass}>
+          </SelectNative>
+        </div>
+        <div className="grid w-24 gap-2">
+          <Label htmlFor={`w-${testSubtestId}`}>Bobot</Label>
+          <Input id={`w-${testSubtestId}`} name="weight" type="number" min={1} defaultValue={1} required />
+        </div>
+        <Button type="submit" disabled={pending}>
           {pending ? "Menugaskan…" : "Tugaskan soal"}
-        </button>
+        </Button>
       </div>
       <FormError message={error} />
     </form>

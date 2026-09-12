@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listCategories } from "@/lib/admin";
 
 import { CategoryForm, CategoryRow } from "../_components/category-form";
-import { AdminShell } from "../_components/shell";
+import { AdminShell, EmptyState } from "../_components/shell";
 
 export const metadata: Metadata = { title: "Kategori soal" };
 
@@ -15,25 +16,25 @@ export default async function KategoriPage() {
       title="Kategori soal"
       description="Kategori memfilter bank soal dan menentukan soal mana yang boleh masuk ke sebuah subtes."
     >
-      <div className="rounded-2xl border border-black/8 bg-white p-6">
-        <h2 className="font-semibold">Tambah kategori</h2>
-        <div className="mt-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Tambah kategori</CardTitle>
+        </CardHeader>
+        <CardContent>
           <CategoryForm />
-        </div>
+        </CardContent>
+      </Card>
+
+      <div className="mt-6 grid gap-2.5">
+        {kategori.map((k) => (
+          <CategoryRow key={k.id} kategori={k} />
+        ))}
       </div>
 
-      <ul className="mt-6 space-y-3">
-        {kategori.map((k) => (
-          <li key={k.id}>
-            <CategoryRow kategori={k} />
-          </li>
-        ))}
-      </ul>
-
       {kategori.length === 0 && (
-        <p className="mt-6 rounded-2xl border border-dashed border-black/12 p-8 text-center text-sm text-muted">
-          Belum ada kategori. Tambahkan kategori pertama di formulir atas.
-        </p>
+        <div className="mt-6">
+          <EmptyState>Belum ada kategori. Tambahkan kategori pertama di formulir atas.</EmptyState>
+        </div>
       )}
     </AdminShell>
   );

@@ -55,12 +55,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               {order.status}
             </span>
           </div>
-          <p className="mt-4 text-sm leading-6 text-muted">
+          <p className="mt-4 text-sm leading-6 text-muted-foreground">
             {keterangan[order.status] ?? "Status pesanan sedang diproses."}
           </p>
-          <p className="mt-2 text-sm text-muted">Dibuat {tanggal.format(order.createdAt)}.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Dibuat {tanggal.format(order.createdAt)}.</p>
           {order.accessExpiresAt && (
-            <p className="mt-2 text-sm text-muted">
+            <p className="mt-2 text-sm text-muted-foreground">
               Masa akses sampai {tanggal.format(order.accessExpiresAt)}.
             </p>
           )}
@@ -92,7 +92,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         )}
 
         {order.status === "pending" && !qrSvg && (
-          <p className="mt-6 rounded-3xl border border-dashed border-black/12 p-7 text-center text-sm leading-6 text-muted">
+          <p className="mt-6 rounded-3xl border border-dashed border-black/12 p-7 text-center text-sm leading-6 text-muted-foreground">
             Kode QRIS untuk pesanan ini sudah kedaluwarsa.{" "}
             <Link className="font-semibold hover:underline" href={`/tes/${order.testSlug}`}>
               Mulai pembayaran baru
@@ -111,13 +111,13 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               <code className="rounded-lg bg-cream px-2 py-1 text-xs font-semibold">
                 {p.externalId}
               </code>
-              <span className="text-muted">{p.status}</span>
-              <span className="text-xs text-muted">{tanggal.format(p.createdAt)}</span>
+              <span className="text-muted-foreground">{p.status}</span>
+              <span className="text-xs text-muted-foreground">{tanggal.format(p.createdAt)}</span>
             </li>
           ))}
         </ul>
 
-        <p className="mt-8 text-sm leading-6 text-muted">
+        <p className="mt-8 text-sm leading-6 text-muted-foreground">
           Halaman ini hanya menampilkan status yang tercatat di sistem kami. Memindai QR tidak
           langsung mengubah status; perubahan menunggu notifikasi resmi DOKU.{" "}
           <Link className="font-semibold hover:underline" href={`/tes/${order.testSlug}`}>

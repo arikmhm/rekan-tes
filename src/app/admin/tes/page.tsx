@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listTests } from "@/lib/admin";
 import { formatPrice } from "@/lib/format";
 
-import { AdminShell, StatusBadge } from "../_components/shell";
+import { AdminShell, EmptyState, StatusBadge } from "../_components/shell";
 import { TestForm } from "../_components/test-form";
 
 export const metadata: Metadata = { title: "Produk tes" };
@@ -17,38 +19,51 @@ export default async function TesPage() {
       title="Produk tes"
       description="Produk tes menyusun subtes menjadi satu simulasi yang dijual. Susunan subtes dan soalnya diatur pada halaman detail."
     >
-      <div className="rounded-2xl border border-black/8 bg-white p-6">
-        <h2 className="font-semibold">Tes baru</h2>
-        <p className="mt-1 text-sm text-muted">
-          Simpan sebagai draft dulu, lalu susun subtesnya sebelum menerbitkan.
-        </p>
-        <div className="mt-4">
-          <TestForm />
-        </div>
-      </div>
-
       {tes.length === 0 ? (
-        <p className="mt-6 rounded-2xl border border-dashed border-black/12 p-8 text-center text-sm text-muted">
-          Belum ada produk tes.
-        </p>
+        <EmptyState>Belum ada produk tes. Buat yang pertama di formulir bawah.</EmptyState>
       ) : (
-        <ul className="mt-6 space-y-3">
-          {tes.map((t) => (
-            <li key={t.id}>
-              <Link
-                href={`/admin/tes/${t.id}`}
-                className="flex flex-wrap items-center gap-3 rounded-2xl border border-black/8 bg-white p-5 transition hover:border-brand/30"
-              >
-                <StatusBadge status={t.status} />
-                <span className="font-medium">{t.name}</span>
-                <code className="rounded-lg bg-cream px-2 py-1 text-xs">{t.slug}</code>
-                <span className="text-sm text-muted">{formatPrice(t.priceAmount)}</span>
-                <span className="text-xs text-muted">{t.subtestCount} subtes</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="bg-card overflow-hidden rounded-xl border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nama</TableHead>
+                <TableHead className="w-28">Harga</TableHead>
+                <TableHead className="w-20">Subtes</TableHead>
+                <TableHead className="w-28">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tes.map((t) => (
+                <TableRow key={t.id} className="hover:bg-muted/40">
+                  <TableCell>
+                    <Link href={`/admin/tes/${t.id}`} className="font-medium hover:underline">
+                      {t.name}
+                    </Link>
+                    <p className="text-muted-foreground font-mono text-xs">/tes/{t.slug}</p>
+                  </TableCell>
+                  <TableCell className="text-sm">{formatPrice(t.priceAmount)}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{t.subtestCount}</TableCell>
+                  <TableCell>
+                    <StatusBadge status={t.status} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-base">Tes baru</CardTitle>
+          <p className="text-muted-foreground text-sm">
+            Simpan sebagai draft dulu, lalu susun subtesnya sebelum menerbitkan.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <TestForm />
+        </CardContent>
+      </Card>
     </AdminShell>
   );
 }

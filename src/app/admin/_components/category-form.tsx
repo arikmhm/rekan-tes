@@ -2,10 +2,13 @@
 
 import { useActionState } from "react";
 
-import { buttonClass, fieldClass, labelClass } from "@/app/_components/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SelectNative } from "@/components/ui/select-native";
 import { saveCategory } from "@/lib/admin";
 
-import { FormError, StatusBadge } from "../_components/shell";
+import { FormError, StatusBadge } from "./shell";
 
 type Kategori = {
   id: string;
@@ -15,74 +18,65 @@ type Kategori = {
   status: string;
 };
 
+const STATUS = ["draft", "published", "archived"];
+
 /** Formulir satu kategori: dipakai untuk membuat maupun menyunting. */
 export function CategoryForm({ kategori }: { kategori?: Kategori }) {
   const [error, action, pending] = useActionState(saveCategory, null);
+  const uid = kategori?.id ?? "baru";
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="grid gap-4">
       {kategori && <input type="hidden" name="id" value={kategori.id} />}
 
-      <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
-        <div>
-          <label className={labelClass} htmlFor={`code-${kategori?.id ?? "baru"}`}>
-            Kode
-          </label>
-          <input
-            id={`code-${kategori?.id ?? "baru"}`}
+      <div className="grid gap-4 sm:grid-cols-[9rem_1fr]">
+        <div className="grid gap-2">
+          <Label htmlFor={`code-${uid}`}>Kode</Label>
+          <Input
+            id={`code-${uid}`}
             name="code"
             required
             defaultValue={kategori?.code}
             placeholder="NUM"
-            className={`${fieldClass} uppercase`}
+            className="uppercase"
           />
         </div>
-        <div>
-          <label className={labelClass} htmlFor={`name-${kategori?.id ?? "baru"}`}>
-            Nama
-          </label>
-          <input
-            id={`name-${kategori?.id ?? "baru"}`}
+        <div className="grid gap-2">
+          <Label htmlFor={`name-${uid}`}>Nama</Label>
+          <Input
+            id={`name-${uid}`}
             name="name"
             required
             defaultValue={kategori?.name}
             placeholder="Numerik"
-            className={fieldClass}
           />
         </div>
       </div>
 
-      <div>
-        <label className={labelClass} htmlFor={`desc-${kategori?.id ?? "baru"}`}>
-          Deskripsi
-        </label>
-        <input
-          id={`desc-${kategori?.id ?? "baru"}`}
+      <div className="grid gap-2">
+        <Label htmlFor={`desc-${uid}`}>Deskripsi</Label>
+        <Input
+          id={`desc-${uid}`}
           name="description"
           defaultValue={kategori?.description ?? ""}
-          className={fieldClass}
+          placeholder="Opsional"
         />
       </div>
 
-      <div className="flex flex-wrap items-end gap-4">
-        <div>
-          <label className={labelClass} htmlFor={`status-${kategori?.id ?? "baru"}`}>
-            Status
-          </label>
-          <select
-            id={`status-${kategori?.id ?? "baru"}`}
-            name="status"
-            defaultValue={kategori?.status ?? "draft"}
-            className={fieldClass}
-          >
-            <option value="draft">draft</option>
-            <option value="published">published</option>
-            <option value="archived">archived</option>
-          </select>
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="grid w-40 gap-2">
+          <Label htmlFor={`status-${uid}`}>Status</Label>
+          <SelectNative id={`status-${uid}`} name="status" defaultValue={kategori?.status ?? "draft"}>
+            {STATUS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </SelectNative>
         </div>
-        <button type="submit" disabled={pending} className={buttonClass}>
+        <Button type="submit" disabled={pending}>
           {pending ? "Menyimpan…" : kategori ? "Simpan perubahan" : "Tambah kategori"}
-        </button>
+        </Button>
       </div>
 
       <FormError message={error} />
@@ -92,13 +86,16 @@ export function CategoryForm({ kategori }: { kategori?: Kategori }) {
 
 export function CategoryRow({ kategori }: { kategori: Kategori }) {
   return (
-    <details className="rounded-2xl border border-black/8 bg-white">
-      <summary className="flex cursor-pointer flex-wrap items-center gap-3 p-5">
-        <code className="rounded-lg bg-cream px-2 py-1 text-xs font-semibold">{kategori.code}</code>
-        <span className="font-semibold">{kategori.name}</span>
+    <details className="group bg-card rounded-xl border">
+      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 p-4 hover:bg-muted/40">
+        <code className="bg-muted rounded px-2 py-1 font-mono text-xs font-semibold">
+          {kategori.code}
+        </code>
+        <span className="font-medium">{kategori.name}</span>
         <StatusBadge status={kategori.status} />
+        <span className="text-muted-foreground ml-auto text-xs group-open:hidden">Sunting</span>
       </summary>
-      <div className="border-t border-black/8 p-5">
+      <div className="border-t p-4">
         <CategoryForm kategori={kategori} />
       </div>
     </details>

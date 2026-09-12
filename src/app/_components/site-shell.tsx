@@ -29,7 +29,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             </span>
             <span className="text-lg">Rekan Tes</span>
           </Link>
-          <div className="flex items-center gap-7 text-sm text-muted">
+          <div className="flex items-center gap-7 text-sm text-muted-foreground">
             <Link className="transition hover:text-ink" href="/tes">
               Katalog
             </Link>
@@ -41,7 +41,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1">{children}</main>
 
       <footer className="border-t border-black/8 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 text-muted sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 text-muted-foreground sm:px-8">
           <p>
             Rekan Tes adalah platform latihan independen, bukan penyelenggara atau mitra resmi
             rekrutmen bank. Pembayaran hanya untuk sesi simulasi dan tidak menjamin kelulusan.
@@ -86,9 +86,9 @@ export function LegalDoc({
 }) {
   return (
     <SiteShell>
-      <article className="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20 [&_h2]:mt-10 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_li]:mt-2 [&_p]:mt-4 [&_p]:leading-7 [&_p]:text-muted [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:leading-7 [&_ul]:text-muted">
+      <article className="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20 [&_h2]:mt-10 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_li]:mt-2 [&_p]:mt-4 [&_p]:leading-7 [&_p]:text-muted-foreground [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:leading-7 [&_ul]:text-muted-foreground">
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{title}</h1>
-        <p className="mt-4 text-sm text-muted">Terakhir diperbarui {updated}.</p>
+        <p className="mt-4 text-sm text-muted-foreground">Terakhir diperbarui {updated}.</p>
         {children}
       </article>
     </SiteShell>

@@ -30,31 +30,31 @@ export default async function TesDetailPage({ params }: { params: Promise<{ slug
     <SiteShell>
       <div className="mx-auto max-w-4xl px-5 py-14 sm:px-8 sm:py-20">
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{tes.name}</h1>
-        <p className="mt-5 text-lg leading-8 text-muted">{tes.description}</p>
+        <p className="mt-5 text-lg leading-8 text-muted-foreground">{tes.description}</p>
 
         <dl className="mt-10 grid gap-4 sm:grid-cols-4">
           <div className="rounded-2xl border border-black/8 bg-white p-5">
-            <dt className="text-xs text-muted">Harga sesi</dt>
+            <dt className="text-xs text-muted-foreground">Harga sesi</dt>
             <dd className="mt-1 text-lg font-semibold text-brand-dark">
               {formatPrice(tes.priceAmount)}
             </dd>
           </div>
           <div className="rounded-2xl border border-black/8 bg-white p-5">
-            <dt className="text-xs text-muted">Total soal</dt>
+            <dt className="text-xs text-muted-foreground">Total soal</dt>
             <dd className="mt-1 text-lg font-semibold">{tes.questionCount}</dd>
           </div>
           <div className="rounded-2xl border border-black/8 bg-white p-5">
-            <dt className="text-xs text-muted">Total durasi</dt>
+            <dt className="text-xs text-muted-foreground">Total durasi</dt>
             <dd className="mt-1 text-lg font-semibold">{formatDuration(tes.durationSeconds)}</dd>
           </div>
           <div className="rounded-2xl border border-black/8 bg-white p-5">
-            <dt className="text-xs text-muted">Masa akses</dt>
+            <dt className="text-xs text-muted-foreground">Masa akses</dt>
             <dd className="mt-1 text-lg font-semibold">{ACCESS_DAYS} hari</dd>
           </div>
         </dl>
 
         <h2 className="mt-12 text-2xl font-semibold tracking-tight">Urutan subtes</h2>
-        <p className="mt-2 text-sm leading-6 text-muted">
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Subtes dikerjakan berurutan. Setiap subtes memiliki batas waktu sendiri dan tidak dapat
           dibuka kembali setelah dikumpulkan.
         </p>
@@ -71,10 +71,10 @@ export default async function TesDetailPage({ params }: { params: Promise<{ slug
               <div className="min-w-45 flex-1">
                 <p className="font-semibold">{s.name}</p>
                 {s.description && (
-                  <p className="mt-1 text-sm leading-6 text-muted">{s.description}</p>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{s.description}</p>
                 )}
               </div>
-              <p className="text-sm text-muted">
+              <p className="text-sm text-muted-foreground">
                 {s.questionLimit} soal · {formatDuration(s.durationSeconds)}
               </p>
             </li>

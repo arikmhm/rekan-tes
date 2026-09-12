@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAdmin } from "@/lib/authz";
 
 import { AdminShell } from "./_components/shell";
@@ -30,27 +31,51 @@ const items = [
   },
 ];
 
+/** Urutan penyusunan konten, supaya admin baru tahu harus mulai dari mana. */
+const urutan = ["Kategori", "Soal", "Subtes", "Produk tes", "Terbitkan"];
+
 export default async function AdminPage() {
   const admin = await requireAdmin();
 
   return (
     <AdminShell
-      title="Panel admin"
-      description={`Masuk sebagai ${admin.username ?? admin.name}. Katalog publik dibangun pada RT-007.`}
+      title="Ringkasan"
+      description={`Masuk sebagai ${admin.username ?? admin.name}.`}
     >
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <Card className="bg-muted/40">
+        <CardHeader>
+          <CardTitle className="text-base">Alur penyusunan tes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ol className="flex flex-wrap items-center gap-x-2 gap-y-2 text-sm">
+            {urutan.map((langkah, i) => (
+              <li key={langkah} className="flex items-center gap-2">
+                <span className="bg-background rounded-md border px-2.5 py-1 font-medium">
+                  {langkah}
+                </span>
+                {i < urutan.length - 1 && <span className="text-muted-foreground">→</span>}
+              </li>
+            ))}
+          </ol>
+        </CardContent>
+      </Card>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {items.map((item) => (
-          <li key={item.href}>
-            <Link
-              href={item.href}
-              className="block rounded-2xl border border-black/8 bg-white p-6 transition hover:border-brand/30"
-            >
-              <h2 className="font-semibold">{item.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{item.description}</p>
-            </Link>
-          </li>
+          <Link key={item.href} href={item.href} className="group">
+            <Card className="hover:border-primary/40 h-full transition">
+              <CardHeader>
+                <CardTitle className="group-hover:text-primary text-base transition">
+                  {item.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm leading-6">
+                {item.description}
+              </CardContent>
+            </Card>
+          </Link>
         ))}
-      </ul>
+      </div>
     </AdminShell>
   );
 }

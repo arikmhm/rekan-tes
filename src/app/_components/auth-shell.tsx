@@ -21,11 +21,11 @@ export function AuthShell({
       </Link>
 
       <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-      <p className="mt-3 text-sm leading-6 text-muted">{description}</p>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
 
       {children}
 
-      <p className="mt-7 text-sm text-muted">{footer}</p>
+      <p className="mt-7 text-sm text-muted-foreground">{footer}</p>
     </main>
   );
 }

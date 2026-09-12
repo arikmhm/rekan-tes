@@ -2,7 +2,11 @@
 
 import { useActionState } from "react";
 
-import { fieldClass, labelClass, submitClass } from "@/app/_components/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SelectNative } from "@/components/ui/select-native";
+import { Textarea } from "@/components/ui/textarea";
 import { saveTest } from "@/lib/admin";
 
 import { FormError } from "./shell";
@@ -16,99 +20,88 @@ type Tes = {
   status: string;
 };
 
+const STATUS = ["draft", "published", "archived"];
+
 /**
  * Formulir produk tes. Status `published` hanya diterima server bila seluruh
  * subtes sudah lengkap, jadi tombol ini juga berfungsi sebagai tombol terbit.
  */
 export function TestForm({ tes }: { tes?: Tes }) {
   const [error, action, pending] = useActionState(saveTest, null);
-  const suffix = tes?.id ?? "baru";
+  const uid = tes?.id ?? "baru";
 
   return (
-    <form action={action} className="space-y-5">
+    <form action={action} className="grid gap-5">
       {tes && <input type="hidden" name="id" value={tes.id} />}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className={labelClass} htmlFor={`tes-name-${suffix}`}>
-            Nama tes
-          </label>
-          <input
-            id={`tes-name-${suffix}`}
+        <div className="grid gap-2">
+          <Label htmlFor={`tes-name-${uid}`}>Nama tes</Label>
+          <Input
+            id={`tes-name-${uid}`}
             name="name"
             required
             defaultValue={tes?.name}
             placeholder="Simulasi Tes Masuk Bank"
-            className={fieldClass}
           />
         </div>
-        <div>
-          <label className={labelClass} htmlFor={`tes-slug-${suffix}`}>
-            Slug
-          </label>
-          <input
-            id={`tes-slug-${suffix}`}
+        <div className="grid gap-2">
+          <Label htmlFor={`tes-slug-${uid}`}>Slug</Label>
+          <Input
+            id={`tes-slug-${uid}`}
             name="slug"
             required
             defaultValue={tes?.slug}
             placeholder="simulasi-tes-masuk-bank"
-            className={`${fieldClass} lowercase`}
+            className="lowercase"
           />
+          <p className="text-muted-foreground text-xs">Menjadi alamat halaman: /tes/slug</p>
         </div>
       </div>
 
-      <div>
-        <label className={labelClass} htmlFor={`tes-desc-${suffix}`}>
-          Deskripsi
-        </label>
-        <textarea
-          id={`tes-desc-${suffix}`}
+      <div className="grid gap-2">
+        <Label htmlFor={`tes-desc-${uid}`}>Deskripsi</Label>
+        <Textarea
+          id={`tes-desc-${uid}`}
           name="description"
           required
           rows={3}
           defaultValue={tes?.description}
-          className={fieldClass}
         />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className={labelClass} htmlFor={`tes-price-${suffix}`}>
-            Harga (rupiah)
-          </label>
-          <input
-            id={`tes-price-${suffix}`}
+        <div className="grid gap-2">
+          <Label htmlFor={`tes-price-${uid}`}>Harga (rupiah)</Label>
+          <Input
+            id={`tes-price-${uid}`}
             name="priceAmount"
             type="number"
             min={0}
             step={1000}
             required
             defaultValue={tes?.priceAmount ?? 0}
-            className={fieldClass}
           />
         </div>
-        <div>
-          <label className={labelClass} htmlFor={`tes-status-${suffix}`}>
-            Status
-          </label>
-          <select
-            id={`tes-status-${suffix}`}
-            name="status"
-            defaultValue={tes?.status ?? "draft"}
-            className={fieldClass}
-          >
-            <option value="draft">draft</option>
-            <option value="published">published</option>
-            <option value="archived">archived</option>
-          </select>
+        <div className="grid gap-2">
+          <Label htmlFor={`tes-status-${uid}`}>Status</Label>
+          <SelectNative id={`tes-status-${uid}`} name="status" defaultValue={tes?.status ?? "draft"}>
+            {STATUS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </SelectNative>
         </div>
       </div>
 
       <FormError message={error} />
 
-      <button type="submit" disabled={pending} className={submitClass}>
-        {pending ? "Menyimpan…" : tes ? "Simpan tes" : "Buat tes"}
-      </button>
+      <div>
+        <Button type="submit" disabled={pending}>
+          {pending ? "Menyimpan…" : tes ? "Simpan tes" : "Buat tes"}
+        </Button>
+      </div>
     </form>
   );
 }

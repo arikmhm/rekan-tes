@@ -11,7 +11,7 @@ export default function NotFound() {
       <div className="mx-auto max-w-2xl px-5 py-20 text-center sm:py-28">
         <p className="font-mono text-sm font-semibold text-brand">404</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight">Halaman tidak ditemukan.</h1>
-        <p className="mt-4 text-base leading-7 text-muted">
+        <p className="mt-4 text-base leading-7 text-muted-foreground">
           Tautannya mungkin salah, atau simulasi yang kamu cari sudah tidak terbit lagi.
         </p>
         <Link

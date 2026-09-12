@@ -44,7 +44,7 @@ export default function Home() {
             </span>
             <span className="text-lg">Rekan Tes</span>
           </a>
-          <div className="hidden items-center gap-7 text-sm text-muted sm:flex">
+          <div className="hidden items-center gap-7 text-sm text-muted-foreground sm:flex">
             <Link className="transition hover:text-ink" href="/tes">
               Katalog
             </Link>
@@ -74,7 +74,7 @@ export default function Home() {
             <h1 className="max-w-3xl text-5xl leading-[1.03] font-semibold tracking-[-0.05em] sm:text-6xl lg:text-7xl">
               Lebih siap sebelum hari tes tiba.
             </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-muted sm:text-xl">
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">
               Latihan terstruktur dengan batas waktu, progres tersimpan, serta hasil dan pembahasan yang membantu menemukan area terlemahmu.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -91,7 +91,7 @@ export default function Home() {
                 Pelajari cara kerja
               </a>
             </div>
-            <p className="mt-6 max-w-xl text-xs leading-5 text-muted">
+            <p className="mt-6 max-w-xl text-xs leading-5 text-muted-foreground">
               Rekan Tes adalah platform latihan independen, bukan penyelenggara atau mitra resmi rekrutmen bank. Pembayaran hanya untuk sesi simulasi dan tidak menjamin kelulusan.
             </p>
           </div>
@@ -108,26 +108,26 @@ export default function Home() {
                     Core Aptitude Perbankan
                   </h2>
                 </div>
-                <span className="rounded-full bg-cream px-3 py-1.5 text-xs font-semibold text-muted">
+                <span className="rounded-full bg-cream px-3 py-1.5 text-xs font-semibold text-muted-foreground">
                   Segera hadir
                 </span>
               </div>
               <div className="my-7 h-px bg-black/8" />
               <dl className="grid grid-cols-2 gap-4">
                 <div className="rounded-2xl bg-cream p-4">
-                  <dt className="text-xs text-muted">Model sesi</dt>
+                  <dt className="text-xs text-muted-foreground">Model sesi</dt>
                   <dd className="mt-1 font-semibold">Sekali beli</dd>
                 </div>
                 <div className="rounded-2xl bg-cream p-4">
-                  <dt className="text-xs text-muted">Format soal</dt>
+                  <dt className="text-xs text-muted-foreground">Format soal</dt>
                   <dd className="mt-1 font-semibold">Pilihan ganda</dd>
                 </div>
                 <div className="rounded-2xl bg-cream p-4">
-                  <dt className="text-xs text-muted">Pengerjaan</dt>
+                  <dt className="text-xs text-muted-foreground">Pengerjaan</dt>
                   <dd className="mt-1 font-semibold">Timer per subtes</dd>
                 </div>
                 <div className="rounded-2xl bg-cream p-4">
-                  <dt className="text-xs text-muted">Setelah tes</dt>
+                  <dt className="text-xs text-muted-foreground">Setelah tes</dt>
                   <dd className="mt-1 font-semibold">Hasil & bahasan</dd>
                 </div>
               </dl>
@@ -149,7 +149,7 @@ export default function Home() {
                 <article key={step.number} className="bg-white p-7 sm:p-8">
                   <p className="font-mono text-sm font-semibold text-brand">{step.number}</p>
                   <h3 className="mt-8 text-xl font-semibold">{step.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-muted">{step.description}</p>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{step.description}</p>
                 </article>
               ))}
             </div>
@@ -164,7 +164,7 @@ export default function Home() {
                 Kemampuan inti untuk seleksi perbankan.
               </h2>
             </div>
-            <p className="max-w-2xl text-base leading-7 text-muted lg:justify-self-end">
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground lg:justify-self-end">
               Setiap produk dapat menggabungkan beberapa subtes dengan urutan, durasi, jumlah soal, dan bobot yang berbeda.
             </p>
           </div>
@@ -200,7 +200,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-black/8 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 text-muted sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 text-muted-foreground sm:px-8">
           <LegalLinks />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p>© 2026 Rekan Tes. Platform simulasi independen.</p>

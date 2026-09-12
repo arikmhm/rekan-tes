@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-const tab = "rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-cream";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+
+import { AdminNav } from "./nav";
 
 export function AdminShell({
   title,
@@ -14,35 +18,44 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   return (
-    <main className="mx-auto w-full max-w-5xl px-5 py-10 sm:py-14">
-      <nav aria-label="Navigasi admin" className="flex flex-wrap items-center gap-1 text-muted">
-        <Link className={tab} href="/admin">
-          Ringkasan
-        </Link>
-        <Link className={tab} href="/admin/kategori">
-          Kategori
-        </Link>
-        <Link className={tab} href="/admin/soal">
-          Bank soal
-        </Link>
-        <Link className={tab} href="/admin/subtes">
-          Subtes
-        </Link>
-        <Link className={tab} href="/admin/tes">
-          Produk tes
-        </Link>
-      </nav>
-
-      <div className="mt-7 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-          {description && <p className="mt-2 text-sm leading-6 text-muted">{description}</p>}
+    <div className="min-h-screen">
+      <header className="border-b bg-card">
+        <div className="mx-auto w-full max-w-6xl px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link href="/admin" className="flex items-center gap-2.5 font-semibold">
+              <span className="bg-primary text-primary-foreground grid size-8 place-items-center rounded-lg text-xs font-bold">
+                RT
+              </span>
+              <span>Panel admin</span>
+            </Link>
+            <Link
+              href="/"
+              className="text-muted-foreground text-sm transition hover:text-foreground"
+            >
+              Lihat situs
+            </Link>
+          </div>
+          <AdminNav />
         </div>
-        {action}
-      </div>
+      </header>
 
-      <div className="mt-8">{children}</div>
-    </main>
+      <main className="mx-auto w-full max-w-6xl px-5 py-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+            {description && (
+              <p className="text-muted-foreground mt-1.5 max-w-2xl text-sm leading-6">
+                {description}
+              </p>
+            )}
+          </div>
+          {action}
+        </div>
+
+        <Separator className="my-6" />
+        {children}
+      </main>
+    </div>
   );
 }
 
@@ -51,21 +64,29 @@ export function FormError({ message }: { message: string | null }) {
   if (!message) return null;
 
   return (
-    <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-      {message}
-    </p>
+    <Alert variant="destructive" role="alert">
+      <AlertDescription>{message}</AlertDescription>
+    </Alert>
   );
 }
 
-const badgeBase = "rounded-full px-2.5 py-1 text-xs font-semibold";
-
+/** Warna status konten: terbit menonjol, arsip meredup, draft menunggu. */
 export function StatusBadge({ status }: { status: string }) {
-  const tone =
-    status === "published"
-      ? "bg-mint text-brand-dark"
-      : status === "archived"
-        ? "bg-black/6 text-muted"
-        : "bg-amber-100 text-amber-800";
+  if (status === "published") return <Badge>{status}</Badge>;
+  if (status === "archived") return <Badge variant="secondary">{status}</Badge>;
 
-  return <span className={`${badgeBase} ${tone}`}>{status}</span>;
+  return (
+    <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">
+      {status}
+    </Badge>
+  );
+}
+
+/** Kotak kosong yang menjelaskan langkah berikutnya, bukan sekadar "kosong". */
+export function EmptyState({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
+      {children}
+    </div>
+  );
 }

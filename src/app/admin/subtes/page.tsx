@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listCategories, listSubtests } from "@/lib/admin";
 
-import { AdminShell } from "../_components/shell";
+import { AdminShell, EmptyState } from "../_components/shell";
 import { SubtestForm, SubtestRow } from "../_components/subtest-form";
 
 export const metadata: Metadata = { title: "Subtes" };
@@ -16,30 +17,28 @@ export default async function SubtesPage() {
       description="Subtes adalah jenis bagian tes beserta kategori soal utamanya. Satu subtes dapat dipakai di banyak produk tes dengan durasi dan jumlah soal berbeda."
     >
       {kategori.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-black/12 p-8 text-center text-sm text-muted">
-          Belum ada kategori. Buat kategori lebih dulu.
-        </p>
+        <EmptyState>Belum ada kategori. Buat kategori lebih dulu.</EmptyState>
       ) : (
-        <div className="rounded-2xl border border-black/8 bg-white p-6">
-          <h2 className="font-semibold">Tambah subtes</h2>
-          <div className="mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Tambah subtes</CardTitle>
+          </CardHeader>
+          <CardContent>
             <SubtestForm kategori={kategori} />
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
-      <ul className="mt-6 space-y-3">
+      <div className="mt-6 grid gap-2.5">
         {subtes.map((s) => (
-          <li key={s.id}>
-            <SubtestRow subtes={s} kategori={kategori} />
-          </li>
+          <SubtestRow key={s.id} subtes={s} kategori={kategori} />
         ))}
-      </ul>
+      </div>
 
       {subtes.length === 0 && kategori.length > 0 && (
-        <p className="mt-6 rounded-2xl border border-dashed border-black/12 p-8 text-center text-sm text-muted">
-          Belum ada subtes. Tambahkan subtes pertama di formulir atas.
-        </p>
+        <div className="mt-6">
+          <EmptyState>Belum ada subtes. Tambahkan subtes pertama di formulir atas.</EmptyState>
+        </div>
       )}
     </AdminShell>
   );

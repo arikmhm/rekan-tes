@@ -19,7 +19,7 @@ Sebelum mengubah implementasi, baca dokumen yang relevan:
 Aturan proyek:
 
 - Gunakan `pnpm` dan pertahankan satu aplikasi Next.js modular monolith.
-- Target router adalah App Router meskipun scaffold saat ini masih memakai `src/pages`.
+- Pertahankan App Router yang aktif di `src/app`.
 - Jangan menambah backend terpisah, Redis, queue, WebSocket, atau Playwright tanpa kebutuhan yang sudah disepakati.
 - Otorisasi, timer, scoring, dan pembayaran harus diverifikasi di server.
 - Jika keputusan produk, database, atau stack berubah, perbarui dokumen sumbernya dan tautan terkait dalam perubahan yang sama.

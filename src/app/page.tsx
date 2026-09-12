@@ -1,69 +1,202 @@
-import Image from "next/image";
+const categories = [
+  "Numerik",
+  "Verbal",
+  "Logika & Figural",
+  "Ketelitian",
+  "Bahasa Inggris",
+  "Pengetahuan Perbankan",
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "Pilih simulasi",
+    description: "Lihat cakupan subtes, jumlah soal, durasi, dan harga sebelum membeli.",
+  },
+  {
+    number: "02",
+    title: "Kerjakan per subtes",
+    description: "Ikuti urutan dan batas waktu seperti kondisi tes yang sebenarnya.",
+  },
+  {
+    number: "03",
+    title: "Pelajari hasil",
+    description: "Tinjau skor, statistik jawaban, kunci, dan pembahasan setiap soal.",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
+    <div className="min-h-screen overflow-hidden bg-background text-ink">
+      <header className="border-b border-black/8 bg-background/90">
+        <nav
+          aria-label="Navigasi utama"
+          className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8"
+        >
+          <a href="#top" className="flex items-center gap-3 font-semibold tracking-tight">
+            <span className="grid size-9 place-items-center rounded-xl bg-brand text-sm font-bold text-white">
+              RT
+            </span>
+            <span className="text-lg">Rekan Tes</span>
           </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <div className="hidden items-center gap-7 text-sm text-muted sm:flex">
+            <a className="transition hover:text-ink" href="#cara-kerja">
+              Cara kerja
+            </a>
+            <a className="transition hover:text-ink" href="#cakupan">
+              Cakupan tes
+            </a>
+            <a
+              className="rounded-full border border-black/10 bg-white px-4 py-2 font-semibold text-ink shadow-sm transition hover:border-brand/30"
+              href="#status"
+            >
+              Status MVP
+            </a>
+          </div>
+        </nav>
+      </header>
+
+      <main id="top">
+        <section className="relative mx-auto grid max-w-6xl gap-14 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:py-28">
+          <div className="absolute -right-48 -top-36 -z-0 size-[520px] rounded-full bg-mint/70 blur-3xl" />
+          <div className="relative z-10">
+            <p className="mb-5 inline-flex rounded-full border border-brand/15 bg-mint px-4 py-2 text-xs font-bold tracking-[0.16em] text-brand-dark uppercase">
+              Simulasi tes kerja perbankan
+            </p>
+            <h1 className="max-w-3xl text-5xl leading-[1.03] font-semibold tracking-[-0.05em] sm:text-6xl lg:text-7xl">
+              Lebih siap sebelum hari tes tiba.
+            </h1>
+            <p className="mt-7 max-w-2xl text-lg leading-8 text-muted sm:text-xl">
+              Latihan terstruktur dengan batas waktu, progres tersimpan, serta hasil dan pembahasan yang membantu menemukan area terlemahmu.
+            </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <a
+                className="rounded-full bg-brand px-6 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-brand/20 transition hover:bg-brand-dark"
+                href="#cakupan"
+              >
+                Lihat fokus latihan
+              </a>
+              <a
+                className="rounded-full border border-black/10 bg-white px-6 py-3.5 text-center text-sm font-bold transition hover:border-brand/30"
+                href="#cara-kerja"
+              >
+                Pelajari cara kerja
+              </a>
+            </div>
+            <p className="mt-6 max-w-xl text-xs leading-5 text-muted">
+              Rekan Tes adalah platform latihan independen, bukan penyelenggara atau mitra resmi rekrutmen bank. Pembayaran hanya untuk sesi simulasi dan tidak menjamin kelulusan.
+            </p>
+          </div>
+
+          <div className="relative z-10 mx-auto w-full max-w-lg">
+            <div className="absolute -inset-4 -z-10 rotate-2 rounded-[2rem] bg-brand/10" />
+            <div className="rounded-[1.75rem] border border-black/8 bg-white p-6 shadow-2xl shadow-black/8 sm:p-8">
+              <div className="flex items-start justify-between gap-5">
+                <div>
+                  <p className="text-xs font-bold tracking-[0.16em] text-brand uppercase">
+                    Produk pertama
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+                    Core Aptitude Perbankan
+                  </h2>
+                </div>
+                <span className="rounded-full bg-cream px-3 py-1.5 text-xs font-semibold text-muted">
+                  Segera hadir
+                </span>
+              </div>
+              <div className="my-7 h-px bg-black/8" />
+              <dl className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl bg-cream p-4">
+                  <dt className="text-xs text-muted">Model sesi</dt>
+                  <dd className="mt-1 font-semibold">Sekali beli</dd>
+                </div>
+                <div className="rounded-2xl bg-cream p-4">
+                  <dt className="text-xs text-muted">Format soal</dt>
+                  <dd className="mt-1 font-semibold">Pilihan ganda</dd>
+                </div>
+                <div className="rounded-2xl bg-cream p-4">
+                  <dt className="text-xs text-muted">Pengerjaan</dt>
+                  <dd className="mt-1 font-semibold">Timer per subtes</dd>
+                </div>
+                <div className="rounded-2xl bg-cream p-4">
+                  <dt className="text-xs text-muted">Setelah tes</dt>
+                  <dd className="mt-1 font-semibold">Hasil & bahasan</dd>
+                </div>
+              </dl>
+              <div className="mt-7 rounded-2xl border border-brand/15 bg-mint/60 p-4 text-sm leading-6 text-brand-dark">
+                Harga, jumlah soal, dan durasi akan ditampilkan secara transparan sebelum checkout.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="cara-kerja" className="border-y border-black/8 bg-white">
+          <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+            <p className="text-sm font-bold text-brand">Cara kerja</p>
+            <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+              Satu alur sederhana dari latihan sampai evaluasi.
+            </h2>
+            <div className="mt-10 grid gap-px overflow-hidden rounded-3xl border border-black/8 bg-black/8 md:grid-cols-3">
+              {steps.map((step) => (
+                <article key={step.number} className="bg-white p-7 sm:p-8">
+                  <p className="font-mono text-sm font-semibold text-brand">{step.number}</p>
+                  <h3 className="mt-8 text-xl font-semibold">{step.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted">{step.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="cakupan" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+          <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+            <div>
+              <p className="text-sm font-bold text-brand">Fokus latihan MVP</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                Kemampuan inti untuk seleksi perbankan.
+              </h2>
+            </div>
+            <p className="max-w-2xl text-base leading-7 text-muted lg:justify-self-end">
+              Setiap produk dapat menggabungkan beberapa subtes dengan urutan, durasi, jumlah soal, dan bobot yang berbeda.
+            </p>
+          </div>
+          <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category, index) => (
+              <li
+                key={category}
+                className="flex items-center gap-4 rounded-2xl border border-black/8 bg-white px-5 py-5 font-semibold shadow-sm shadow-black/[0.02]"
+              >
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-mint font-mono text-xs text-brand-dark">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                {category}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section id="status" className="px-5 pb-16 sm:px-8 sm:pb-24">
+          <div className="mx-auto flex max-w-6xl flex-col gap-7 overflow-hidden rounded-[2rem] bg-brand-dark px-7 py-10 text-white sm:px-10 sm:py-12 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-sm font-bold text-emerald-200">Status pengembangan</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight">MVP sedang dibangun.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-emerald-50/75">
+                Katalog, akun, pembayaran, dan sesi tes belum dibuka. Halaman ini menampilkan arah produk tanpa menerima transaksi.
+              </p>
+            </div>
+            <span className="shrink-0 self-start rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold lg:self-auto">
+              Belum menerima pendaftaran
+            </span>
+          </div>
+        </section>
       </main>
+
+      <footer className="border-t border-black/8 bg-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
+          <p>Fokus awal: simulasi tes masuk kerja perbankan.</p>
+        </div>
+      </footer>
     </div>
   );
 }

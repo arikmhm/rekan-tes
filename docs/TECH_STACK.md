@@ -54,17 +54,23 @@ Versi package yang terpasang mengikuti `package.json` dan lockfile, bukan didupl
 
 ## Status repository
 
-- Next.js sudah terpasang, tetapi scaffold saat ini masih menggunakan Pages Router di `src/pages`.
-- Migrasi scaffold ke `src/app` adalah pekerjaan implementasi pertama.
-- Tailwind, shadcn/ui, Better Auth, Drizzle, Neon driver, Zod, dan Vitest belum tercatat di `package.json`.
+- Next.js 16 dan React 19 sudah terpasang dengan App Router di `src/app`.
+- Tailwind CSS 4 sudah terpasang melalui `@tailwindcss/postcss` dan diimpor dari root layout.
+- Shell halaman publik dan metadata dasar sudah menggunakan identitas Rekan Tes.
+- shadcn/ui belum dipasang; tambahkan hanya saat komponen pertama benar-benar membutuhkannya.
+- Better Auth, Drizzle, Neon driver, Zod, dan Vitest belum tercatat di `package.json`.
+- Urutan pekerjaan terperinci dan statusnya dicatat di [ISSUES.md](./ISSUES.md).
 
 ## Urutan implementasi awal
 
-1. Migrasikan scaffold ke App Router dan pasang Tailwind serta komponen shadcn/ui minimum.
-2. Hubungkan Neon, Drizzle, dan Better Auth beserta verifikasi email.
+1. Hubungkan Neon dan Drizzle, lalu buat schema serta migrasi MVP.
+2. Pasang Better Auth, alur akun, otorisasi role, dan verifikasi email.
 3. Bangun pengelolaan kategori, soal reusable, subtes, dan produk tes.
-4. Integrasikan order serta DOKU Checkout.
-5. Bangun test engine, autosave, scoring, hasil, dan pengujian kritis.
+4. Bangun katalog publik, detail produk, serta dokumen legal minimum.
+5. Integrasikan order serta DOKU Checkout secara idempotent.
+6. Bangun test engine, autosave, scoring, hasil, dan pengujian kritis.
+
+Rincian dependensi dan kriteria selesai untuk setiap tahap tersedia di [ISSUES.md](./ISSUES.md).
 
 ## Keputusan yang belum ditetapkan
 

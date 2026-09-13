@@ -29,9 +29,9 @@ export default async function AkunPage() {
   const orders = await listOrdersForUser(user.id);
 
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Halo, {user.username ?? user.name}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Ringkasan akun dan riwayat pesananmu.</p>
+    <div className="mx-auto max-w-4xl p-4 pt-2 sm:p-6 sm:pt-3">
+      <h1 className="text-2xl font-semibold tracking-tight">Halo, {user.username ?? user.name}</h1>
+      <p className="mt-1.5 text-sm text-muted-foreground">Ringkasan akun dan riwayat pesananmu.</p>
 
       <section className="mt-8 rounded-3xl border border-black/8 bg-white p-7">
         <h2 className="text-lg font-semibold">Info akun</h2>
@@ -56,13 +56,6 @@ export default async function AkunPage() {
             </div>
           </div>
         )}
-
-        <Link
-          href="/lupa-password"
-          className="mt-5 inline-block text-sm font-semibold text-brand hover:text-brand-dark"
-        >
-          Ganti password
-        </Link>
       </section>
 
       <section className="mt-8">
@@ -107,14 +100,20 @@ export default async function AkunPage() {
                         <span className="text-muted-foreground">· Skor {order.attemptScore}</span>
                       )}
                     </div>
-                    {order.attemptStatus !== "submitted" && order.attemptStatus !== "submitted_by_timeout" && (
-                      <Link
-                        href={`/attempt/${order.attemptId}`}
-                        className="text-sm font-semibold text-brand hover:text-brand-dark"
-                      >
-                        Buka sesi
-                      </Link>
-                    )}
+                    <Link
+                      href={
+                        order.attemptStatus === "submitted" ||
+                        order.attemptStatus === "submitted_by_timeout"
+                          ? `/attempt/${order.attemptId}/hasil`
+                          : `/attempt/${order.attemptId}`
+                      }
+                      className="text-sm font-semibold text-brand hover:text-brand-dark"
+                    >
+                      {order.attemptStatus === "submitted" ||
+                      order.attemptStatus === "submitted_by_timeout"
+                        ? "Lihat hasil"
+                        : "Buka sesi"}
+                    </Link>
                   </div>
                 )}
               </li>

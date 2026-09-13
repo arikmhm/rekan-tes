@@ -1,15 +1,21 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useOptimistic, useState } from "react";
 
 import { saveAnswer } from "@/lib/attempt";
 
 type Option = { id: string; label: string; content: string };
 
 /**
- * Pilihan jawaban satu soal. Setiap opsi adalah tombol submit, jadi menjawab
- * tetap berjalan tanpa JavaScript dan tanpa state klien yang bisa melenceng
- * dari server. Indikator "menyimpan/tersimpan" menyusul di RT-013.
+ * Pilihan jawaban satu soal: pilihan tampil seketika (optimistis) sementara
+ * penyimpanan berjalan di latar, dan status simpan selalu terlihat — menyimpan,
+ * tersimpan, atau gagal.
+ *
+ * Aksi dibungkus closure klien supaya kegagalan pengiriman dapat ditangkap.
+ * Konsekuensinya form ini tidak lagi bisa di-progressive-enhance: tanpa
+ * JavaScript, menjawab tidak jalan. Ditukar sadar — halaman pengerjaan sudah
+ * butuh JavaScript untuk hitung mundur, dan error pengiriman yang tak
+ * tertangkap akan melempar peserta keluar dari sesi yang waktunya berjalan.
  */
 export function AnswerOptions({
   attemptId,
@@ -22,7 +28,25 @@ export function AnswerOptions({
   options: Option[];
   selectedOptionId: string | null;
 }) {
-  const [pesan, action, pending] = useActionState(saveAnswer, null);
+  // Nilai optimistis kembali sendiri ke nilai server begitu aksi selesai, jadi
+  // penyimpanan yang gagal terlihat sebagai pilihan yang batal — bukan centang
+  // yang menipu peserta seolah jawabannya sudah tersimpan.
+  const [terpilih, pilihOptimistis] = useOptimistic(selectedOptionId);
+  const [pernahKirim, setPernahKirim] = useState(false);
+
+  const [galat, action, pending] = useActionState(async (_prev: string | null, form: FormData) => {
+    pilihOptimistis(String(form.get("optionId") ?? ""));
+    setPernahKirim(true);
+
+    try {
+      return await saveAnswer(null, form);
+    } catch {
+      // Aksi gagal terkirim sama sekali (koneksi putus, server mati). Tanpa
+      // tangkapan ini React melempar ke error boundary dan seluruh halaman
+      // pengerjaan hilang bersama sisa waktu yang sedang berjalan.
+      return "Jawaban belum tersimpan karena koneksi bermasalah. Pilih lagi setelah koneksi pulih.";
+    }
+  }, null);
 
   return (
     <form action={action} className="mt-6 space-y-3">
@@ -30,7 +54,7 @@ export function AnswerOptions({
       <input type="hidden" name="assignmentId" value={assignmentId} />
 
       {options.map((o) => {
-        const terpilih = o.id === selectedOptionId;
+        const aktif = o.id === terpilih;
 
         return (
           <button
@@ -38,15 +62,14 @@ export function AnswerOptions({
             type="submit"
             name="optionId"
             value={o.id}
-            disabled={pending}
-            aria-pressed={terpilih}
-            className={`flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition disabled:opacity-60 ${
-              terpilih ? "border-brand bg-mint/60" : "border-black/12 bg-white hover:border-brand/30"
+            aria-pressed={aktif}
+            className={`flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition ${
+              aktif ? "border-brand bg-mint/60" : "border-black/12 bg-white hover:border-brand/30"
             }`}
           >
             <span
               className={`grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold ${
-                terpilih ? "bg-brand text-white" : "bg-cream text-ink"
+                aktif ? "bg-brand text-white" : "bg-cream text-ink"
               }`}
             >
               {o.label}
@@ -56,9 +79,17 @@ export function AnswerOptions({
         );
       })}
 
-      {pesan && (
-        <p role="status" className="text-sm leading-6 text-muted-foreground">
-          {pesan}
+      {/* `pending` diperiksa lebih dulu: selagi percobaan baru berjalan,
+          `galat` masih berisi hasil percobaan sebelumnya — menampilkannya akan
+          mengabarkan kegagalan yang sedang dicoba ulang saat itu juga. */}
+      {!pending && galat ? (
+        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          {galat}
+        </p>
+      ) : (
+        // Ruangnya tetap ada agar teks status tidak menggeser daftar opsi.
+        <p role="status" className="min-h-5 text-xs font-semibold text-muted-foreground">
+          {pending ? "Menyimpan…" : pernahKirim ? "Tersimpan" : ""}
         </p>
       )}
     </form>

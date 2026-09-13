@@ -59,5 +59,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: hasil.result }, { status: 400 });
   }
 
+  // Satu-satunya jejak bahwa notifikasi benar-benar sampai dan diproses.
+  // Tanpa ini, "webhook tidak pernah tiba" dan "webhook tiba lalu berhasil"
+  // tidak bisa dibedakan dari log.
+  console.log("Notifikasi DOKU diproses:", hasil.result, notifikasi.invoiceNumber);
+
   return NextResponse.json({ received: true });
 }

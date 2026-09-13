@@ -77,7 +77,7 @@ pernah meninggalkan aplikasi, dan tidak ada halaman pemilihan kanal.
 5. Hanya HTTP Notification DOKU dengan signature valid yang boleh mengubah status pembayaran. Notifikasi memakai skema signature non-SNAP (`Client-Id/Request-Id/Request-Timestamp/Request-Target/Digest` di-HMAC-SHA256 dengan secret key yang sama), berbeda dari skema SNAP pada langkah 2–3.
 6. Status sukses menandai order `paid` dan membuat maksimal satu attempt dalam transaksi yang idempotent, dijaga `UPDATE ... WHERE status <> 'paid'` di dalam `db.transaction` — kunci baris Postgres, bukan pemeriksaan aplikasi.
 7. Memindai QR tidak mengubah apa pun di sisi kami; halaman pesanan hanya membaca status.
-8. **Backup selain webhook:** Notification URL harus dikonfigurasi manual di DOKU Back Office dan tidak dapat menjangkau `localhost`, sehingga webhook bisa saja tidak pernah datang. Selama order masih `pending`, halaman pesanan menanyakan status langsung ke DOKU lewat Query QRIS (`/snap-adapter/b2b/v1.0/qr/qr-mpm-query`, skema SNAP yang sama seperti generate) dan memakai fungsi aktivasi yang sama seperti webhook, sehingga jalur push dan pull tidak pernah berbeda perilaku.
+8. **Backup selain webhook:** Notification URL harus dikonfigurasi manual di DOKU Back Office dan tidak dapat menjangkau `localhost`, sehingga webhook bisa saja tidak pernah datang. Peserta dapat menekan tombol "Cek status pembayaran" di halaman pesanan untuk menanyakan status langsung ke DOKU lewat Query QRIS (`/snap-adapter/b2b/v1.0/qr/qr-mpm-query`, skema SNAP yang sama seperti generate), memakai fungsi aktivasi yang sama seperti webhook sehingga jalur push dan pull tidak pernah berbeda perilaku. Pemicunya manual, bukan otomatis di setiap render, agar DOKU tidak dipanggil tanpa alasan.
 
 ## Status repository
 

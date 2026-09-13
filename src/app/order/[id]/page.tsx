@@ -3,11 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 
-import { parseDokuEnv } from "@/lib/env-schema";
 import { formatPrice } from "@/lib/format";
 import { getOrder } from "@/lib/order";
-import { pollPaymentStatus } from "@/lib/webhook";
 
+import { CheckPaymentButton } from "../../_components/check-payment-button";
 import { SiteShell } from "../../_components/site-shell";
 
 export const metadata: Metadata = { title: "Status pesanan" };
@@ -24,36 +23,7 @@ const keterangan: Record<string, string> = {
 };
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
-  let order = await getOrder((await params).id);
-
-  if (!order) {
-    notFound();
-  }
-
-  // Backup selain webhook: sambil menunggu notifikasi resmi, tanyakan langsung
-  // ke DOKU setiap halaman ini dibuka atau menyegarkan diri. Menutup celah
-  // ketika Notification URL belum terdaftar atau memang tidak bisa dituju DOKU
-  // (mis. diuji dari localhost).
-  if (order.status === "pending") {
-    const pembayaranPending = order.payments.find((p) => p.status === "pending" && p.referenceNo);
-
-    if (pembayaranPending?.referenceNo) {
-      try {
-        const hasil = await pollPaymentStatus(parseDokuEnv(process.env), {
-          externalId: pembayaranPending.externalId,
-          referenceNo: pembayaranPending.referenceNo,
-        });
-
-        if (hasil.result === "activated" || hasil.result === "already_paid") {
-          order = await getOrder(order.id);
-        }
-      } catch (error) {
-        // DOKU sedang bermasalah atau kredensial belum lengkap bukan alasan
-        // menggagalkan seluruh halaman; webhook tetap jalur utama.
-        console.error("Polling status QRIS gagal:", error);
-      }
-    }
-  }
+  const order = await getOrder((await params).id);
 
   if (!order) {
     notFound();
@@ -116,8 +86,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               Berlaku sampai pukul {jam.format(qris.expiresAt)}
             </p>
             <p className="mt-2 text-xs leading-5 text-brand-dark/70">
-              Halaman ini memuat ulang sendiri. Setelah pembayaranmu terverifikasi, statusnya
-              berubah tanpa perlu kamu lakukan apa pun.
+              Halaman ini memuat ulang sendiri untuk membaca notifikasi dari DOKU. Kalau kamu sudah
+              membayar tapi status belum berubah, tekan tombol di bawah untuk memeriksa langsung.
             </p>
           </div>
         )}
@@ -128,8 +98,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <Link className="font-semibold hover:underline" href={`/tes/${order.testSlug}`}>
               Mulai pembayaran baru
             </Link>
-            .
+            . Sudah sempat membayar sebelum kedaluwarsa? Tekan tombol di bawah untuk memeriksa.
           </p>
+        )}
+
+        {order.status === "pending" && (
+          <div className="mt-6 text-center">
+            <CheckPaymentButton orderId={order.id} />
+          </div>
         )}
 
         <h2 className="mt-10 text-lg font-semibold">Percobaan pembayaran</h2>

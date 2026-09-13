@@ -1,6 +1,7 @@
 "use server";
 
 import { and, desc, eq, gt, isNotNull } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { db, schema } from "@/db";
@@ -9,6 +10,7 @@ import { assertOwner, requireVerifiedUser } from "./authz";
 import { getPublishedTest } from "./catalog";
 import { externalId, generateQris, invoiceNumber } from "./doku";
 import { parseDokuEnv } from "./env-schema";
+import { pollPaymentStatus } from "./webhook";
 
 const PROVIDER = "doku";
 
@@ -113,6 +115,57 @@ export async function startCheckout(_prev: string | null, form: FormData) {
   // QR ditampilkan di halaman kami sendiri; peserta tidak pernah keluar dari
   // aplikasi, jadi tidak ada redirect yang perlu dipercaya sebagai bukti bayar.
   redirect(`/order/${orderId}`);
+}
+
+/**
+ * Backup selain webhook: peserta menekan tombol untuk menanyakan status
+ * transaksi langsung ke DOKU, dipakai saat notifikasi belum atau tidak pernah
+ * sampai. Dipicu manual, bukan otomatis di setiap render, supaya tidak
+ * memanggil DOKU tanpa alasan selama halaman dibuka.
+ */
+export async function checkPaymentStatus(_prev: string | null, form: FormData) {
+  const orderId = String(form.get("orderId") ?? "");
+
+  // `getOrder` sudah memverifikasi kepemilikan lewat `assertOwner`; dipakai
+  // ulang di sini agar tidak ada jalur kedua yang memeriksa hal yang sama.
+  const order = await getOrder(orderId);
+  if (!order) return "Pesanan tidak ditemukan.";
+
+  if (order.status !== "pending") {
+    revalidatePath(`/order/${orderId}`);
+    return null;
+  }
+
+  const pembayaran = order.payments.find((p) => p.status === "pending" && p.referenceNo);
+  if (!pembayaran?.referenceNo) {
+    return "Tidak ada QRIS aktif untuk pesanan ini. Buat pembayaran baru dari halaman tes.";
+  }
+
+  let hasil;
+  try {
+    hasil = await pollPaymentStatus(parseDokuEnv(process.env), {
+      externalId: pembayaran.externalId,
+      referenceNo: pembayaran.referenceNo,
+    });
+  } catch (error) {
+    console.error("Cek status QRIS gagal:", error);
+    return "Gagal menghubungi DOKU. Coba lagi beberapa saat.";
+  }
+
+  revalidatePath(`/order/${orderId}`);
+
+  if (hasil.result === "still_pending") {
+    return "Belum terbaca sebagai lunas. Pastikan pembayaran sudah selesai, lalu coba lagi.";
+  }
+  if (hasil.result === "not_found" || hasil.result === "amount_mismatch") {
+    // Seharusnya tidak terjadi karena `pembayaran` sudah dicocokkan lewat
+    // invoice miliknya sendiri; ditangani agar tidak diam-diam gagal.
+    return "Status pembayaran tidak dapat diverifikasi. Hubungi kami bila ini berulang.";
+  }
+
+  // "activated" atau "already_paid": halaman menampilkan status baru begitu
+  // `revalidatePath` di atas membuat render berikutnya membaca ulang database.
+  return null;
 }
 
 /** Satu order beserta percobaan pembayarannya, hanya untuk pemiliknya. */

@@ -221,9 +221,15 @@ export async function listOrdersForUser(userId: string) {
       createdAt: schema.orders.createdAt,
       testName: schema.tests.name,
       testSlug: schema.tests.slug,
+      // Ikut ditampilkan di halaman akun supaya peserta melihat status
+      // pengerjaannya tanpa perlu buka satu per satu halaman pesanan.
+      attemptId: schema.testAttempts.id,
+      attemptStatus: schema.testAttempts.status,
+      attemptScore: schema.testAttempts.finalScore,
     })
     .from(schema.orders)
     .innerJoin(schema.tests, eq(schema.tests.id, schema.orders.testId))
+    .leftJoin(schema.testAttempts, eq(schema.testAttempts.orderId, schema.orders.id))
     .where(eq(schema.orders.userId, userId))
     .orderBy(desc(schema.orders.createdAt));
 }

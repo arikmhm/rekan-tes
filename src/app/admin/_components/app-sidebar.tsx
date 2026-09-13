@@ -7,6 +7,7 @@ import {
   ListChecks,
   LogOut,
   Package,
+  Receipt,
   Tags,
 } from "lucide-react";
 import Link from "next/link";
@@ -52,6 +53,10 @@ const grup = [
     label: "Produk",
     items: [{ href: "/admin/tes", label: "Produk tes", icon: Package }],
   },
+  {
+    label: "Operasional",
+    items: [{ href: "/admin/pesanan", label: "Pesanan", icon: Receipt }],
+  },
 ];
 
 export function AppSidebar({ nama }: { nama: string }) {
@@ -94,6 +99,7 @@ export function AppSidebar({ nama }: { nama: string }) {
                       <SidebarMenuButton
                         isActive={aktif}
                         tooltip={item.label}
+                        className="data-active:text-brand-orange"
                         render={<Link href={item.href} />}
                       >
                         <item.icon />

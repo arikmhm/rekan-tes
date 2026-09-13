@@ -67,3 +67,18 @@ export function EmptyState({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+/** Status transaksi punya arti berbeda dari status konten, jadi warnanya sendiri. */
+export function OrderBadge({ status }: { status: string }) {
+  if (status === "paid") return <Badge>{status}</Badge>;
+  if (status === "refunded" || status === "cancelled") {
+    return <Badge variant="secondary">{status}</Badge>;
+  }
+  if (status === "expired") return <Badge variant="outline">{status}</Badge>;
+
+  return (
+    <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-800">
+      {status}
+    </Badge>
+  );
+}

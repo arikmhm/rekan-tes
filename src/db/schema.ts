@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   check,
   index,
@@ -211,6 +212,16 @@ export const orders = pgTable(
     status: orderStatus("status").notNull().default("pending"),
     // Diisi saat pembayaran berhasil, 30 hari setelahnya. Lihat RT-009.
     accessExpiresAt: timestamp("access_expires_at", { withTimezone: true }),
+    /**
+     * Tiga kolom di bawah hanya terisi pada order yang diberikan admin sebagai
+     * penggantian akses (RT-015), dan sekaligus menjadi jejak auditnya: siapa
+     * yang memberi, alasannya, dan order mana yang digantikan. Order itu
+     * sendiri sudah satu baris per pemberian, jadi tidak perlu tabel log
+     * terpisah yang bisa melenceng dari order yang dicatatnya.
+     */
+    grantedBy: text("granted_by").references(() => user.id),
+    grantReason: text("grant_reason"),
+    replacesOrderId: text("replaces_order_id").references((): AnyPgColumn => orders.id),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -218,6 +229,11 @@ export const orders = pgTable(
     index("orders_user_created_idx").on(t.userId, t.createdAt),
     index("orders_status_created_idx").on(t.status, t.createdAt),
     check("orders_amount_non_negative", sql`${t.amount} >= 0`),
+    // Alasan wajib menyertai pemberi: jejak audit tanpa keduanya tidak berguna.
+    check(
+      "orders_grant_reason_with_granter",
+      sql`(${t.grantedBy} is null and ${t.grantReason} is null) or (${t.grantedBy} is not null and ${t.grantReason} is not null)`,
+    ),
   ],
 );
 

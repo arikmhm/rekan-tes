@@ -3,10 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getAttempt } from "@/lib/attempt";
-import { activeSubtest, attemptAccessProblem, isDone, subtestDeadline } from "@/lib/attempt-flow";
+import { activeSubtest, attemptAccessProblem, isDone } from "@/lib/attempt-flow";
 import { formatDuration } from "@/lib/format";
 
+import { AnswerOptions } from "../../_components/answer-options";
 import { StartAttemptButton, SubmitSubtestButton } from "../../_components/attempt-buttons";
+import { Countdown } from "../../_components/countdown";
 import { SiteShell } from "../../_components/site-shell";
 
 export const metadata: Metadata = { title: "Sesi pengerjaan" };
@@ -18,7 +20,15 @@ export const dynamic = "force-dynamic";
 const tanggal = new Intl.DateTimeFormat("id-ID", { dateStyle: "long", timeStyle: "short" });
 const jam = new Intl.DateTimeFormat("id-ID", { timeStyle: "short" });
 
-export default async function AttemptPage({ params }: { params: Promise<{ id: string }> }) {
+type Attempt = NonNullable<Awaited<ReturnType<typeof getAttempt>>>;
+
+export default async function AttemptPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ soal?: string }>;
+}) {
   const attempt = await getAttempt((await params).id);
 
   if (!attempt) {
@@ -30,7 +40,6 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
     new Date(),
   );
   const aktif = masalah ? null : activeSubtest(attempt.subtests);
-  const deadline = aktif && aktif.startedAt ? subtestDeadline(aktif) : null;
   const totalDurasi = attempt.subtests.reduce((n, s) => n + s.durationSeconds, 0);
 
   return (
@@ -72,33 +81,11 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
             jumlahSubtes={attempt.subtests.length}
           />
         ) : (
-          <div className="mt-8 rounded-3xl border border-brand/15 bg-mint/60 p-7">
-            <p className="text-sm font-semibold text-brand-dark">
-              Subtes {aktif.position} dari {attempt.subtests.length}
-            </p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-brand-dark">
-              {aktif.name}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-brand-dark/80">
-              {aktif.questionLimit} soal · {formatDuration(aktif.durationSeconds)}
-              {deadline && ` · batas waktu pukul ${jam.format(deadline)}`}
-            </p>
-
-            {/* Mesin soal, navigasi nomor, dan hitung mundur menyusul bersama
-                timer server. Halaman ini sudah menjadi satu-satunya pintu ke
-                subtes yang sedang berjalan. */}
-            <p className="mt-6 rounded-2xl border border-dashed border-brand/25 bg-white/70 p-6 text-sm leading-6 text-brand-dark/80">
-              Daftar soal subtes ini akan tampil di halaman yang sama. Batas waktunya sudah berjalan
-              sejak subtes dibuka dan dihitung server, jadi menutup peramban tidak menghentikannya.
-            </p>
-
-            <div className="mt-6">
-              <SubmitSubtestButton attemptId={attempt.id} />
-            </div>
-            <p className="mt-3 text-xs leading-5 text-brand-dark/70">
-              Subtes yang sudah dikumpulkan tidak dapat dibuka kembali.
-            </p>
-          </div>
+          <Engine
+            attempt={attempt}
+            aktif={aktif}
+            nomor={nomorSoal((await searchParams).soal, attempt.questions.length)}
+          />
         )}
 
         <h2 className="mt-12 text-lg font-semibold">Urutan subtes</h2>
@@ -106,11 +93,7 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
           {attempt.subtests.map((s) => (
             <li
               key={s.testSubtestId}
-              className={`flex flex-wrap items-center gap-4 rounded-2xl border p-5 ${
-                s.testSubtestId === aktif?.testSubtestId
-                  ? "border-brand/30 bg-white"
-                  : "border-black/8 bg-white"
-              }`}
+              className="flex flex-wrap items-center gap-4 rounded-2xl border border-black/8 bg-white p-5"
             >
               <span className="grid size-9 shrink-0 place-items-center rounded-full bg-mint font-mono text-xs font-semibold text-brand-dark">
                 {String(s.position).padStart(2, "0")}
@@ -133,6 +116,115 @@ export default async function AttemptPage({ params }: { params: Promise<{ id: st
         </ol>
       </div>
     </SiteShell>
+  );
+}
+
+/** Nomor soal dari query string, dijepit ke rentang yang benar-benar ada. */
+function nomorSoal(raw: string | undefined, jumlah: number) {
+  const n = Number.parseInt(raw ?? "1", 10);
+  if (!Number.isFinite(n) || jumlah === 0) return 1;
+  return Math.min(Math.max(n, 1), jumlah);
+}
+
+/** Soal, navigasi nomor, dan sisa waktu subtes yang sedang berjalan. */
+function Engine({
+  attempt,
+  aktif,
+  nomor,
+}: {
+  attempt: Attempt;
+  aktif: Attempt["subtests"][number];
+  nomor: number;
+}) {
+  const soal = attempt.questions[nomor - 1];
+
+  return (
+    <div className="mt-8 rounded-3xl border border-brand/15 bg-mint/60 p-6 sm:p-7">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-brand-dark">
+            Subtes {aktif.position} dari {attempt.subtests.length}
+          </p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-brand-dark">
+            {aktif.name}
+          </h2>
+        </div>
+        {attempt.remainingSeconds !== null && attempt.deadline && (
+          <p className="text-right text-sm text-brand-dark/80">
+            Sisa waktu{" "}
+            <strong className="text-base text-brand-dark">
+              <Countdown remainingSeconds={attempt.remainingSeconds} />
+            </strong>
+            <br />
+            <span className="text-xs">sampai pukul {jam.format(attempt.deadline)}</span>
+          </p>
+        )}
+      </div>
+
+      {!soal ? (
+        <p className="mt-6 rounded-2xl border border-dashed border-brand/25 bg-white/70 p-6 text-sm leading-6 text-brand-dark/80">
+          Subtes ini belum memiliki soal. Kumpulkan saja untuk melanjutkan ke subtes berikutnya.
+        </p>
+      ) : (
+        <>
+          <nav aria-label="Navigasi nomor soal" className="mt-6 flex flex-wrap gap-2">
+            {attempt.questions.map((q) => (
+              <Link
+                key={q.assignmentId}
+                href={`/attempt/${attempt.id}?soal=${q.nomor}`}
+                aria-current={q.nomor === nomor ? "page" : undefined}
+                className={`grid size-10 place-items-center rounded-xl text-sm font-semibold transition ${
+                  q.nomor === nomor
+                    ? "bg-brand text-white"
+                    : q.selectedOptionId
+                      ? "bg-white text-brand-dark ring-1 ring-brand/40"
+                      : "bg-white/70 text-muted-foreground hover:bg-white"
+                }`}
+              >
+                {q.nomor}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="mt-6 rounded-2xl bg-white p-5 sm:p-6">
+            <p className="text-xs font-semibold text-muted-foreground">
+              Soal {soal.nomor} dari {attempt.questions.length}
+            </p>
+            <p className="mt-3 text-base leading-7 whitespace-pre-line">{soal.prompt}</p>
+
+            <AnswerOptions
+              attemptId={attempt.id}
+              assignmentId={soal.assignmentId}
+              options={soal.options}
+              selectedOptionId={soal.selectedOptionId}
+            />
+
+            <div className="mt-6 flex items-center justify-between gap-3 text-sm font-semibold">
+              {nomor > 1 ? (
+                <Link className="text-brand hover:text-brand-dark" href={`/attempt/${attempt.id}?soal=${nomor - 1}`}>
+                  ← Sebelumnya
+                </Link>
+              ) : (
+                <span />
+              )}
+              {nomor < attempt.questions.length && (
+                <Link className="text-brand hover:text-brand-dark" href={`/attempt/${attempt.id}?soal=${nomor + 1}`}>
+                  Berikutnya →
+                </Link>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="mt-6">
+        <SubmitSubtestButton attemptId={attempt.id} subtestId={aktif.id ?? ""} />
+      </div>
+      <p className="mt-3 text-xs leading-5 text-brand-dark/70">
+        Subtes yang sudah dikumpulkan tidak dapat dibuka kembali. Waktu tetap berjalan walau halaman
+        ditutup; subtes dikumpulkan otomatis begitu batas waktunya lewat.
+      </p>
+    </div>
   );
 }
 
@@ -162,6 +254,7 @@ function Petunjuk({
         </li>
         <li>Subtes yang sudah dikumpulkan tidak dapat dibuka kembali.</li>
         <li>Setiap soal berupa pilihan ganda dengan satu jawaban benar.</li>
+        <li>Jawaban tersimpan begitu dipilih dan masih dapat diganti selama waktunya belum habis.</li>
         <li>Satu pesanan memberi satu kali kesempatan mengerjakan.</li>
         {accessExpiresAt && <li>Masa akses berakhir {tanggal.format(accessExpiresAt)}.</li>}
       </ul>

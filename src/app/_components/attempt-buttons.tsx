@@ -18,10 +18,18 @@ export function StartAttemptButton({ attemptId }: { attemptId: string }) {
 }
 
 /** Menyubmit subtes berjalan dan melanjutkan ke subtes berikutnya. */
-export function SubmitSubtestButton({ attemptId }: { attemptId: string }) {
+export function SubmitSubtestButton({
+  attemptId,
+  subtestId,
+}: {
+  attemptId: string;
+  /** Subtes yang sedang dilihat; server menolak bila sudah berpindah. */
+  subtestId: string;
+}) {
   return (
     <AttemptForm
       attemptId={attemptId}
+      subtestId={subtestId}
       action={submitSubtest}
       label="Kumpulkan subtes"
       pendingLabel="Mengumpulkan…"
@@ -32,12 +40,14 @@ export function SubmitSubtestButton({ attemptId }: { attemptId: string }) {
 
 function AttemptForm({
   attemptId,
+  subtestId,
   action: aksi,
   label,
   pendingLabel,
   className,
 }: {
   attemptId: string;
+  subtestId?: string;
   action: (prev: string | null, form: FormData) => Promise<string | null>;
   label: string;
   pendingLabel: string;
@@ -48,6 +58,7 @@ function AttemptForm({
   return (
     <form action={action}>
       <input type="hidden" name="attemptId" value={attemptId} />
+      {subtestId && <input type="hidden" name="subtestId" value={subtestId} />}
       <button
         type="submit"
         disabled={pending}

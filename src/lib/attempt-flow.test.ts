@@ -5,6 +5,7 @@ import {
   attemptAccessProblem,
   nextSubtest,
   subtestDeadline,
+  timeoutPlan,
   type SubtestProgress,
 } from "./attempt-flow";
 
@@ -58,4 +59,41 @@ test("deadline dihitung dari started_at server", () => {
 
 test("subtes yang belum dimulai belum punya deadline", () => {
   expect(subtestDeadline(subtes(1, "not_started"))).toBeNull();
+});
+
+test("subtes yang masih punya sisa waktu tidak ditutup", () => {
+  const jalan = subtes(1, "in_progress", new Date(now.getTime() - 60_000));
+  expect(timeoutPlan([jalan, subtes(2, "not_started")], now)).toEqual([]);
+});
+
+test("subtes yang belum dimulai tidak punya deadline untuk dilanggar", () => {
+  expect(timeoutPlan([subtes(1, "not_started")], now)).toEqual([]);
+});
+
+test("deadline lewat menutup subtes dan menjalankan penerusnya sejak deadline", () => {
+  const mulai = new Date(now.getTime() - 700_000);
+  const plan = timeoutPlan([subtes(1, "in_progress", mulai), subtes(2, "not_started")], now);
+
+  expect(plan).toHaveLength(1);
+  expect(plan[0].close.position).toBe(1);
+  expect(plan[0].at).toEqual(new Date(mulai.getTime() + 600_000));
+  expect(plan[0].start?.position).toBe(2);
+});
+
+test("peramban yang lama ditutup menutup beberapa subtes sekaligus", () => {
+  const mulai = new Date(now.getTime() - 7_200_000);
+  const plan = timeoutPlan(
+    [subtes(1, "in_progress", mulai), subtes(2, "not_started"), subtes(3, "not_started")],
+    now,
+  );
+
+  expect(plan.map((s) => s.close.position)).toEqual([1, 2, 3]);
+  // Subtes ketiga mulai dua durasi setelah subtes pertama, bukan saat dibuka.
+  expect(plan[2].at).toEqual(new Date(mulai.getTime() + 3 * 600_000));
+  expect(plan[2].start).toBeNull();
+});
+
+test("subtes terakhir yang habis waktunya tidak punya penerus", () => {
+  const mulai = new Date(now.getTime() - 700_000);
+  expect(timeoutPlan([subtes(1, "submitted"), subtes(2, "in_progress", mulai)], now)[0].start).toBeNull();
 });

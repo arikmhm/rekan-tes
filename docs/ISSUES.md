@@ -29,8 +29,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 9 | RT-009 | Order dan pembayaran QRIS | Done | RT-004, RT-007, RT-008 |
 | 10 | RT-010 | Webhook DOKU dan pemberian attempt | Done | RT-009 |
 | 11 | RT-011 | Memulai attempt dan urutan subtes | Done | RT-010 |
-| 12 | RT-012 | Test engine, timer server, dan submit | Next | RT-011 |
-| 13 | RT-013 | Autosave dan pemulihan progres | Queued | RT-012 |
+| 12 | RT-012 | Test engine, timer server, dan submit | Done | RT-011 |
+| 13 | RT-013 | Autosave dan pemulihan progres | Next | RT-012 |
 | 14 | RT-014 | Scoring, hasil, dan pembahasan | Queued | RT-013 |
 | 15 | RT-015 | Operasional admin dan penggantian akses | Queued | RT-010, RT-014 |
 | 16 | RT-016 | Hardening dan kesiapan rilis MVP | Queued | RT-001–RT-015 |
@@ -327,21 +327,37 @@ Acceptance criteria:
 - `started_at` dan seluruh deadline ditetapkan server. Seluruh nilai waktu berasal dari `new Date()` di dalam Server Action, tidak ada waktu dari formulir; deadline diturunkan, bukan disimpan.
 - Peserta hanya dapat membuka subtes aktif berikutnya dan tidak dapat kembali ke subtes submitted. Tidak ada route per subtes yang dapat dituju; `activeSubtest` mengembalikan subtes pertama yang belum disubmit dan diuji untuk kasus urutan acak, subtes timeout, dan seluruh subtes selesai.
 
-Catatan verifikasi: lint, `vitest run` (109 test), dan `next build` lulus; guard anonim diverifikasi terhadap dev server yang berjalan. Jalur berbayar dari ujung ke ujung (petunjuk → mulai → submit → subtes berikutnya) belum dijalankan di peramban karena database saat ini tidak memiliki satu pun baris `test_attempts`: dua order berstatus `paid` yang ada dijadikan paid secara manual saat pengujian awal (payment-nya masih `pending`, `paid_at` dan `access_expires_at` kosong), bukan lewat `activatePayment`. Menjalankannya butuh satu pembayaran sandbox baru dari akun yang login.
+Catatan verifikasi: lint, `vitest run`, dan `next build` lulus; guard anonim diverifikasi terhadap dev server yang berjalan (`/attempt/<id acak>` → 404). Jalur berbayar dari ujung ke ujung menyusul diverifikasi di peramban saat pengujian RT-012, memakai data uji yang dibuat langsung di database lalu dihapus: petunjuk tampil pada attempt `not_started`, tombol mulai menetapkan `started_at` server dan menjalankan hanya subtes pertama, submit menutup subtes itu dan menjalankan penerusnya, dan submit pada subtes terakhir menutup attempt sebagai `submitted`. Detailnya di RT-012.
+
+Catatan data: dua order berstatus `paid` yang ada di database dijadikan paid secara manual saat pengujian awal (payment-nya masih `pending`, `paid_at` dan `access_expires_at` kosong), bukan lewat `activatePayment`, sehingga keduanya tidak punya attempt dan tidak akan bisa dikerjakan. Sisa uji coba lama, bukan cacat alur.
 
 ### RT-012 — Test engine, timer server, dan submit
 
-**Status:** Queued
+**Status:** Done
 
 **Tujuan:** Menyediakan pengalaman pengerjaan pilihan ganda yang adil dan mobile-friendly.
 
+Hasil implementasi:
+
+- Mesin soal menempel pada route tunggal `/attempt/[id]` milik RT-011; nomor soal hanya query string (`?soal=3`) yang dijepit ke rentang yang ada. Tidak ada route baru, sehingga penjagaan urutan subtes tetap satu tempat.
+- **Kunci jawaban tidak pernah meninggalkan database.** Query soal hanya men-`select` id, prompt, label, dan isi opsi; `question_options.is_correct` dan `questions.explanation` tidak ikut. Bukan disembunyikan di UI — memang tidak pernah masuk payload.
+- Sisa waktu dihitung server (`remainingSeconds` dari deadline server), lalu komponen `Countdown` menghitung mundur memakai waktu yang berlalu sejak dipasang, bukan jam peramban, sehingga jam klien yang salah setel tidak menggeser sisa waktu. Saat mencapai nol ia hanya meminta `router.refresh()`; server yang memutuskan subtes ditutup.
+- **Timeout tidak butuh cron atau job.** `timeoutPlan` di `attempt-flow.ts` menghitung subtes mana yang seharusnya sudah tertutup, dan `getAttempt` menerapkannya sebelum halaman maupun Server Action mana pun melihat datanya. Satu guard di fungsi yang dilewati semua jalur, bukan pemeriksaan waktu yang harus diulang di setiap pemanggil.
+- Subtes penerus dimulai pada **deadline pendahulunya**, bukan pada saat halaman dibuka, sehingga menutup peramban tidak menghadiahi waktu tambahan. Satu kunjungan karena itu dapat menutup beberapa subtes sekaligus; `timeoutPlan` mengembalikan daftar langkah dan seluruhnya dijalankan dalam satu transaksi.
+- `saveAnswer` memvalidasi assignment dan opsi terhadap soal subtes yang sedang berjalan — datanya berasal dari `getAttempt`, jadi id yang dikarang klien tidak akan ditemukan, dan opsi milik soal lain ditolak. Penolakan setelah deadline datang gratis: subtes yang waktunya habis sudah tidak `in_progress` saat validasi berjalan, jadi tidak ada pemeriksaan waktu kedua yang bisa berbeda.
+- Penyimpanan memakai `onConflictDoUpdate` pada key unik `(attempt_subtest_id, test_subtest_question_id)`, sehingga pengiriman ulang tidak pernah menghasilkan jawaban ganda.
+- Tombol "Kumpulkan subtes" ikut mengirim id subtes yang dilihat peserta dan server menolak bila sudah berpindah. Tanpa ini, halaman basi yang subtesnya keburu tertutup karena waktu habis akan menyubmit subtes **berikutnya** seketika dan menghabiskan waktunya tanpa satu soal pun terlihat.
+- Menjawab memakai tombol submit per opsi, bukan state klien, jadi tetap berjalan tanpa JavaScript. Indikator "menyimpan/tersimpan/gagal" dan pengiriman tanpa muat ulang sengaja ditinggalkan untuk RT-013.
+
 Acceptance criteria:
 
-- UI menampilkan soal, navigasi nomor, pilihan jawaban, dan sisa waktu.
-- Timer berasal dari deadline server dan tetap benar setelah reload atau browser ditutup.
-- Server menolak perubahan setelah deadline/submission.
-- Timeout menyubmit subtes otomatis dan melanjutkan urutan yang valid.
-- Jawaban benar tidak dikirim ke browser selama attempt aktif.
+- UI menampilkan soal, navigasi nomor, pilihan jawaban, dan sisa waktu. Diverifikasi di peramban terhadap data uji: soal 1–3 dengan navigasi nomor, tiga opsi, dan "Sisa waktu 1:59" yang berjalan.
+- Timer berasal dari deadline server dan tetap benar setelah reload atau browser ditutup. Diverifikasi: berpindah nomor soal dan memuat ulang halaman tidak menyetel ulang hitungan (1:59 → 1:19 → 0:55 sesuai waktu nyata yang berlalu); jawaban yang tersimpan ikut terpulihkan sebagai opsi terpilih.
+- Server menolak perubahan setelah deadline/submission. Diverifikasi dengan halaman yang sengaja dibuat basi (durasi subtes dipendekkan di database di belakang halaman yang sedang terbuka): menekan opsi mengembalikan "Jawaban tidak dapat disimpan; subtes mungkin sudah berpindah", `attempt_answers` tetap kosong, dan menekan "Kumpulkan subtes" mengembalikan "Subtes sudah berpindah karena waktunya habis" tanpa menutup subtes berikutnya.
+- Timeout menyubmit subtes otomatis dan melanjutkan urutan yang valid. Diverifikasi terhadap Neon: subtes 1 (120 detik, mulai 10:22:14) tercatat `submitted_by_timeout` pada 10:24:14 dan subtes 2 (60 detik) mulai tepat pada 10:24:14 lalu tertutup pada 10:25:14 — keduanya pada deadline masing-masing, bukan pada 10:26 saat halaman akhirnya dibuka, dan attempt menjadi `submitted_by_timeout`. Submit manual pada subtes terakhir menutup attempt sebagai `submitted`.
+- Jawaban benar tidak dikirim ke browser selama attempt aktif. Diverifikasi terhadap HTML+payload RSC halaman yang sedang dikerjakan (33 KB): nol kemunculan `is_correct`, `isCorrect`, `explanation`, maupun teks pembahasan.
+
+Catatan verifikasi: dijalankan penuh di peramban memakai data uji bertanda `RT012UJI` (user, kategori, 5 soal, 1 produk tes 2 subtes berdurasi 120 dan 60 detik, 2 order paid, 2 attempt) yang dibuat langsung di database dan **dihapus seluruhnya setelah selesai** — hitungan baris kembali ke kondisi semula dan tidak ada jejak `RT012UJI` tersisa. Satu kegagalan yang muncul saat pengujian (`Failed query ... fetch failed` tepat ketika deadline lewat) adalah gangguan koneksi Neon sesaat, bukan perilaku aplikasi: skrip pemeriksa dan login pengguna lain gagal pada detik yang sama, dan muat ulang berikutnya langsung menerapkan seluruh transisi timeout dengan benar.
 
 ### RT-013 — Autosave dan pemulihan progres
 

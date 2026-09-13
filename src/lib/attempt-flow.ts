@@ -63,3 +63,43 @@ export function subtestDeadline(row: SubtestProgress): Date | null {
 function sorted<T extends SubtestProgress>(rows: T[]) {
   return [...rows].sort((a, b) => a.position - b.position);
 }
+
+export type TimeoutStep<T> = {
+  /** Subtes yang deadline-nya sudah lewat dan harus ditutup. */
+  close: T;
+  /** Waktu penutupan: deadline itu sendiri, bukan saat halaman dibuka. */
+  at: Date;
+  /** Subtes berikutnya yang jamnya mulai berjalan sejak `at`, bila ada. */
+  start: T | null;
+};
+
+/**
+ * Subtes yang seharusnya sudah tertutup karena waktunya habis, beserta
+ * penerusnya. Dihitung, bukan dijadwalkan: tidak ada cron atau job yang bisa
+ * mati diam-diam, dan hasilnya sama saja apakah peserta menutup peramban satu
+ * menit atau satu minggu.
+ *
+ * Subtes penerus dimulai pada deadline pendahulunya, bukan pada `now`, supaya
+ * menutup peramban tidak menghadiahi waktu tambahan. Karena itu satu kunjungan
+ * dapat menutup beberapa subtes sekaligus — makanya berbentuk daftar langkah.
+ */
+export function timeoutPlan<T extends SubtestProgress>(rows: T[], now: Date): TimeoutStep<T>[] {
+  const list = sorted(rows);
+  const steps: TimeoutStep<T>[] = [];
+
+  let aktif = list.find((r) => !isDone(r.status)) ?? null;
+  let mulai = aktif?.startedAt ?? null;
+
+  while (aktif && mulai) {
+    const deadline = new Date(mulai.getTime() + aktif.durationSeconds * 1000);
+    if (deadline > now) break;
+
+    const berikutnya = list.find((r) => r.position > aktif!.position) ?? null;
+    steps.push({ close: aktif, at: deadline, start: berikutnya });
+
+    aktif = berikutnya;
+    mulai = deadline;
+  }
+
+  return steps;
+}

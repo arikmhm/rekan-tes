@@ -282,6 +282,8 @@ Hasil implementasi:
 - Guard idempotency memakai `UPDATE ... WHERE status <> 'paid'` di dalam transaksi database, bukan tabel log terpisah. Baris hanya berubah sekali; kunci baris Postgres saat `UPDATE` membuat notifikasi yang datang bersamaan tetap aman tanpa perlu lock aplikasi.
 - Route Handler `src/app/api/doku/notifications/route.ts` menerima notifikasi. Path-nya (`NOTIFICATION_PATH` di `doku.ts`) harus didaftarkan sama persis sebagai Notification URL di DOKU Back Office, karena path itu ikut ditandatangani sebagai `Request-Target`.
 - Ditambahkan konfigurasi `rekan-tes-verify` (port 3099) di `.claude/launch.json` untuk menjalankan dev server verifikasi tanpa mengganggu server pengembangan yang sudah dipakai di port 3000.
+- **Backup selain webhook: polling dari halaman pesanan.** Notification URL DOKU wajib dikonfigurasi manual di Back Office dan tidak bisa menjangkau `localhost` sama sekali; keduanya membuat webhook gagal datang pada kondisi yang realistis (belum sempat dikonfigurasi, atau sedang diuji lokal). `payments.reference_no` (kolom baru, migrasi `0004`) menyimpan `referenceNo` balasan generate QRIS. `queryQris` di `doku.ts` menanyakan status transaksi langsung ke DOKU (`/snap-adapter/b2b/v1.0/qr/qr-mpm-query`, skema SNAP yang sama dengan generate — `qrisHeaders` digeneralisasi menerima `path` alih-alih hardcode path generate) dan membaca hasilnya ke bentuk `QrisNotification` yang sama dengan notifikasi webhook. `pollPaymentStatus` di `webhook.ts` memakainya lalu mendelegasikan ke `activatePayment` yang sama persis — jalur push (webhook) dan jalur pull (polling) berbagi satu logika aktivasi dan satu guard idempotency, tidak ada state transition kedua yang bisa berbeda perilaku.
+- `/order/[id]` memanggil `pollPaymentStatus` sebelum render setiap kali status masih `pending`, dibungkus try/catch agar DOKU yang sedang bermasalah tidak menggagalkan seluruh halaman. Begitu status `paid`, polling berhenti — tidak ada alasan terus bertanya setelah jawabannya diketahui.
 
 Acceptance criteria:
 
@@ -292,6 +294,8 @@ Acceptance criteria:
 - Transaksi database atau guard setara mencegah state paid tanpa hak akses. Seluruh transisi berada dalam satu `db.transaction`; guard `WHERE status <> 'paid'` adalah kunci baris Postgres, bukan pemeriksaan aplikasi yang bisa kalah start dalam race.
 
 Catatan: signature pada balasan DOKU dari RT-009 (`generateQris`) masih belum diverifikasi, sebagaimana dicatat di sana; RT-010 ini menutup bagian yang sebenarnya menentukan uang, yaitu notifikasi pembayaran. Status `FAILED`/lainnya diakui dengan 200 tanpa mengubah apa pun, mengikuti panduan resmi DOKU bahwa integrasi Checkout/QRIS tidak boleh bereaksi terhadap status gagal.
+
+Verifikasi backup polling: dijalankan penuh terhadap DOKU Sandbox sungguhan, termasuk pembayaran nyata lewat [QRIS Simulator](https://sandbox.doku.com/qris-simulator/) DOKU. QR yang belum dibayar diquery dan benar kembali `PENDING`. Setelah simulator melaporkan `Success`, halaman pesanan dimuat ulang **tanpa Notification URL pernah dikonfigurasi** (server verifikasi berjalan di `localhost:3099`, memang tidak bisa dituju DOKU) — status langsung berubah `paid`, `access_expires_at` terisi, dan tepat satu `test_attempts` dibuat, murni dari hasil polling. Reload berikutnya tidak menambah attempt kedua karena polling berhenti begitu status sudah `paid`.
 
 ### RT-011 — Memulai attempt dan urutan subtes
 

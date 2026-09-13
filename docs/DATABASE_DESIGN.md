@@ -51,7 +51,7 @@ CLI Better Auth tidak dipakai: rilis stabilnya tertinggal beberapa minor dari li
 | Tabel | Kolom penting | Fungsi |
 |---|---|---|
 | `orders` | `id PK`, `user_id FK`, `test_id FK`, `amount`, `status`, `access_expires_at`, timestamps | Pembelian satu sesi tes. `amount` menyimpan harga saat checkout. |
-| `payments` | `id PK`, `order_id FK`, `provider`, `external_id`, `request_id`, `qr_content?`, `expires_at?`, `amount`, `status`, `paid_at?`, timestamps | Setiap percobaan pembayaran. Untuk DOKU SNAP QRIS, `external_id` menyimpan `partnerReferenceNo` (invoice), `request_id` menyimpan `X-EXTERNAL-ID` yang wajib numerik dan unik harian, dan `qr_content` menyimpan payload QRIS yang dirender menjadi QR. |
+| `payments` | `id PK`, `order_id FK`, `provider`, `external_id`, `request_id`, `qr_content?`, `reference_no?`, `expires_at?`, `amount`, `status`, `paid_at?`, timestamps | Setiap percobaan pembayaran. Untuk DOKU SNAP QRIS, `external_id` menyimpan `partnerReferenceNo` (invoice), `request_id` menyimpan `X-EXTERNAL-ID` yang wajib numerik dan unik harian, `qr_content` menyimpan payload QRIS yang dirender menjadi QR, dan `reference_no` menyimpan `referenceNo` milik DOKU yang dibutuhkan Query QRIS (RT-010) untuk menanyakan status transaksi langsung sebagai backup selain webhook. |
 
 ## 5. Tabel pengerjaan
 

@@ -171,11 +171,15 @@ export function qrisBody(credentials: DokuCredentials, request: QrisRequest, now
   };
 }
 
-/** Header generate QRIS, termasuk tanda tangan simetris. */
+/**
+ * Header transaksi SNAP QRIS, termasuk tanda tangan simetris. Dipakai untuk
+ * generate maupun query, sehingga `path` selalu eksplisit — bukan ditebak
+ * dari konteks pemanggil.
+ */
 export function qrisHeaders(
   credentials: DokuCredentials,
   token: string,
-  request: { externalId: string; body: string; timestamp: string },
+  request: { path: string; externalId: string; body: string; timestamp: string },
 ) {
   return {
     "Content-Type": "application/json",
@@ -188,7 +192,7 @@ export function qrisHeaders(
       credentials.secretKey,
       transactionStringToSign({
         method: "POST",
-        path: QRIS_GENERATE_PATH,
+        path: request.path,
         accessToken: token,
         body: request.body,
         timestamp: request.timestamp,
@@ -209,7 +213,12 @@ export async function generateQris(
 
   const response = await fetch(`${credentials.baseUrl}${QRIS_GENERATE_PATH}`, {
     method: "POST",
-    headers: qrisHeaders(credentials, token, { externalId: request.externalId, body, timestamp }),
+    headers: qrisHeaders(credentials, token, {
+      path: QRIS_GENERATE_PATH,
+      externalId: request.externalId,
+      body,
+      timestamp,
+    }),
     body,
   });
 
@@ -242,6 +251,92 @@ export async function generateQris(
       parseSnapTimestamp(data.additionalInfo?.validityPeriod) ??
       new Date(now.getTime() + request.validMinutes * 60_000),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Query QRIS — jalur backup selain webhook, untuk ditanyakan langsung saat
+// peserta membuka halaman pesanan. Hasilnya dibentuk sebagai `QrisNotification`
+// yang sama dengan notifikasi webhook, sehingga kedua jalur berbagi satu
+// logika aktivasi (`activatePayment` di `webhook.ts`).
+// ---------------------------------------------------------------------------
+
+export const QRIS_QUERY_PATH = "/snap-adapter/b2b/v1.0/qr/qr-mpm-query";
+
+/** Kode layanan tetap milik API Query QRIS. */
+const QRIS_QUERY_SERVICE_CODE = "47";
+
+export type QrisQueryRequest = {
+  /** `referenceNo` milik DOKU dari respons generate. */
+  originalReferenceNo: string;
+  /** Invoice kami; sama dengan `partnerReferenceNo` saat generate. */
+  originalPartnerReferenceNo: string;
+};
+
+export function queryQrisBody(credentials: DokuCredentials, request: QrisQueryRequest) {
+  return {
+    originalReferenceNo: request.originalReferenceNo,
+    originalPartnerReferenceNo: request.originalPartnerReferenceNo,
+    serviceCode: QRIS_QUERY_SERVICE_CODE,
+    merchantId: credentials.merchantId,
+  };
+}
+
+/**
+ * Membaca balasan Query QRIS ke bentuk `QrisNotification`. `"00"` berarti
+ * sukses; kode lain (pending, gagal, dibatalkan) diperlakukan sama seperti
+ * notifikasi webhook berstatus non-sukses — diakui, tidak mengaktifkan apa pun.
+ */
+export function parseQrisQueryResponse(
+  body: unknown,
+  fallbackInvoice: string,
+): QrisNotification | null {
+  if (typeof body !== "object" || body === null) return null;
+  const b = body as Record<string, unknown>;
+
+  const amount = Number((b.amount as Record<string, unknown> | undefined)?.value);
+  if (!Number.isFinite(amount)) return null;
+
+  return {
+    status: b.latestTransactionStatus === "00" ? "SUCCESS" : "PENDING",
+    invoiceNumber:
+      typeof b.originalPartnerReferenceNo === "string" ? b.originalPartnerReferenceNo : fallbackInvoice,
+    amount: Math.round(amount),
+  };
+}
+
+/** Menanyakan status satu transaksi QRIS langsung ke DOKU. */
+export async function queryQris(
+  credentials: DokuCredentials,
+  request: QrisQueryRequest,
+  now = new Date(),
+): Promise<QrisNotification> {
+  const token = await accessToken(credentials, now);
+  const timestamp = snapTimestamp(now);
+  const body = JSON.stringify(queryQrisBody(credentials, request));
+
+  const response = await fetch(`${credentials.baseUrl}${QRIS_QUERY_PATH}`, {
+    method: "POST",
+    headers: qrisHeaders(credentials, token, {
+      path: QRIS_QUERY_PATH,
+      externalId: externalId(now),
+      body,
+      timestamp,
+    }),
+    body,
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`DOKU menolak query QRIS (${response.status}): ${text}`);
+  }
+
+  const notifikasi = parseQrisQueryResponse(JSON.parse(text), request.originalPartnerReferenceNo);
+  if (!notifikasi) {
+    throw new Error(`DOKU membalas query QRIS dengan format tak terduga: ${text}`);
+  }
+
+  return notifikasi;
 }
 
 // ---------------------------------------------------------------------------

@@ -102,7 +102,12 @@ export async function startCheckout(_prev: string | null, form: FormData) {
 
   await db
     .update(schema.payments)
-    .set({ qrContent: qris.qrContent, expiresAt: qris.expiresAt, updatedAt: new Date() })
+    .set({
+      qrContent: qris.qrContent,
+      referenceNo: qris.referenceNo,
+      expiresAt: qris.expiresAt,
+      updatedAt: new Date(),
+    })
     .where(eq(schema.payments.id, payment.id));
 
   // QR ditampilkan di halaman kami sendiri; peserta tidak pernah keluar dari
@@ -135,6 +140,7 @@ export async function getOrder(id: string) {
     .select({
       id: schema.payments.id,
       externalId: schema.payments.externalId,
+      referenceNo: schema.payments.referenceNo,
       status: schema.payments.status,
       qrContent: schema.payments.qrContent,
       expiresAt: schema.payments.expiresAt,

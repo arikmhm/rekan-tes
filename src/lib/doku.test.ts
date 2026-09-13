@@ -8,10 +8,13 @@ import {
   notificationDigest,
   notificationSignatureComponent,
   parseQrisNotification,
+  parseQrisQueryResponse,
   parseSnapTimestamp,
   qrisBody,
   qrisHeaders,
+  queryQrisBody,
   QRIS_GENERATE_PATH,
+  QRIS_QUERY_PATH,
   snapAmount,
   snapTimestamp,
   tokenSignature,
@@ -120,6 +123,7 @@ test("body QRIS memuat field wajib dan masa berlaku", () => {
 
 test("header QRIS membawa token, partner id, dan channel H2H", () => {
   const headers = qrisHeaders(kredensial, "token123", {
+    path: QRIS_GENERATE_PATH,
     externalId: "123",
     body: "{}",
     timestamp: "2026-09-13T08:00:00+07:00",
@@ -140,6 +144,87 @@ test("header QRIS membawa token, partner id, dan channel H2H", () => {
       }),
     ),
   );
+});
+
+test("header query QRIS ditandatangani dengan path query, bukan generate", () => {
+  const headers = qrisHeaders(kredensial, "token123", {
+    path: QRIS_QUERY_PATH,
+    externalId: "123",
+    body: "{}",
+    timestamp: "2026-09-13T08:00:00+07:00",
+  });
+
+  expect(headers["X-SIGNATURE"]).toBe(
+    transactionSignature(
+      kredensial.secretKey,
+      transactionStringToSign({
+        method: "POST",
+        path: QRIS_QUERY_PATH,
+        accessToken: "token123",
+        body: "{}",
+        timestamp: "2026-09-13T08:00:00+07:00",
+      }),
+    ),
+  );
+  expect(headers["X-SIGNATURE"]).not.toBe(
+    qrisHeaders(kredensial, "token123", {
+      path: QRIS_GENERATE_PATH,
+      externalId: "123",
+      body: "{}",
+      timestamp: "2026-09-13T08:00:00+07:00",
+    })["X-SIGNATURE"],
+  );
+});
+
+test("body query QRIS memuat originalReferenceNo, invoice, dan kode layanan tetap", () => {
+  expect(
+    queryQrisBody(kredensial, {
+      originalReferenceNo: "REF123",
+      originalPartnerReferenceNo: "RT1ABC",
+    }),
+  ).toEqual({
+    originalReferenceNo: "REF123",
+    originalPartnerReferenceNo: "RT1ABC",
+    serviceCode: "47",
+    merchantId: "MALL-001",
+  });
+});
+
+test("balasan query QRIS sukses (kode 00) terbaca sebagai QrisNotification", () => {
+  // Fixture dibangun dari skema resmi DOKU (properti dan pola nominal), bukan
+  // contoh dari dokumentasi karena Query QRIS tidak menyertakan contoh JSON.
+  const balasan = {
+    responseCode: "2004700",
+    responseMessage: "Success",
+    originalReferenceNo: "REF123",
+    originalPartnerReferenceNo: "RT1ABC",
+    serviceCode: "47",
+    latestTransactionStatus: "00",
+    transactionStatusDesc: "Success",
+    paidTime: "2026-09-13T09:00:00+07:00",
+    amount: { value: "25000.00", currency: "IDR" },
+  };
+
+  expect(parseQrisQueryResponse(balasan, "RT1ABC")).toEqual({
+    status: "SUCCESS",
+    invoiceNumber: "RT1ABC",
+    amount: 25000,
+  });
+});
+
+test("kode status query selain 00 dianggap belum lunas, bukan ditolak", () => {
+  const pending = { originalPartnerReferenceNo: "RT1ABC", latestTransactionStatus: "03", amount: { value: "25000.00" } };
+  expect(parseQrisQueryResponse(pending, "RT1ABC")).toEqual({
+    status: "PENDING",
+    invoiceNumber: "RT1ABC",
+    amount: 25000,
+  });
+});
+
+test("balasan query QRIS yang tidak lengkap ditolak", () => {
+  expect(parseQrisQueryResponse({}, "RT1ABC")).toBeNull();
+  expect(parseQrisQueryResponse(null, "RT1ABC")).toBeNull();
+  expect(parseQrisQueryResponse({ amount: { value: "bukan-angka" } }, "RT1ABC")).toBeNull();
 });
 
 test("masa berlaku dari DOKU dibaca kembali sebagai waktu yang sama", () => {

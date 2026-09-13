@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 
+import { parseDokuEnv } from "@/lib/env-schema";
 import { formatPrice } from "@/lib/format";
 import { getOrder } from "@/lib/order";
+import { pollPaymentStatus } from "@/lib/webhook";
 
 import { SiteShell } from "../../_components/site-shell";
 
@@ -22,7 +24,36 @@ const keterangan: Record<string, string> = {
 };
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
-  const order = await getOrder((await params).id);
+  let order = await getOrder((await params).id);
+
+  if (!order) {
+    notFound();
+  }
+
+  // Backup selain webhook: sambil menunggu notifikasi resmi, tanyakan langsung
+  // ke DOKU setiap halaman ini dibuka atau menyegarkan diri. Menutup celah
+  // ketika Notification URL belum terdaftar atau memang tidak bisa dituju DOKU
+  // (mis. diuji dari localhost).
+  if (order.status === "pending") {
+    const pembayaranPending = order.payments.find((p) => p.status === "pending" && p.referenceNo);
+
+    if (pembayaranPending?.referenceNo) {
+      try {
+        const hasil = await pollPaymentStatus(parseDokuEnv(process.env), {
+          externalId: pembayaranPending.externalId,
+          referenceNo: pembayaranPending.referenceNo,
+        });
+
+        if (hasil.result === "activated" || hasil.result === "already_paid") {
+          order = await getOrder(order.id);
+        }
+      } catch (error) {
+        // DOKU sedang bermasalah atau kredensial belum lengkap bukan alasan
+        // menggagalkan seluruh halaman; webhook tetap jalur utama.
+        console.error("Polling status QRIS gagal:", error);
+      }
+    }
+  }
 
   if (!order) {
     notFound();

@@ -233,6 +233,8 @@ export const payments = pgTable(
     requestId: text("request_id").notNull(),
     /** Payload QRIS dari DOKU; dirender menjadi QR di halaman pesanan. */
     qrContent: text("qr_content"),
+    /** `referenceNo` milik DOKU dari respons generate; dibutuhkan Query QRIS. */
+    referenceNo: text("reference_no"),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     amount: integer("amount").notNull(),
     status: paymentStatus("status").notNull().default("pending"),

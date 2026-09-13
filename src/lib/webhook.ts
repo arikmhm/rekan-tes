@@ -5,13 +5,14 @@ import { and, eq, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
 
 import { ACCESS_DAYS } from "./catalog";
-import type { QrisNotification } from "./doku";
+import { queryQris, type DokuCredentials, type QrisNotification } from "./doku";
 
 export type ActivationResult =
   | { result: "activated" }
   | { result: "already_paid" }
   | { result: "not_found" }
-  | { result: "amount_mismatch"; expected: number };
+  | { result: "amount_mismatch"; expected: number }
+  | { result: "still_pending" };
 
 /**
  * Mengaktifkan order dan memberi satu attempt setelah notifikasi QRIS `SUCCESS`
@@ -52,4 +53,29 @@ export async function activatePayment(notif: QrisNotification): Promise<Activati
 
     return { result: "activated" };
   });
+}
+
+/**
+ * Jalur backup selain webhook: menanyakan status transaksi langsung ke DOKU,
+ * lalu memakai fungsi aktivasi yang sama. Dipanggil dari halaman pesanan saat
+ * masih `pending`, untuk kasus notifikasi yang belum atau tidak pernah sampai
+ * (mis. Notification URL salah konfigurasi, atau diuji dari localhost yang
+ * memang tidak bisa dituju DOKU).
+ *
+ * ponytail: tidak ada rate limit atau cache di sini — setiap kunjungan/refresh
+ * halaman pesanan yang masih pending memanggil DOKU. Cukup untuk MVP; beri
+ * jeda minimum antar panggilan bila trafik sungguhan membuat ini berarti.
+ */
+export async function pollPaymentStatus(
+  credentials: DokuCredentials,
+  payment: { externalId: string; referenceNo: string },
+): Promise<ActivationResult> {
+  const notif = await queryQris(credentials, {
+    originalReferenceNo: payment.referenceNo,
+    originalPartnerReferenceNo: payment.externalId,
+  });
+
+  if (notif.status !== "SUCCESS") return { result: "still_pending" };
+
+  return activatePayment(notif);
 }

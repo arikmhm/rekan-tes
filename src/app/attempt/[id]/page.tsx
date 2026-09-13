@@ -63,14 +63,14 @@ export default async function AttemptPage({
             <h2 className="text-lg font-semibold text-brand-dark">Seluruh subtes selesai</h2>
             <p className="mt-2 text-sm leading-6 text-brand-dark/80">
               Semua subtes sudah dikumpulkan
-              {attempt.submittedAt ? ` pada ${tanggal.format(attempt.submittedAt)}` : ""}. Hasil dan
-              pembahasan akan tampil di sini setelah penilaian tersedia.
+              {attempt.submittedAt ? ` pada ${tanggal.format(attempt.submittedAt)}` : ""}. Skor,
+              rincian per subtes, dan pembahasan setiap soal sudah dapat dibuka.
             </p>
             <Link
-              href="/akun"
-              className="mt-5 inline-block text-sm font-semibold text-brand hover:text-brand-dark"
+              href={`/attempt/${attempt.id}/hasil`}
+              className="mt-5 inline-block rounded-full bg-brand px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-dark"
             >
-              Kembali ke akun saya
+              Lihat hasil dan pembahasan
             </Link>
           </div>
         ) : attempt.status === "not_started" ? (

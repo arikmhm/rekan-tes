@@ -1,6 +1,6 @@
 "use server";
 
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db, schema } from "@/db";
@@ -8,12 +8,17 @@ import { db, schema } from "@/db";
 import {
   activeSubtest,
   attemptAccessProblem,
+  isDone,
   nextSubtest,
+  ringkasSubtes,
   subtestDeadline,
   timeoutPlan,
   type SubtestProgress,
 } from "./attempt-flow";
 import { assertOwner } from "./authz";
+
+/** Tipe `tx` di dalam `db.transaction`, dipakai helper penilaian di bawah. */
+type Transaksi = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /**
  * Satu attempt beserta order dan progres seluruh subtesnya, hanya untuk
@@ -103,12 +108,14 @@ function sisaDetik(deadline: Date | null, now: Date) {
  * setiap `UPDATE` dijaga status sehingga dua request bersamaan tetap aman.
  *
  * ponytail: penutupan terjadi saat dibaca, bukan saat waktunya benar-benar
- * habis. Attempt yang peserta dan admin sama-sama tidak pernah buka lagi tetap
- * tercatat `in_progress` di database walau seluruh deadline-nya sudah lewat —
- * angka laporan bisa ikut salah bila kelak ada yang menghitung langsung dari
- * kolom status. Cukup selama setiap pembaca lewat `getAttempt`; begitu ada
- * query yang membaca `test_attempts` langsung (laporan RT-014, panel admin
- * RT-015), jalankan penyapu berkala atau ikut hitung deadline di query itu.
+ * habis. Attempt yang tidak pernah dibuka lagi tetap tercatat `in_progress`
+ * walau seluruh deadline-nya sudah lewat, dan `final_score`-nya belum terisi.
+ * Sudah ada satu pembaca langsung: daftar pesanan di `/akun` menampilkan status
+ * dan skor dari kolomnya, jadi sesi seperti itu tampil "sedang dikerjakan"
+ * tanpa skor sampai peserta membukanya sekali — lalu benar dengan sendirinya.
+ * Cukup untuk MVP karena tidak ada angka yang salah, hanya tertunda. Begitu
+ * ada laporan agregat atau panel admin (RT-015) yang menghitung dari kolom
+ * status, jalankan penyapu berkala atau ikut hitung deadline di query itu.
  */
 async function applyTimeouts<T extends SubtestProgress & { id: string | null }>(
   attemptId: string,
@@ -132,6 +139,8 @@ async function applyTimeouts<T extends SubtestProgress & { id: string | null }>(
           ),
         );
 
+      await scoreSubtest(tx, step.close.id);
+
       if (step.start?.id) {
         await tx
           .update(schema.attemptSubtests)
@@ -152,6 +161,8 @@ async function applyTimeouts<T extends SubtestProgress & { id: string | null }>(
               eq(schema.testAttempts.status, "in_progress"),
             ),
           );
+
+        await finalizeAttempt(tx, attemptId);
       }
     }
   });
@@ -175,23 +186,79 @@ async function applyTimeouts<T extends SubtestProgress & { id: string | null }>(
 }
 
 /**
+ * Menilai satu subtes yang baru ditutup: membekukan benar/salah setiap jawaban
+ * dari kunci yang berlaku saat itu, lalu menjumlahkan bobotnya menjadi skor
+ * subtes. Dipanggil dari kedua jalur penutupan — submit manual dan timeout —
+ * sehingga tidak ada subtes tertutup yang lolos tanpa nilai.
+ *
+ * `is_correct` disimpan, bukan dihitung ulang saat hasil dibaca, supaya
+ * koreksi soal di kemudian hari tidak diam-diam mengubah hasil attempt lama.
+ * Perhitungannya idempotent: mengulangnya menghasilkan angka yang sama.
+ */
+async function scoreSubtest(tx: Transaksi, attemptSubtestId: string) {
+  await tx.execute(sql`
+    update ${schema.attemptAnswers} aa
+    set is_correct = qo.is_correct, updated_at = now()
+    from ${schema.questionOptions} qo
+    where qo.id = aa.selected_option_id and aa.attempt_subtest_id = ${attemptSubtestId}
+  `);
+
+  await tx.execute(sql`
+    update ${schema.attemptSubtests}
+    set score = (
+      select coalesce(sum(tsq.weight), 0)
+      from ${schema.attemptAnswers} aa
+      join ${schema.testSubtestQuestions} tsq on tsq.id = aa.test_subtest_question_id
+      where aa.attempt_subtest_id = ${attemptSubtestId} and aa.is_correct
+    ), updated_at = now()
+    where id = ${attemptSubtestId}
+  `);
+}
+
+/** Skor akhir attempt: jumlah skor subtesnya. Dipanggil saat attempt ditutup. */
+async function finalizeAttempt(tx: Transaksi, attemptId: string) {
+  await tx.execute(sql`
+    update ${schema.testAttempts}
+    set final_score = (
+      select coalesce(sum(score), 0) from ${schema.attemptSubtests} where attempt_id = ${attemptId}
+    ), updated_at = now()
+    where id = ${attemptId}
+  `);
+}
+
+/**
  * Soal subtes berjalan beserta pilihan dan jawaban peserta. Kolom `is_correct`
  * dan `explanation` tidak pernah ikut di-select, sehingga kunci jawaban tidak
  * dapat bocor ke peramban lewat payload React — bukan disembunyikan di UI,
  * memang tidak pernah meninggalkan database.
  */
-async function loadQuestions(aktif: { id: string; testSubtestId: string; questionLimit: number }) {
-  const soal = await db
+/**
+ * Soal yang benar-benar tampil pada satu subtes: assignment terurut `position`,
+ * dipotong `question_limit`. Satu-satunya definisi "soal mana yang dikerjakan",
+ * dipakai halaman pengerjaan maupun halaman hasil — kalau keduanya memakai
+ * aturan sendiri-sendiri, pembahasan bisa memuat soal yang tidak pernah
+ * ditampilkan atau melewatkan soal yang dijawab.
+ *
+ * Kunci jawaban dan pembahasan sengaja tidak ikut di-select di sini; pemanggil
+ * yang berhak (halaman hasil) mengambilnya terpisah.
+ */
+async function presentedQuestions(testSubtestId: string, questionLimit: number) {
+  return db
     .select({
       assignmentId: schema.testSubtestQuestions.id,
+      weight: schema.testSubtestQuestions.weight,
       questionId: schema.questions.id,
       prompt: schema.questions.prompt,
     })
     .from(schema.testSubtestQuestions)
     .innerJoin(schema.questions, eq(schema.questions.id, schema.testSubtestQuestions.questionId))
-    .where(eq(schema.testSubtestQuestions.testSubtestId, aktif.testSubtestId))
+    .where(eq(schema.testSubtestQuestions.testSubtestId, testSubtestId))
     .orderBy(asc(schema.testSubtestQuestions.position))
-    .limit(aktif.questionLimit);
+    .limit(questionLimit);
+}
+
+async function loadQuestions(aktif: { id: string; testSubtestId: string; questionLimit: number }) {
+  const soal = await presentedQuestions(aktif.testSubtestId, aktif.questionLimit);
 
   if (soal.length === 0) return [];
 
@@ -317,6 +384,8 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
     // untuk kedua kalinya, jadi berhenti begitu tidak ada baris yang berubah.
     if (disubmit.length === 0) return;
 
+    await scoreSubtest(tx, aktifId);
+
     if (berikutnya?.id) {
       await tx
         .update(schema.attemptSubtests)
@@ -334,6 +403,8 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
       .update(schema.testAttempts)
       .set({ status: "submitted", submittedAt: now, updatedAt: now })
       .where(eq(schema.testAttempts.id, attempt.id));
+
+    await finalizeAttempt(tx, attempt.id);
   });
 
   revalidatePath(`/attempt/${attempt.id}`);
@@ -385,4 +456,101 @@ export async function saveAnswer(_prev: string | null, form: FormData) {
 
   revalidatePath(`/attempt/${attempt.id}`);
   return null;
+}
+
+/**
+ * Hasil dan pembahasan satu attempt yang sudah selesai. Kunci jawaban dan
+ * pembahasan baru ikut terbaca di sini — jalur pengerjaan (`loadQuestions`)
+ * tetap tidak pernah menyentuh keduanya, jadi status attempt adalah satu-satunya
+ * pintu yang menentukan kunci boleh keluar atau tidak.
+ *
+ * Mengembalikan null bila attempt tidak ada atau bukan milik peminta
+ * (`getAttempt` sudah menolak lewat `assertOwner`), dan `selesai: false` bila
+ * pengerjaannya belum tuntas — halaman yang memanggil mengarahkan balik ke sesi.
+ */
+export async function getResult(attemptId: string) {
+  const attempt = await getAttempt(attemptId);
+  if (!attempt) return null;
+  if (!isDone(attempt.status)) return { selesai: false as const, attempt };
+
+  const subtes = await Promise.all(
+    attempt.subtests.map(async (s) => {
+      const soal = await presentedQuestions(s.testSubtestId, s.questionLimit);
+      return { subtes: s, soal };
+    }),
+  );
+
+  const questionIds = subtes.flatMap((x) => x.soal.map((q) => q.questionId));
+  const attemptSubtestIds = attempt.subtests.map((s) => s.id).filter((id) => id !== null);
+
+  // Dua query massal, bukan per soal: jumlah soal satu attempt masih kecil,
+  // tetapi per-soal berarti puluhan round trip untuk satu halaman hasil.
+  const opsi = questionIds.length
+    ? await db
+        .select({
+          id: schema.questionOptions.id,
+          questionId: schema.questionOptions.questionId,
+          label: schema.questionOptions.label,
+          content: schema.questionOptions.content,
+          isCorrect: schema.questionOptions.isCorrect,
+        })
+        .from(schema.questionOptions)
+        .where(inArray(schema.questionOptions.questionId, questionIds))
+        .orderBy(asc(schema.questionOptions.position))
+    : [];
+
+  const pembahasan = questionIds.length
+    ? await db
+        .select({ id: schema.questions.id, explanation: schema.questions.explanation })
+        .from(schema.questions)
+        .where(inArray(schema.questions.id, questionIds))
+    : [];
+
+  const jawaban = attemptSubtestIds.length
+    ? await db
+        .select({
+          attemptSubtestId: schema.attemptAnswers.attemptSubtestId,
+          testSubtestQuestionId: schema.attemptAnswers.testSubtestQuestionId,
+          selectedOptionId: schema.attemptAnswers.selectedOptionId,
+          isCorrect: schema.attemptAnswers.isCorrect,
+        })
+        .from(schema.attemptAnswers)
+        .where(inArray(schema.attemptAnswers.attemptSubtestId, attemptSubtestIds))
+    : [];
+
+  const hasil = subtes.map(({ subtes: s, soal }) => {
+    const daftar = soal.map((q, i) => {
+      const jawab = jawaban.find(
+        (j) => j.attemptSubtestId === s.id && j.testSubtestQuestionId === q.assignmentId,
+      );
+      const pilihan = opsi.filter((o) => o.questionId === q.questionId);
+
+      return {
+        ...q,
+        nomor: i + 1,
+        options: pilihan,
+        selectedOptionId: jawab?.selectedOptionId ?? null,
+        // Kebenaran dibaca dari yang dibekukan saat subtes ditutup, bukan
+        // dibandingkan ulang dengan kunci yang berlaku sekarang.
+        isCorrect: jawab?.isCorrect ?? null,
+        dijawab: Boolean(jawab),
+        explanation: pembahasan.find((p) => p.id === q.questionId)?.explanation ?? "",
+      };
+    });
+
+    return { ...s, soal: daftar, ...ringkasSubtes(daftar) };
+  });
+
+  return {
+    selesai: true as const,
+    attempt,
+    subtes: hasil,
+    total: {
+      skor: hasil.reduce((n, s) => n + s.skor, 0),
+      maksimal: hasil.reduce((n, s) => n + s.maksimal, 0),
+      benar: hasil.reduce((n, s) => n + s.benar, 0),
+      salah: hasil.reduce((n, s) => n + s.salah, 0),
+      kosong: hasil.reduce((n, s) => n + s.kosong, 0),
+    },
+  };
 }

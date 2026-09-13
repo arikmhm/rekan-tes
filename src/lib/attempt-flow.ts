@@ -103,3 +103,33 @@ export function timeoutPlan<T extends SubtestProgress>(rows: T[], now: Date): Ti
 
   return steps;
 }
+
+export type HasilSoal = {
+  /** Bobot assignment; hanya diperoleh bila jawabannya benar. */
+  weight: number;
+  /** Ada baris jawaban untuk soal ini. Soal yang dilewati tidak punya baris. */
+  dijawab: boolean;
+  /** Kebenaran yang dibekukan saat subtes ditutup, bukan dihitung ulang. */
+  isCorrect: boolean | null;
+};
+
+/**
+ * Ringkasan satu subtes. Jawaban salah dan kosong sama-sama bernilai nol; MVP
+ * tidak memakai penalti, jadi skor tidak pernah turun karena menebak.
+ *
+ * `isCorrect` yang masih null pada soal yang dijawab dihitung sebagai salah,
+ * bukan benar: kalau penilaian pernah gagal, kesalahannya tidak boleh
+ * menguntungkan skor.
+ */
+export function ringkasSubtes(soal: HasilSoal[]) {
+  const benar = soal.filter((s) => s.dijawab && s.isCorrect === true);
+  const salah = soal.filter((s) => s.dijawab && s.isCorrect !== true);
+
+  return {
+    benar: benar.length,
+    salah: salah.length,
+    kosong: soal.filter((s) => !s.dijawab).length,
+    skor: benar.reduce((n, s) => n + s.weight, 0),
+    maksimal: soal.reduce((n, s) => n + s.weight, 0),
+  };
+}

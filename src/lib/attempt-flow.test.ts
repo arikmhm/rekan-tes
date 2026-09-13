@@ -4,6 +4,7 @@ import {
   activeSubtest,
   attemptAccessProblem,
   nextSubtest,
+  ringkasSubtes,
   subtestDeadline,
   timeoutPlan,
   type SubtestProgress,
@@ -96,4 +97,25 @@ test("peramban yang lama ditutup menutup beberapa subtes sekaligus", () => {
 test("subtes terakhir yang habis waktunya tidak punya penerus", () => {
   const mulai = new Date(now.getTime() - 700_000);
   expect(timeoutPlan([subtes(1, "submitted"), subtes(2, "in_progress", mulai)], now)[0].start).toBeNull();
+});
+
+const soal = (weight: number, dijawab: boolean, isCorrect: boolean | null) => ({ weight, dijawab, isCorrect });
+
+test("skor adalah jumlah bobot jawaban benar", () => {
+  const hasil = ringkasSubtes([soal(1, true, true), soal(3, true, true), soal(1, true, false)]);
+  expect(hasil.skor).toBe(4);
+  expect(hasil.maksimal).toBe(5);
+});
+
+test("jawaban salah dan kosong bernilai nol tanpa penalti", () => {
+  const hasil = ringkasSubtes([soal(2, true, false), soal(2, false, null)]);
+  expect(hasil).toMatchObject({ benar: 0, salah: 1, kosong: 1, skor: 0, maksimal: 4 });
+});
+
+test("soal yang dijawab tetapi belum dinilai dihitung salah, bukan benar", () => {
+  expect(ringkasSubtes([soal(5, true, null)])).toMatchObject({ benar: 0, salah: 1, skor: 0 });
+});
+
+test("subtes tanpa soal tidak membagi nol", () => {
+  expect(ringkasSubtes([])).toEqual({ benar: 0, salah: 0, kosong: 0, skor: 0, maksimal: 0 });
 });

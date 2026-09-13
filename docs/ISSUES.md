@@ -28,8 +28,8 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 8 | RT-008 | Dokumen legal minimum | Done | RT-007 |
 | 9 | RT-009 | Order dan pembayaran QRIS | Done | RT-004, RT-007, RT-008 |
 | 10 | RT-010 | Webhook DOKU dan pemberian attempt | Done | RT-009 |
-| 11 | RT-011 | Memulai attempt dan urutan subtes | Next | RT-010 |
-| 12 | RT-012 | Test engine, timer server, dan submit | Queued | RT-011 |
+| 11 | RT-011 | Memulai attempt dan urutan subtes | Done | RT-010 |
+| 12 | RT-012 | Test engine, timer server, dan submit | Next | RT-011 |
 | 13 | RT-013 | Autosave dan pemulihan progres | Queued | RT-012 |
 | 14 | RT-014 | Scoring, hasil, dan pembahasan | Queued | RT-013 |
 | 15 | RT-015 | Operasional admin dan penggantian akses | Queued | RT-010, RT-014 |
@@ -303,16 +303,31 @@ Verifikasi backup cek manual: dijalankan penuh terhadap DOKU Sandbox sungguhan, 
 
 ### RT-011 — Memulai attempt dan urutan subtes
 
-**Status:** Next
+**Status:** Done
 
 **Tujuan:** Mengubah hak akses berbayar menjadi sesi pengerjaan yang terkontrol.
 
+Hasil implementasi:
+
+- **Satu route untuk seluruh sesi: `/attempt/[id]`.** Tidak ada URL per subtes. Server yang menentukan subtes mana yang sedang berjalan, sehingga "tidak bisa melompat ke subtes berikutnya" dan "tidak bisa kembali ke subtes yang sudah disubmit" dijaga oleh struktur, bukan oleh pemeriksaan yang harus diulang di setiap route. Tidak ada nomor subtes di URL yang bisa ditebak atau diubah peserta.
+- `src/lib/attempt-flow.ts` (baru) memuat aturan urutannya sebagai fungsi murni — `attemptAccessProblem`, `activeSubtest`, `nextSubtest`, `subtestDeadline`, `isDone` — dan diuji tanpa database di `attempt-flow.test.ts`, mengikuti alasan yang sama dengan `test-publish.ts`: file `"use server"` hanya boleh mengekspor fungsi async.
+- Deadline **tidak** disimpan sebagai kolom. `subtestDeadline` menghitungnya dari `attempt_subtests.started_at` milik server dan `test_subtests.duration_seconds`, sehingga tidak ada dua sumber kebenaran yang bisa berbeda. Peramban tidak pernah mengirimkan waktu apa pun.
+- `src/lib/attempt.ts` (baru, `"use server"`) memuat `getAttempt`, `startAttempt`, dan `submitSubtest`. `getAttempt` memverifikasi kepemilikan lewat `assertOwner` yang sama dengan order, dan me-LEFT JOIN konfigurasi `test_subtests` dengan progres `attempt_subtests` karena baris progres baru ada setelah attempt dimulai — halaman petunjuk tetap perlu menampilkan susunan subtes sebelum itu.
+- Hak akses dibaca dari **order**, bukan dari attempt: attempt hanya ada karena order lunas, dan `access_expires_at` yang lewat mencabut hak walau attempt masih berjalan.
+- `startAttempt` memakai guard idempotency berbentuk sama dengan aktivasi pembayaran RT-010: `UPDATE ... WHERE status = 'not_started'` di dalam transaksi. Klik ganda atau dua tab tidak menggeser `started_at` yang sudah berjalan dan tidak membuat baris `attempt_subtests` ganda.
+- Hanya subtes pertama yang jamnya berjalan saat attempt dimulai; subtes berikutnya menerima `started_at` dari `submitSubtest` dalam transaksi yang sama dengan submit pendahulunya. Durasi subtes tidak habis sementara peserta masih mengerjakan subtes sebelumnya, dan tidak pernah ada keadaan "subtes tertutup tetapi tidak ada penerusnya".
+- Petunjuk (jumlah subtes, total durasi, aturan timer server, subtes tidak dapat dibuka ulang, masa akses) tampil di halaman yang sama selama attempt masih `not_started`. Timer subtes pertama baru berjalan setelah tombol "Mulai mengerjakan" ditekan.
+- Halaman pesanan menambahkan pintu masuk "Buka sesi pengerjaan" begitu order `paid` dan attempt-nya ada; `getOrder` ikut me-LEFT JOIN `test_attempts` untuk mendapatkan id-nya, bukan query kedua.
+- Mesin soal, navigasi nomor, hitung mundur, dan auto-submit saat waktu habis **sengaja belum ada** — itu RT-012. Kartu subtes aktif sudah menampilkan nama, jumlah soal, dan batas waktu server, dengan tombol "Kumpulkan subtes" untuk meneruskan urutan.
+
 Acceptance criteria:
 
-- Attempt hanya dapat dimulai oleh pemilik order paid yang belum kedaluwarsa.
-- Petunjuk tampil sebelum waktu subtes pertama dimulai.
-- `started_at` dan seluruh deadline ditetapkan server.
-- Peserta hanya dapat membuka subtes aktif berikutnya dan tidak dapat kembali ke subtes submitted.
+- Attempt hanya dapat dimulai oleh pemilik order paid yang belum kedaluwarsa. Kepemilikan lewat `assertOwner` (attempt milik orang lain menjadi 404, anonim diarahkan ke `/masuk`), status dan masa akses lewat `attemptAccessProblem` yang diuji unit. Diverifikasi terhadap dev server: `/attempt/<id acak>` tanpa sesi mengembalikan 404 tanpa menyentuh data.
+- Petunjuk tampil sebelum waktu subtes pertama dimulai. Attempt `not_started` hanya merender petunjuk dan tombol mulai; `started_at` baru ditulis di dalam Server Action tombol itu.
+- `started_at` dan seluruh deadline ditetapkan server. Seluruh nilai waktu berasal dari `new Date()` di dalam Server Action, tidak ada waktu dari formulir; deadline diturunkan, bukan disimpan.
+- Peserta hanya dapat membuka subtes aktif berikutnya dan tidak dapat kembali ke subtes submitted. Tidak ada route per subtes yang dapat dituju; `activeSubtest` mengembalikan subtes pertama yang belum disubmit dan diuji untuk kasus urutan acak, subtes timeout, dan seluruh subtes selesai.
+
+Catatan verifikasi: lint, `vitest run` (109 test), dan `next build` lulus; guard anonim diverifikasi terhadap dev server yang berjalan. Jalur berbayar dari ujung ke ujung (petunjuk → mulai → submit → subtes berikutnya) belum dijalankan di peramban karena database saat ini tidak memiliki satu pun baris `test_attempts`: dua order berstatus `paid` yang ada dijadikan paid secara manual saat pengujian awal (payment-nya masih `pending`, `paid_at` dan `access_expires_at` kosong), bukan lewat `activatePayment`. Menjalankannya butuh satu pembayaran sandbox baru dari akun yang login.
 
 ### RT-012 — Test engine, timer server, dan submit
 

@@ -67,6 +67,22 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           )}
         </div>
 
+        {order.status === "paid" && order.attemptId && (
+          <div className="mt-6 rounded-3xl border border-brand/15 bg-mint/60 p-7">
+            <h2 className="text-lg font-semibold text-brand-dark">Sesi siap dikerjakan</h2>
+            <p className="mt-2 text-sm leading-6 text-brand-dark/80">
+              Baca petunjuk dulu; waktu subtes pertama baru berjalan setelah kamu menekan tombol
+              mulai di halaman sesi.
+            </p>
+            <Link
+              href={`/attempt/${order.attemptId}`}
+              className="mt-5 inline-block rounded-full bg-brand px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-dark"
+            >
+              Buka sesi pengerjaan
+            </Link>
+          </div>
+        )}
+
         {qrSvg && qris?.expiresAt && (
           <div className="mt-6 rounded-3xl border border-brand/15 bg-mint/60 p-7 text-center">
             <h2 className="text-lg font-semibold text-brand-dark">Bayar dengan QRIS</h2>

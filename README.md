@@ -4,7 +4,7 @@ Platform B2C untuk simulasi tes masuk kerja, dengan fokus awal perbankan dan pem
 
 ## Status
 
-Fondasi aplikasi sudah menggunakan Next.js App Router dan Tailwind CSS. Halaman publik awal sudah diselaraskan dengan positioning produk, schema database MVP sudah diterapkan ke Neon, serta registrasi, login, dan otorisasi role sudah berjalan. Verifikasi email, bank soal, pembayaran, test engine, dan hasil masih berada dalam backlog.
+Fondasi aplikasi sudah menggunakan Next.js App Router dan Tailwind CSS. Akun, verifikasi email, panel admin bank soal dan produk tes, katalog publik, pembayaran QRIS lewat DOKU, serta pemberian dan pembukaan sesi pengerjaan sudah berjalan. Mesin soal, timer, autosave, dan hasil masih berada dalam backlog.
 
 Urutan implementasi tersedia di [docs/ISSUES.md](./docs/ISSUES.md).
 

@@ -180,9 +180,13 @@ export async function getOrder(id: string) {
       createdAt: schema.orders.createdAt,
       testName: schema.tests.name,
       testSlug: schema.tests.slug,
+      // Attempt lahir dari notifikasi pembayaran; halaman pesanan memakainya
+      // sebagai pintu masuk ke sesi pengerjaan.
+      attemptId: schema.testAttempts.id,
     })
     .from(schema.orders)
     .innerJoin(schema.tests, eq(schema.tests.id, schema.orders.testId))
+    .leftJoin(schema.testAttempts, eq(schema.testAttempts.orderId, schema.orders.id))
     .where(eq(schema.orders.id, id));
 
   if (!order) return null;
@@ -204,4 +208,22 @@ export async function getOrder(id: string) {
     .orderBy(desc(schema.payments.createdAt));
 
   return { ...order, payments };
+}
+
+/** Riwayat pesanan milik satu user, terbaru dulu. Dipakai di halaman akun. */
+export async function listOrdersForUser(userId: string) {
+  return db
+    .select({
+      id: schema.orders.id,
+      amount: schema.orders.amount,
+      status: schema.orders.status,
+      accessExpiresAt: schema.orders.accessExpiresAt,
+      createdAt: schema.orders.createdAt,
+      testName: schema.tests.name,
+      testSlug: schema.tests.slug,
+    })
+    .from(schema.orders)
+    .innerJoin(schema.tests, eq(schema.tests.id, schema.orders.testId))
+    .where(eq(schema.orders.userId, userId))
+    .orderBy(desc(schema.orders.createdAt));
 }

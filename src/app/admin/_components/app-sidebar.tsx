@@ -8,6 +8,7 @@ import {
   LogOut,
   Package,
   Receipt,
+  Users,
   Tags,
 } from "lucide-react";
 import Link from "next/link";
@@ -55,7 +56,10 @@ const grup = [
   },
   {
     label: "Operasional",
-    items: [{ href: "/admin/pesanan", label: "Pesanan", icon: Receipt }],
+    items: [
+      { href: "/admin/pesanan", label: "Pesanan", icon: Receipt },
+      { href: "/admin/pengguna", label: "Pengguna", icon: Users },
+    ],
   },
 ];
 

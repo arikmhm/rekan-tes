@@ -107,11 +107,11 @@ export default async function Home() {
               </Link>
             </div>
             <p className="mt-6 max-w-md text-xs leading-5 text-[#105C78]/60">
-              Latihan mandiri, bukan bagian dari bank manapun — bukan jaminan lolos seleksi.
+              Latihan mandiri, bukan bagian dari bank manapun. Bukan jaminan lolos seleksi.
             </p>
           </div>
 
-          {/* Contoh soal asli, bukan kartu statistik generik — biar kelihatan
+          {/* Contoh soal asli, bukan kartu statistik generik. Biar kelihatan
               produknya beneran seperti apa, bukan cuma diceritakan. */}
           <div className="relative z-10 mx-auto w-full max-w-md">
             <div aria-hidden className="absolute -right-6 -bottom-6 -z-10 size-40 rounded-[6px] bg-[#F68B1F]" />
@@ -151,9 +151,12 @@ export default async function Home() {
         </section>
 
         <div className={`border-y ${hairline} bg-[#105C78]/5`}>
-          <p className="mx-auto max-w-6xl px-5 py-4 text-center text-sm font-medium text-[#105C78]/80 sm:px-8">
-            QRIS instan · Timer tiap subtes · Akses {ACCESS_DAYS} hari · Email terverifikasi
-          </p>
+          <div className="mx-auto flex max-w-6xl flex-wrap justify-center divide-x divide-[#105C78]/20 px-5 py-4 text-sm font-medium text-[#105C78]/80 sm:px-8">
+            <span className="px-4 first:pl-0 last:pr-0">QRIS instan</span>
+            <span className="px-4 first:pl-0 last:pr-0">Timer tiap subtes</span>
+            <span className="px-4 first:pl-0 last:pr-0">Akses {ACCESS_DAYS} hari</span>
+            <span className="px-4 first:pl-0 last:pr-0">Email terverifikasi</span>
+          </div>
         </div>
 
         <section id="cara-kerja" className={`border-b ${hairline} bg-white`}>
@@ -196,7 +199,7 @@ export default async function Home() {
           <div className="mx-auto flex max-w-6xl flex-col gap-4 overflow-hidden rounded-[6px] bg-[#105C78] px-7 py-10 text-white sm:px-10 sm:py-12">
             <h2 className="text-3xl font-bold tracking-tight">Katalog & pembayaran aktif sekarang.</h2>
             <p className="max-w-2xl text-sm leading-6 text-white/80">
-              Daftar, pilih simulasi, dan bayar QRIS — semua sudah bisa. Halaman pengerjaan soal masih kami siapkan.
+              Daftar, pilih simulasi, dan bayar QRIS: semua sudah bisa. Halaman pengerjaan soal masih kami siapkan.
             </p>
           </div>
         </section>

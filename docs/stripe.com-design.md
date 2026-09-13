@@ -154,6 +154,16 @@ Cards are white with a `{colors.secondary}` hairline border and `rounded.md` cor
 
 Numbered steps (`01 / 02 / 03`) are only justified when the content is an actual sequence with a real order — a checkout-then-do-then-review flow. Don't add numbering to a list that has no inherent order just for visual rhythm.
 
+The hero's sample-question card is a deliberate exception to "no fake screenshots": there's no real question-answering UI to screenshot yet (that's RT-012, not built), and no image-generation tool is available in this environment. A disclosed illustrative mockup ("Ilustrasi tampilan, bukan soal ujian resmi") beats an abstract stat card here, but the moment RT-012 ships a real subtest UI, replace this mockup with an actual screenshot rather than keeping the hand-built one.
+
+## Copy Rules
+Audited against `.agents/skills/design-taste-frontend`; these are the rules that actually applied and what they caught on this page.
+
+- **No em dash (`—`) anywhere the user can see it** — headline, body, button, caption, `<title>`, meta description. Restructure into two sentences, or use a comma or colon. This caught three real instances on first audit (the hero disclaimer, the status-band paragraph, and the site `<title>` in `layout.tsx`), all fixed.
+- **Middle dot (`·`) rationed to one per line.** A metadata strip separating four facts with three dots ("QRIS instan · Timer tiap subtes · Akses 30 hari · Email terverifikasi") reads as a templated spec-strip. Use a divided flex row (a hairline between items) instead of chaining dots — that's what the specs strip under the hero does now.
+- **No filler verbs** ("elevate", "seamless", "unleash", "revolutionize"). Say what the thing does.
+- **One copy register per page.** Don't mix casual slang, formal legal phrasing, and marketing punch in the same section.
+
 ## Do's and Don'ts
 - Do keep every headline and label at 700/600 weight — confident, not tentative.
 - Do use hairline borders (`{colors.secondary}`, ~20% opacity) everywhere a divider is needed; never a fully-saturated 1px border, which reads heavier than the pixel width suggests.
@@ -163,3 +173,9 @@ Numbered steps (`01 / 02 / 03`) are only justified when the content is an actual
 - Don't reach for numbered markers, badge pills, or icon grids by default — use them only when the content actually is a sequence, a status, or a real metadata tag.
 - Don't introduce gradients, glow, or shadow for depth — flat fill and hairlines only.
 - Don't let a card, button, or section outlive its first draft unexamined — if it would work unchanged on any other SaaS landing page, it needs another pass.
+- Don't use an em dash in anything a user reads, including page `<title>`s and meta descriptions.
+- Don't chain more than one middle dot per line; use a divided row instead.
+
+## Stack Notes
+- Icons: `lucide-react` (already a project dependency before this system existed, so it stays rather than switching families mid-project).
+- Motion: plain CSS `transition` on hover/active states only. No animation library is installed; `tw-animate-css` is present but its `animate-in` utilities didn't resolve correctly in this Next.js setup (an incomplete `@keyframes enter`), so entrance animations were dropped rather than shipped broken. Revisit only if a real animation need comes up — don't add a library speculatively.

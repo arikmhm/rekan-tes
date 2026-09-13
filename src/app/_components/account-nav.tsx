@@ -47,7 +47,10 @@ export function AccountNav() {
           Admin
         </Link>
       )}
-      <span className="font-semibold text-ink">{session.user.username ?? session.user.name}</span>
+      {/* Identitas sudah diwakili tautan "Akun" di layar sempit. */}
+      <span className="hidden font-semibold text-ink sm:inline">
+        {session.user.username ?? session.user.name}
+      </span>
       <button
         type="button"
         disabled={signingOut}

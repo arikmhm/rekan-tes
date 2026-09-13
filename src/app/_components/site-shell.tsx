@@ -29,7 +29,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             </span>
             <span className="text-lg">Rekan Tes</span>
           </Link>
-          <div className="flex items-center gap-7 text-sm text-muted-foreground">
+          {/* Jarak dirapatkan di layar sempit; dengan gap-7 isi nav meluber
+              melewati 375 px dan membuat seluruh halaman bisa digeser. */}
+          <div className="flex items-center gap-3 text-sm text-muted-foreground sm:gap-7">
             <Link className="transition hover:text-ink" href="/tes">
               Katalog
             </Link>

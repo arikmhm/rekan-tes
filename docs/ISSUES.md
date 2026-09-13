@@ -30,10 +30,10 @@ Satu issue dianggap selesai hanya jika acceptance criteria terpenuhi, lint dan b
 | 10 | RT-010 | Webhook DOKU dan pemberian attempt | Done | RT-009 |
 | 11 | RT-011 | Memulai attempt dan urutan subtes | Done | RT-010 |
 | 12 | RT-012 | Test engine, timer server, dan submit | Done | RT-011 |
-| 13 | RT-013 | Autosave dan pemulihan progres | Next | RT-012 |
-| 14 | RT-014 | Scoring, hasil, dan pembahasan | Queued | RT-013 |
-| 15 | RT-015 | Operasional admin dan penggantian akses | Queued | RT-010, RT-014 |
-| 16 | RT-016 | Hardening dan kesiapan rilis MVP | Queued | RT-001–RT-015 |
+| 13 | RT-013 | Autosave dan pemulihan progres | Done | RT-012 |
+| 14 | RT-014 | Scoring, hasil, dan pembahasan | Done | RT-013 |
+| 15 | RT-015 | Operasional admin dan penggantian akses | Done | RT-010, RT-014 |
+| 16 | RT-016 | Hardening dan kesiapan rilis MVP | Next | RT-001–RT-015 |
 
 ## Detail issues
 
@@ -361,44 +361,81 @@ Catatan verifikasi: dijalankan penuh di peramban memakai data uji bertanda `RT01
 
 ### RT-013 — Autosave dan pemulihan progres
 
-**Status:** Queued
+**Status:** Done
 
 **Tujuan:** Mencegah kehilangan jawaban saat reload atau koneksi tidak stabil.
 
+Hasil implementasi:
+
+- **Sebagian besar issue ini sudah terpenuhi oleh bentuk RT-012 dan tidak ditulis ulang di sini.** Penyimpanan sudah berupa `onConflictDoUpdate` pada key unik `(attempt_subtest_id, test_subtest_question_id)`, validasi opsi sudah dilakukan terhadap soal subtes berjalan, dan pemulihan setelah reload sudah datang dari server karena halaman tidak pernah menyimpan state pengerjaan di klien. Yang benar-benar kurang hanyalah status simpan yang terlihat peserta.
+- `AnswerOptions` memakai `useOptimistic`, sehingga pilihan muncul seketika sementara penyimpanan berjalan di latar. Nilai optimistis kembali sendiri ke nilai server saat aksi selesai, jadi penyimpanan yang gagal tampak sebagai pilihan yang batal — bukan centang yang menipu peserta seolah jawabannya sudah aman.
+- Tiga status terlihat: "Menyimpan…" selagi berjalan, "Tersimpan" setelah berhasil, dan kotak merah `role="alert"` ketika gagal. Ruang teks status dipesan (`min-h-5`) agar daftar opsi tidak bergeser saat statusnya berubah.
+- Kegagalan pengiriman ditangkap di klien. Tanpa itu, aksi yang gagal terkirim (koneksi putus, server mati) melempar ke error boundary dan **seluruh halaman pengerjaan hilang bersama sisa waktu yang sedang berjalan** — kegagalan autosave justru menjadi kerugian terbesar, kebalikan dari tujuan issue ini.
+- `pending` diperiksa sebelum `galat` saat merender status. `useActionState` menahan state lama selagi aksi baru berjalan, sehingga tanpa urutan ini percobaan ulang menampilkan pesan gagal milik percobaan sebelumnya — terlihat seperti gagal lagi padahal sedang berjalan. Ditemukan saat verifikasi, bukan dari membaca kode.
+- **Trade-off yang diambil sadar:** membungkus Server Action dengan closure klien menghilangkan progressive enhancement, jadi menjawab kini butuh JavaScript. Ditukar dengan penangkapan galat di atas; halaman pengerjaan toh sudah membutuhkan JavaScript untuk hitung mundur. Dicatat di komentar `answer-options.tsx` agar tidak dikira masih jalan tanpa JavaScript.
+- Tidak ada retry otomatis, debounce, atau antrean offline. Peserta memilih ulang setelah koneksi pulih, dan upsert membuat pengulangan itu aman. Tambahkan bila data lapangan menunjukkan peserta benar-benar kehilangan jawaban karena koneksi, bukan karena mengantisipasinya lebih dulu.
+
 Acceptance criteria:
 
-- Jawaban di-upsert menggunakan key unik assignment dalam attempt subtest.
-- Retry request aman dan tidak membuat jawaban duplikat.
-- UI menunjukkan state menyimpan, tersimpan, dan gagal; kegagalan tidak diam-diam hilang.
-- Reload memulihkan jawaban dan waktu aktif dari server.
-- Opsi terpilih divalidasi benar-benar milik soal yang sedang dijawab.
+- Jawaban di-upsert menggunakan key unik assignment dalam attempt subtest. Diverifikasi di peramban: mengganti jawaban B → A → C pada soal yang sama menyisakan tepat satu baris `attempt_answers` yang berubah isinya.
+- Retry request aman dan tidak membuat jawaban duplikat. Diverifikasi: tiga klik beruntun (C, C, A) tanpa jeda menghasilkan satu baris dengan klik terakhir sebagai isinya.
+- UI menunjukkan state menyimpan, tersimpan, dan gagal; kegagalan tidak diam-diam hilang. Diverifikasi dengan `window.fetch` yang sengaja dibuat gagal untuk meniru koneksi putus: "Menyimpan…" muncul dalam 120 ms, "Tersimpan" setelah berhasil, dan saat gagal muncul kotak merah sementara pilihan kembali ke jawaban terakhir yang benar-benar tersimpan. Database tidak berubah pada percobaan yang gagal.
+- Reload memulihkan jawaban dan waktu aktif dari server. Diverifikasi: setelah muat ulang penuh, opsi yang tersimpan kembali tertandai dan hitung mundur melanjutkan waktu server, bukan mengulang dari awal.
+- Opsi terpilih divalidasi benar-benar milik soal yang sedang dijawab. Diverifikasi pada RT-012 lewat halaman basi yang subtesnya sudah berpindah: assignment-nya tidak ditemukan di soal subtes berjalan dan penyimpanan ditolak.
+
+Catatan verifikasi: memakai data uji bertanda `RT013UJI` yang dibuat langsung di database lalu dihapus seluruhnya; hitungan akhir `attempt_answers` dan `test_attempts` kembali nol tanpa jejak tersisa.
 
 ### RT-014 — Scoring, hasil, dan pembahasan
 
-**Status:** Queued
+**Status:** Done
 
 **Tujuan:** Menghitung hasil objektif setelah seluruh subtes selesai.
 
+Hasil implementasi:
+
+- **Kebenaran dibekukan, bukan dihitung ulang saat hasil dibaca.** `scoreSubtest` mengisi `attempt_answers.is_correct` dari kunci yang berlaku tepat ketika subtes ditutup, lalu menjumlahkan bobotnya ke `attempt_subtests.score`. Koreksi soal di kemudian hari karena itu tidak dapat diam-diam mengubah hasil attempt lama — janji yang sudah ada di PRD tetapi belum punya penegaknya sampai sekarang.
+- Penilaian dipanggil dari **kedua** jalur penutupan, submit manual dan timeout, di dalam transaksi yang sama dengan penutupannya. Tidak ada subtes tertutup yang bisa lolos tanpa nilai, dan tidak perlu job terpisah yang bisa mati diam-diam. `finalizeAttempt` mengisi `test_attempts.final_score` saat subtes terakhir tertutup, lewat jalur mana pun.
+- **Satu definisi "soal mana yang tampil".** `presentedQuestions` (assignment terurut `position`, dipotong `question_limit`) kini dipakai bersama oleh halaman pengerjaan dan halaman hasil. Kalau keduanya memakai aturan sendiri, pembahasan bisa memuat soal yang tidak pernah ditampilkan atau melewatkan soal yang dijawab.
+- Kunci jawaban dan `explanation` tetap tidak pernah ikut di-select pada jalur pengerjaan; keduanya hanya dibaca `getResult`, yang berhenti lebih dulu bila attempt belum selesai. Status attempt karena itu satu-satunya pintu yang menentukan kunci boleh keluar, bukan pilihan kolom yang tersebar di beberapa query.
+- Aturan skornya sendiri berupa fungsi murni `ringkasSubtes` di `attempt-flow.ts` dan diuji tanpa database, termasuk kasus `is_correct` yang masih null pada soal terjawab — dihitung salah, bukan benar, agar kegagalan penilaian tidak pernah menguntungkan skor.
+- Halaman `/attempt/[id]/hasil` memuat skor akhir, jumlah benar/salah/kosong, skor per subtes, dan pembahasan setiap soal dengan penanda "pilihanmu" serta "kunci". Penanda benar/salah/kosong memakai teks, bukan hanya warna. Pintu masuknya dari kartu penyelesaian sesi dan dari daftar pesanan di `/akun`.
+- Persentil tidak ditampilkan, dan halaman menyebutkan alasannya secara terbuka ketimbang membiarkan peserta menduga angkanya hilang.
+- `attempt_subtests.score` dan `test_attempts.final_score` tetap disimpan meski halaman hasil menurunkan angkanya sendiri dari `is_correct`: keduanya dibaca daftar pesanan `/akun` tanpa harus membuka seluruh jawaban satu per satu. Kedua angka berasal dari data beku yang sama, jadi tidak mungkin berbeda.
+
 Acceptance criteria:
 
-- Jawaban benar mendapat weight assignment; salah/kosong bernilai nol tanpa penalti.
-- Final score, skor per subtes, dan jumlah benar/salah/kosong dihitung server-side.
-- Hasil dan pembahasan hanya tersedia untuk attempt submitted milik peserta.
-- Halaman pembahasan menampilkan pilihan peserta, jawaban benar, dan explanation.
-- Persentil tidak ditampilkan pada MVP.
+- Jawaban benar mendapat weight assignment; salah/kosong bernilai nol tanpa penalti. Diverifikasi dengan bobot sengaja dibuat tidak seragam (1, 3, 2 dan 5, 1): menjawab benar soal berbobot 1 dan salah pada soal berbobot 3 memberi skor subtes 1 dari 6 — skor mengikuti bobot, bukan jumlah jawaban benar, dan jawaban salah tidak mengurangi apa pun.
+- Final score, skor per subtes, dan jumlah benar/salah/kosong dihitung server-side. Diverifikasi terhadap Neon: `attempt_subtests.score` 1 dan 1, `test_attempts.final_score` 2, dan halaman menampilkan angka yang sama beserta 2 benar / 1 salah / 2 kosong.
+- Hasil dan pembahasan hanya tersedia untuk attempt submitted milik peserta. Diverifikasi: tanpa sesi → 307 ke `/masuk`; attempt milik orang lain → 404; attempt yang belum tuntas → 307 balik ke halaman sesi, baik saat `not_started` maupun `in_progress`.
+- Halaman pembahasan menampilkan pilihan peserta, jawaban benar, dan explanation. Diverifikasi pada ketiga keadaan soal: benar (pilihan peserta sekaligus kunci), salah (pilihan peserta dan kunci ditandai terpisah), dan kosong (hanya kunci).
+- Persentil tidak ditampilkan pada MVP. Tidak ada perhitungan persentil di kode mana pun.
+
+Catatan verifikasi: memakai data uji `RT014UJI` yang dibuat langsung di database lalu dihapus seluruhnya (`test_attempts`, `attempt_subtests`, dan `attempt_answers` kembali nol, tidak ada akun uji tersisa). Penilaian jalur timeout ikut diuji sungguhan dengan subtes berdurasi 60 detik yang dibiarkan habis. Sebagai regresi RT-012, halaman pengerjaan yang sedang aktif dibaca ulang setelah refaktor `presentedQuestions`: nol kemunculan `is_correct`, `isCorrect`, maupun `explanation` di seluruh payload.
 
 ### RT-015 — Operasional admin dan penggantian akses
 
-**Status:** Queued
+**Status:** Done
 
 **Tujuan:** Membantu admin menangani masalah transaksi dan pengerjaan tanpa mengubah histori secara sembarang.
 
+Hasil implementasi:
+
+- **Jejak audit tanpa tabel log.** Hak pengganti *adalah* sebuah order, jadi tiga kolom baru pada `orders` (`granted_by`, `grant_reason`, `replaces_order_id`, migrasi `0005`) sekaligus menjadi catatannya. Satu pemberian = satu baris order, sehingga log tidak mungkin melenceng dari hal yang dicatatnya — berbeda dengan tabel audit terpisah yang bisa kosong, dobel, atau menunjuk order yang sudah berubah.
+- Constraint database menegakkan jejaknya, bukan kode aplikasi: `orders_grant_reason_with_granter` menolak baris yang punya pemberi tanpa alasan atau sebaliknya, dan `replaces_order_id` mereferensikan `orders.id` sendiri sehingga tidak bisa menunjuk order yang tidak ada.
+- `grantReplacementAccess` membuat order baru bernilai nol berstatus `paid` dengan masa akses baru, lalu satu attempt baru — dan **tidak menyentuh order lama sama sekali**: tidak menghapus hasil, tidak menghidupkan ulang attempt yang sudah selesai, tidak mengubah statusnya. Nilainya nol supaya penggantian tidak pernah tercampur dengan angka penjualan.
+- Pencarian menyasar apa yang benar-benar dipegang peserta saat mengeluh: username, email, nomor invoice, atau id pesanan yang mereka salin dari URL. Satu kolom pencarian, bukan empat filter terpisah.
+- **Ketidakcocokan order dan pembayaran ditandai, bukan diperbaiki diam-diam.** `orderPaymentMismatch` (fungsi murni, diuji tanpa database) menamai selisihnya untuk admin. Memperbaikinya otomatis justru akan menyembunyikan kasus yang perlu diperiksa manusia.
+- Order penggantian dikecualikan dari pemeriksaan itu: lunas tanpa pembayaran adalah bentuk yang benar baginya. Ditemukan saat verifikasi — versi pertama menandai setiap pemberian sebagai janggal, yang akan melatih admin mengabaikan peringatan ini sampai yang sungguhan janggal ikut terlewat.
+- Refund tidak dieksekusi dari panel. Kebijakan refund MVP memang manual lewat kanal DOKU, jadi panel hanya menampilkan status payment apa adanya; tombol refund yang tidak benar-benar memindahkan uang lebih berbahaya daripada tidak ada tombol sama sekali.
+
 Acceptance criteria:
 
-- Admin dapat mencari dan melihat order, payment attempts, serta attempt terkait.
-- Tindakan penggantian akses memerlukan alasan dan meninggalkan audit trail minimum.
-- Penggantian akses membuat hak baru yang eksplisit; tidak menghapus hasil atau menghidupkan ulang attempt lama.
-- Refund dan status order ditampilkan konsisten dengan data payment.
+- Admin dapat mencari dan melihat order, payment attempts, serta attempt terkait. Diverifikasi terhadap data sungguhan di Neon: pencarian `memoir` (username) 2 baris, nomor invoice `RTMTYXRVKQCD0ED4` 1 baris, id pesanan 1 baris, `mhm.ariyanto` (email) 1 baris, filter `status=paid` 2 baris, kata yang tidak ada 0 baris. Halaman detail menampilkan pesanan, seluruh percobaan pembayaran, dan sesi pengerjaannya.
+- Tindakan penggantian akses memerlukan alasan dan meninggalkan audit trail minimum. Diverifikasi: alasan pendek ditolak server **setelah atribut `minlength` dilepas dari DOM**, jadi penolakannya bukan sekadar validasi peramban. Pemberian yang sah menyimpan admin pemberi, alasan lengkap, dan order yang digantikan; keduanya tampil di halaman detail kedua order.
+- Penggantian akses membuat hak baru yang eksplisit; tidak menghapus hasil atau menghidupkan ulang attempt lama. Diverifikasi terhadap Neon sebelum dan sesudah: order pengganti baru (Rp 0, `paid`, masa akses terisi, attempt `not_started`), sementara order lama tidak berubah sama sekali — status, nilai, masa akses, dan ketiadaan attempt-nya identik.
+- Refund dan status order ditampilkan konsisten dengan data payment. Diverifikasi pada dua order warisan yang memang janggal (berstatus `paid` padahal payment-nya masih `pending`): keduanya memunculkan peringatan yang menyebutkan selisihnya, sementara order penggantian yang sah tidak.
+
+Catatan verifikasi: dijalankan sebagai admin sungguhan lewat sesi sementara, terhadap data produksi-pengembangan yang ada. Order penggantian hasil uji beserta attempt-nya dihapus setelah selesai dan order lama diperiksa ulang masih utuh; hitungan akhir kembali ke 3 order, 0 attempt, 0 pemberian.
 
 ### RT-016 — Hardening dan kesiapan rilis MVP
 

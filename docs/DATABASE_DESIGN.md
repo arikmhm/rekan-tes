@@ -50,7 +50,7 @@ CLI Better Auth tidak dipakai: rilis stabilnya tertinggal beberapa minor dari li
 
 | Tabel | Kolom penting | Fungsi |
 |---|---|---|
-| `orders` | `id PK`, `user_id FK`, `test_id FK`, `amount`, `status`, `access_expires_at`, timestamps | Pembelian satu sesi tes. `amount` menyimpan harga saat checkout. |
+| `orders` | `id PK`, `user_id FK`, `test_id FK`, `amount`, `status`, `access_expires_at`, `granted_by FK?`, `grant_reason?`, `replaces_order_id FK?`, timestamps | Pembelian satu sesi tes. `amount` menyimpan harga saat checkout. Tiga kolom terakhir hanya terisi pada order yang diberikan admin sebagai penggantian akses (RT-015) dan sekaligus menjadi jejak auditnya: pemberi, alasan, dan order yang digantikan. Order itu sendiri sudah satu baris per pemberian, sehingga tidak ada tabel log terpisah yang bisa melenceng dari order yang dicatatnya. |
 | `payments` | `id PK`, `order_id FK`, `provider`, `external_id`, `request_id`, `qr_content?`, `reference_no?`, `expires_at?`, `amount`, `status`, `paid_at?`, timestamps | Setiap percobaan pembayaran. Untuk DOKU SNAP QRIS, `external_id` menyimpan `partnerReferenceNo` (invoice), `request_id` menyimpan `X-EXTERNAL-ID` yang wajib numerik dan unik harian, `qr_content` menyimpan payload QRIS yang dirender menjadi QR, dan `reference_no` menyimpan `referenceNo` milik DOKU yang dibutuhkan Query QRIS (RT-010) untuk menanyakan status transaksi langsung sebagai backup selain webhook. |
 
 ## 5. Tabel pengerjaan
@@ -118,6 +118,8 @@ CLI Better Auth tidak dipakai: rilis stabilnya tertinggal beberapa minor dari li
 - `orders.amount` dan `payments.amount` tidak boleh negatif.
 - `UNIQUE(provider, external_id)` pada `payments` agar webhook idempotent.
 - `UNIQUE(provider, request_id)` pada `payments` agar pembuatan checkout tidak diproses dua kali.
+- `granted_by` dan `grant_reason` pada `orders` harus sama-sama terisi atau sama-sama kosong (check constraint `orders_grant_reason_with_granter`); jejak audit tanpa salah satunya tidak berguna.
+- `replaces_order_id` mereferensikan `orders.id` sendiri, sehingga penggantian tidak dapat menunjuk order yang tidak ada.
 - `UNIQUE(order_id)` pada `test_attempts`.
 - `UNIQUE(attempt_id, test_subtest_id)` pada `attempt_subtests`.
 - `UNIQUE(attempt_subtest_id, test_subtest_question_id)` pada `attempt_answers`.

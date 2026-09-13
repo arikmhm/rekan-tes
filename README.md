@@ -4,7 +4,7 @@ Platform B2C untuk simulasi tes masuk kerja, dengan fokus awal perbankan dan pem
 
 ## Status
 
-Fondasi aplikasi sudah menggunakan Next.js App Router dan Tailwind CSS. Akun, verifikasi email, panel admin bank soal dan produk tes, katalog publik, pembayaran QRIS lewat DOKU, serta pemberian dan pembukaan sesi pengerjaan sudah berjalan. Sesi pengerjaan sudah memiliki mesin soal dan timer server. Autosave, scoring, hasil, dan pembahasan masih berada dalam backlog.
+Fondasi aplikasi sudah menggunakan Next.js App Router dan Tailwind CSS. Akun, verifikasi email, panel admin bank soal dan produk tes, katalog publik, pembayaran QRIS lewat DOKU, serta pemberian dan pembukaan sesi pengerjaan sudah berjalan. Sesi pengerjaan sudah lengkap dari petunjuk sampai hasil: mesin soal, timer server, autosave, penilaian, dan pembahasan. Panel admin juga sudah bisa menelusuri pesanan dan memberi akses pengganti. Tersisa hardening kesiapan rilis.
 
 Urutan implementasi tersedia di [docs/ISSUES.md](./docs/ISSUES.md).
 

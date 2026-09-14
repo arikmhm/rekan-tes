@@ -80,15 +80,17 @@ export type JenisProduk = "simulasi" | "bank-soal" | "materi";
 
 export const JENIS: Record<JenisProduk, { label: string; ringkas: string }> = {
   simulasi: {
-    label: "Simulasi tes",
-    ringkas: "Dikerjakan berwaktu seperti tes aslinya, lengkap dengan hasil dan pembahasan.",
+    label: "Simulasi",
+    ringkas:
+      "Dikerjakan berwaktu seperti tes aslinya, lengkap dengan hasil dan pembahasan.",
   },
   "bank-soal": {
-    label: "Bank soal",
-    ringkas: "Kumpulan soal beserta pembahasannya, dikerjakan sesuka tempo sendiri.",
+    label: "Soal",
+    ringkas:
+      "Kumpulan soal beserta pembahasannya, dikerjakan sesuka tempo sendiri.",
   },
   materi: {
-    label: "Materi & ebook",
+    label: "Ebook",
     ringkas: "Bahan bacaan yang bisa diunduh dan dibuka kapan saja.",
   },
 };
@@ -132,11 +134,4 @@ export async function listKatalog(): Promise<ProdukKatalog[]> {
       { ikon: "durasi" as const, teks: formatDuration(t.durationSeconds) },
     ],
   }));
-}
-
-/** Produk dikelompokkan per jenis, mengikuti urutan JENIS. */
-export function kelompokkanKatalog(produk: ProdukKatalog[]) {
-  return (Object.keys(JENIS) as JenisProduk[])
-    .map((jenis) => ({ jenis, isi: produk.filter((p) => p.jenis === jenis) }))
-    .filter((g) => g.isi.length > 0);
 }

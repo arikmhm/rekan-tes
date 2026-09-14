@@ -53,41 +53,49 @@ export function HeroPreview() {
 
   return (
     <div className="relative pb-8">
-      <div aria-hidden className="absolute -right-6 -bottom-14 -z-10 size-40 rounded-[6px] bg-[#F68B1F]" />
-
       <div className={`rounded-[8px] border ${hairline} bg-white`}>
-        <div className={`flex items-center justify-between border-b ${hairline} px-5 py-4 sm:px-6`}>
-          <div className="flex items-center gap-2 text-sm font-medium text-[#105C78]">
+        <div
+          className={`flex items-center justify-between border-b ${hairline} px-5 py-4 sm:px-6`}
+        >
+          <div className="flex items-center gap-2 text-sm font-medium text-brand">
             <ListChecks className="size-4" aria-hidden />
             Simulasi / {subtes.nama}
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-[4px] bg-[#105C78] px-2.5 py-1 font-mono text-xs font-medium text-white">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-2.5 py-1 font-mono text-xs font-medium text-white">
             <Clock className="size-3.5" aria-hidden />
             {subtes.timer}
           </span>
         </div>
 
         <div className="relative px-5 py-6 sm:px-6 sm:py-7">
-          <span className="inline-flex items-center rounded-[4px] bg-[#105C78]/10 px-2.5 py-1 text-xs font-medium text-[#105C78]">
+          <span className="inline-flex items-center rounded-lg bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand">
             Sedang dikerjakan
           </span>
-          <p className="mt-4 text-base leading-7 font-normal text-[#105C78]">{subtes.prompt}</p>
+          <p className="mt-4 text-base leading-7 font-normal text-brand">
+            {subtes.prompt}
+          </p>
           <div className="mt-5 space-y-2">
             {subtes.opsi.map((opsi) => (
               <div
                 key={opsi.label}
-                className={`flex items-center gap-3 rounded-[4px] border p-3 ${
-                  opsi.benar ? "border-[#105C78] bg-[#105C78]/5" : `${hairline} bg-white`
+                className={`flex items-center gap-3 rounded-lg border p-3 ${
+                  opsi.benar
+                    ? "border-brand bg-brand/5"
+                    : `${hairline} bg-white`
                 }`}
               >
                 <span
                   className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-medium ${
-                    opsi.benar ? "bg-[#105C78] text-white" : "border border-[#105C78]/30 text-[#105C78]/50"
+                    opsi.benar
+                      ? "bg-brand text-white"
+                      : "border border-brand/30 text-brand/50"
                   }`}
                 >
                   {opsi.label}
                 </span>
-                <span className="text-sm font-normal text-[#105C78]">{opsi.teks}</span>
+                <span className="text-sm font-normal text-brand">
+                  {opsi.teks}
+                </span>
               </div>
             ))}
           </div>
@@ -95,10 +103,14 @@ export function HeroPreview() {
           <div
             className={`absolute right-5 -bottom-3 hidden max-w-56 items-start gap-2.5 rounded-[6px] border ${hairline} bg-white p-3 shadow-[0_4px_16px_rgba(16,92,120,0.12)] sm:flex`}
           >
-            <Save className="mt-0.5 size-4 shrink-0 text-[#105C78]" aria-hidden />
+            <Save className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
             <div>
-              <p className="text-xs font-medium text-[#105C78]">Jawaban tersimpan otomatis</p>
-              <p className="mt-0.5 text-xs font-normal text-[#105C78]/60">Tersimpan beberapa detik lalu</p>
+              <p className="text-xs font-medium text-brand">
+                Jawaban tersimpan otomatis
+              </p>
+              <p className="mt-0.5 text-xs font-normal text-brand/60">
+                Tersimpan beberapa detik lalu
+              </p>
             </div>
           </div>
         </div>
@@ -113,7 +125,9 @@ export function HeroPreview() {
             type="button"
             onClick={() => setAktif(i)}
             className={`rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors sm:text-sm ${
-              i === aktif ? "bg-[#105C78] text-white" : "text-[#105C78]/70 hover:text-[#105C78]"
+              i === aktif
+                ? "bg-brand text-white"
+                : "text-brand/70 hover:text-brand"
             }`}
           >
             {s.nama}

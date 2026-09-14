@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AccountNav } from "./_components/account-nav";
 import { HeroPreview } from "./_components/hero-preview";
+import { PhoneChat } from "./_components/phone-chat";
 import { LegalLinks } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
@@ -14,24 +15,6 @@ const materi = [
   { nama: "Ketelitian", uji: "Akurasi dan kecepatan mengoreksi" },
   { nama: "Bahasa Inggris", uji: "Grammar dan reading dasar" },
   { nama: "Pengetahuan Perbankan", uji: "Istilah dan konsep dasar bank" },
-];
-
-const steps = [
-  {
-    number: "01",
-    title: "Pilih & bayar",
-    description: "Cek subtes, harga, dan durasinya. Bayar pakai QRIS.",
-  },
-  {
-    number: "02",
-    title: "Kerjakan per subtes",
-    description: "Waktunya jalan tiap subtes, mirip ujian asli.",
-  },
-  {
-    number: "03",
-    title: "Lihat hasil",
-    description: "Cek skor dan ringkasan jawabanmu.",
-  },
 ];
 
 const hairline = "border-[#105C78]/20";
@@ -45,7 +28,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-white text-brand">
+    <div className="min-h-screen bg-white text-brand">
       <header className={`relative z-10 border-b ${hairline} bg-white`}>
         <nav
           aria-label="Navigasi utama"
@@ -66,9 +49,9 @@ export default async function Home() {
             </Link>
             <a
               className="hidden transition hover:text-brand-orange sm:inline"
-              href="#cara-kerja"
+              href="#mulai"
             >
-              Cara kerja
+              Mulai
             </a>
             <a
               className="hidden transition hover:text-brand-orange sm:inline"
@@ -82,15 +65,7 @@ export default async function Home() {
       </header>
 
       <main id="top">
-        <section className="relative mx-auto flex max-w-3xl flex-col items-center px-5 py-20 text-center sm:px-8 sm:py-28">
-          <div
-            aria-hidden
-            className="absolute -top-2 right-2 -z-10 size-14 rotate-6 rounded-[6px] bg-brand-orange sm:-top-4 sm:right-10 sm:size-20"
-          />
-          <div
-            aria-hidden
-            className="absolute bottom-6 left-2 -z-10 hidden size-10 -rotate-6 rounded-[6px] bg-brand-orange/70 sm:block sm:bottom-10 sm:left-10 sm:size-14"
-          />
+        <section className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-5 py-16 text-center sm:px-8 sm:py-20">
           <h1 className="max-w-xl text-4xl leading-[1.2] font-medium tracking-[-0.01em] text-brand sm:text-5xl lg:text-[52px]">
             Setiap Kesempatan Layak Dipersiapkan.
           </h1>
@@ -99,7 +74,7 @@ export default async function Home() {
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link
-              className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-center text-sm font-normal text-white transition-all hover:-translate-y-0.5 hover:bg-[#F68B1F] active:translate-y-0"
+              className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-center text-sm font-normal text-white transition-all hover:-translate-y-0.5 hover:bg-brand-orange active:translate-y-0"
               href="/tes"
             >
               Lihat katalog simulasi
@@ -109,7 +84,7 @@ export default async function Home() {
               />
             </Link>
             <Link
-              className={`flex h-12 items-center justify-center rounded-lg border ${hairline} bg-white px-6 text-center text-sm font-normal text-[#105C78] transition-all hover:-translate-y-0.5 hover:bg-[#105C78] hover:text-white active:translate-y-0`}
+              className={`flex h-12 items-center justify-center rounded-lg border ${hairline} bg-white px-6 text-center text-sm font-normal text-brand transition-all hover:-translate-y-0.5 hover:bg-brand hover:text-white active:translate-y-0`}
               href="/daftar"
             >
               Buat akun gratis
@@ -120,31 +95,20 @@ export default async function Home() {
         {/* Tangkapan layar ilustratif produk, biar kelihatan beneran seperti apa,
             bukan cuma diceritakan. Tab subtesnya sungguhan bisa diklik. Slot ini
             bisa diganti video simulasi yang looping begitu asetnya tersedia. */}
-        <div className="mx-auto max-w-xl px-5 pb-24 sm:px-8 sm:pb-32">
+        <div className="mx-auto w-full max-w-xl px-5 pb-16 sm:px-8 sm:pb-20">
           <HeroPreview />
         </div>
 
-        <section id="cara-kerja" className={`border-b ${hairline} bg-white`}>
-          <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-            <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.01em] text-[#105C78] sm:text-4xl">
-              Alurnya cuma tiga langkah.
+        <section
+          id="mulai"
+          className={`border-b ${hairline} bg-white px-5 pt-16 sm:px-8 sm:pt-20`}
+        >
+          <div className="mx-auto max-w-6xl bg-brand-orange/80">
+            <h2 className="mx-auto max-w-lg text-center text-3xl font-medium tracking-[-0.01em] text-white sm:text-4xl">
+              Bingung Harus Mulai dari Mana?
             </h2>
-            <div
-              className={`mt-10 grid gap-px overflow-hidden rounded-[6px] border ${hairline} bg-[#105C78]/20 md:grid-cols-3`}
-            >
-              {steps.map((step) => (
-                <article key={step.number} className="bg-white p-7 sm:p-8">
-                  <p className="font-mono text-3xl font-medium text-[#F68B1F]">
-                    {step.number}
-                  </p>
-                  <h3 className="mt-6 text-xl font-medium text-[#105C78]">
-                    {step.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 font-normal text-[#105C78]/70">
-                    {step.description}
-                  </p>
-                </article>
-              ))}
+            <div className="mt-8 flex justify-center">
+              <PhoneChat />
             </div>
           </div>
         </section>
@@ -153,7 +117,7 @@ export default async function Home() {
           id="materi"
           className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24"
         >
-          <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.01em] text-[#105C78] sm:text-4xl">
+          <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.01em] text-brand sm:text-4xl">
             Yang sering diuji saat seleksi kerja bank.
           </h2>
           <div
@@ -166,15 +130,15 @@ export default async function Home() {
                   i > 0 ? `border-t ${hairline}` : ""
                 }`}
               >
-                <p className="font-medium text-[#105C78]">{m.nama}</p>
-                <p className="text-sm font-normal text-[#105C78]/60">{m.uji}</p>
+                <p className="font-medium text-brand">{m.nama}</p>
+                <p className="text-sm font-normal text-brand/60">{m.uji}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section id="status" className="px-5 pb-16 sm:px-8 sm:pb-24">
-          <div className="mx-auto flex max-w-6xl flex-col gap-4 overflow-hidden rounded-[6px] bg-[#105C78] px-7 py-10 text-white sm:px-10 sm:py-12">
+          <div className="mx-auto flex max-w-6xl flex-col gap-4 overflow-hidden rounded-[6px] bg-brand px-7 py-10 text-white sm:px-10 sm:py-12">
             <h2 className="text-3xl font-medium tracking-[-0.01em]">
               Katalog & pembayaran aktif sekarang.
             </h2>
@@ -187,7 +151,7 @@ export default async function Home() {
       </main>
 
       <footer className={`border-t ${hairline} bg-white`}>
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-[#105C78]/60 sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-brand/60 sm:px-8">
           <LegalLinks />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p>© 2026 Rekan Tes. Platform simulasi independen.</p>

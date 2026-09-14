@@ -24,9 +24,14 @@ export async function listPublishedTests() {
       subtestCount: countDistinct(schema.testSubtests.id),
       questionCount: sql<number>`coalesce(sum(${schema.testSubtests.questionLimit}), 0)::int`,
       durationSeconds: sql<number>`coalesce(sum(${schema.testSubtests.durationSeconds}), 0)::int`,
+      // Nama subtes jadi label isi tiap kartu katalog. Diambil sekalian di sini
+      // supaya daftar tidak memicu satu query tambahan per kartu. `array_remove`
+      // membuang null milik tes yang belum punya subtes sama sekali.
+      subtestNames: sql<string[]>`array_remove(array_agg(${schema.subtests.name} order by ${schema.testSubtests.position}), null)`,
     })
     .from(schema.tests)
     .leftJoin(schema.testSubtests, eq(schema.testSubtests.testId, schema.tests.id))
+    .leftJoin(schema.subtests, eq(schema.subtests.id, schema.testSubtests.subtestId))
     .where(eq(schema.tests.status, "published"))
     .groupBy(schema.tests.id)
     .orderBy(asc(schema.tests.name));

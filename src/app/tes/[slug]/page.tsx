@@ -75,7 +75,7 @@ export default async function TesDetailPage({
         </p>
 
         <ol
-          className={`mt-6 divide-y ${hairline} rounded-[8px] border ${hairline} bg-white`}
+          className={`mt-6 divide-y ${hairline} rounded-2xl border ${hairline} bg-white`}
         >
           {tes.subtests.map((s) => (
             <li key={s.id} className="flex flex-wrap items-center gap-4 p-5">
@@ -98,7 +98,7 @@ export default async function TesDetailPage({
           ))}
         </ol>
 
-        <div className={`mt-10 rounded-[8px] border ${hairline} bg-cream p-7`}>
+        <div className={`mt-10 rounded-2xl border ${hairline} bg-cream p-7`}>
           <h2 className="text-lg font-medium text-brand">Beli sesi</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 font-normal text-brand/70">
             Satu pembelian memberi satu kali pengerjaan, dengan masa akses{" "}

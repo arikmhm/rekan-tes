@@ -464,6 +464,35 @@ function Hasil({
           <div className="mt-6 flex flex-col items-center">
             <Donat persen={akurasi} angka={benar} dari={soal.length} />
           </div>
+
+          <dl className={`mt-6 divide-y ${hairline} border-y ${hairline}`}>
+            {[
+              [CircleCheck, "Benar", benar, "text-brand"],
+              [CircleX, "Salah", salah, "text-brand-orange"],
+              [CircleDashed, "Kosong", kosong, "text-brand/40"],
+            ].map(([Ikon, label, nilai, warna]) => {
+              const Komponen = Ikon as typeof CircleCheck;
+
+              return (
+                <div
+                  key={label as string}
+                  className="flex items-center gap-3 py-3"
+                >
+                  <Komponen
+                    className={`size-5 shrink-0 ${warna as string}`}
+                    aria-hidden
+                  />
+                  <dt className="flex-1 text-sm font-normal text-brand/60">
+                    {label as string}
+                  </dt>
+                  <dd className="text-lg font-medium text-brand">
+                    {nilai as number}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+
           <p
             className={`mt-6 rounded-xl px-4 py-3 text-center text-xs leading-5 font-normal ${
               akurasi >= 70
@@ -519,10 +548,8 @@ function Hasil({
             ini setelah membaca pembahasan subtes tersebut.
           </p>
         </Kartu>
-      </div>
 
-      <div className="grid gap-4 lg:grid-cols-[19rem_1fr] lg:items-start">
-        <Kartu judul="Peta kecepatan soal" Ikon={Gauge}>
+        <Kartu judul="Peta kecepatan soal" Ikon={Gauge} kelas="lg:self-start">
           <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
             Klik nomor soal untuk membuka pembahasannya. Warna menunjukkan
             ketepatan, angka di bawahnya lama pengerjaan.
@@ -578,6 +605,7 @@ function Hasil({
           judul={`Pembahasan soal ${dilihat + 1}`}
           Ikon={ClipboardList}
           tanda={`${waktuSoal[dilihat]} detik · ideal ${idealPerSoal} detik`}
+          kelas="lg:col-span-2"
         >
           <p className="mt-4 text-xs font-medium text-brand/60">
             {s.subtes} ·{" "}
@@ -642,32 +670,6 @@ function Hasil({
         </Kartu>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {[
-          [CircleCheck, "Benar", benar, "text-brand"],
-          [CircleX, "Salah", salah, "text-brand-orange"],
-          [CircleDashed, "Kosong", kosong, "text-brand/40"],
-        ].map(([Ikon, label, nilai, warna]) => {
-          const Komponen = Ikon as typeof CircleCheck;
-          return (
-            <div
-              key={label as string}
-              className={`flex items-center gap-4 rounded-2xl border ${hairline} bg-white p-5`}
-            >
-              <Komponen className={`size-6 ${warna as string}`} aria-hidden />
-              <div>
-                <p className="text-xs font-normal text-brand/60">
-                  {label as string}
-                </p>
-                <p className="text-2xl font-medium text-brand">
-                  {nilai as number}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
       <div
         className={`flex flex-col gap-2.5 border-t ${hairline} pt-5 sm:flex-row`}
       >
@@ -700,15 +702,20 @@ function Kartu({
   judul,
   Ikon,
   tanda,
+  kelas = "",
   children,
 }: {
   judul: string;
   Ikon: typeof Award;
   tanda?: string;
+  /** Rentang kolom atau perataan tambahan saat kartu duduk di dalam grid. */
+  kelas?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className={`rounded-2xl border ${hairline} bg-white p-5 sm:p-6`}>
+    <div
+      className={`rounded-2xl border ${hairline} bg-white p-5 sm:p-6 ${kelas}`}
+    >
       <div
         className={`flex items-center justify-between gap-3 border-b ${hairline} pb-4`}
       >

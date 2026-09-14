@@ -1,4 +1,4 @@
-import { ArrowRight, BookMarked, CalendarClock } from "lucide-react";
+import { ArrowRight, BookMarked } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -6,7 +6,12 @@ import { requireUser } from "@/lib/authz";
 import { JENIS, type JenisProduk } from "@/lib/catalog";
 import { listOrdersForUser } from "@/lib/order";
 
-import { LABEL_ATTEMPT, selesai, tanggalSingkat } from "../_components/label";
+import {
+  hitungJenis,
+  SaringanJenis,
+  URUTAN_JENIS,
+} from "../_components/saringan-jenis";
+import { KartuPustaka, type MilikPeserta } from "./_components/kartu-pustaka";
 
 export const metadata: Metadata = { title: "Pustaka" };
 
@@ -15,8 +20,6 @@ export const metadata: Metadata = { title: "Pustaka" };
 export const dynamic = "force-dynamic";
 
 const hairline = "border-[#105C78]/20";
-
-const URUTAN_JENIS = Object.keys(JENIS) as JenisProduk[];
 
 /**
  * Produk yang sudah dibayar beserta jalan masuk untuk memakainya. Isinya
@@ -33,30 +36,36 @@ export default async function PustakaPage({
   // Semua isi pustaka hari ini lahir dari order simulasi — jenis lain belum
   // punya jalur pemenuhan sama sekali. Jenisnya tetap dilekatkan di sini supaya
   // penyaringnya tinggal membaca data, bukan dirombak saat jenis lain terbit.
-  const milik = (await listOrdersForUser(user.id))
+  const milik: MilikPeserta[] = (await listOrdersForUser(user.id))
     .filter((o) => o.status === "paid")
-    .map((o) => ({ ...o, jenis: "simulasi" as JenisProduk }));
+    .map((o) => ({
+      orderId: o.id,
+      jenis: "simulasi" as JenisProduk,
+      nama: o.testName,
+      attemptId: o.attemptId,
+      attemptStatus: o.attemptStatus,
+      attemptScore: o.attemptScore,
+      accessExpiresAt: o.accessExpiresAt,
+    }));
 
-  // Penyaring hidup di URL, sama seperti katalog: hasilnya bisa ditautkan dan
+  // Penyaring hidup di URL, sama seperti etalase: hasilnya bisa ditautkan dan
   // tetap jalan tanpa JavaScript.
   const dipilih = (await searchParams).jenis;
   const aktif = URUTAN_JENIS.find((j) => j === dipilih) ?? null;
   const tampil = aktif ? milik.filter((m) => m.jenis === aktif) : milik;
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-4 pt-5 sm:p-6 sm:pt-6">
-      <h1 className="text-2xl font-medium tracking-[-0.01em] text-brand">
-        {aktif ? JENIS[aktif].label : "Pustaka"}
-      </h1>
-      <p className="mt-1.5 text-sm leading-6 font-normal text-brand/60">
-        {aktif
-          ? JENIS[aktif].ringkas
-          : "Produk yang sudah kamu beli. Pakai kapan saja selama masa aksesnya masih berjalan."}
-      </p>
+    <div className="mx-auto w-full max-w-6xl p-4 pt-5 sm:p-6 sm:pt-6">
+      <SaringanJenis
+        dasar="/peserta/pustaka"
+        aktif={aktif}
+        jumlah={hitungJenis(milik)}
+        total={milik.length}
+      />
 
       {tampil.length === 0 ? (
         <div
-          className={`mt-7 rounded-2xl border border-dashed ${hairline} bg-white p-10 text-center`}
+          className={`mt-8 rounded-2xl border border-dashed ${hairline} bg-white p-10 text-center`}
         >
           <BookMarked className="mx-auto size-5 text-brand/30" aria-hidden />
           <h2 className="mt-3 text-lg font-medium text-brand">
@@ -77,80 +86,17 @@ export default async function PustakaPage({
           </Link>
         </div>
       ) : (
-        <ul className="mt-7 grid gap-4 lg:grid-cols-2">
-          {tampil.map((m) => {
-            const rampung = selesai(m.attemptStatus);
-
-            return (
-              <li
-                key={m.id}
-                className={`flex flex-col rounded-2xl border ${hairline} bg-white p-6`}
-              >
-                <span className="inline-flex w-fit rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-brand/70">
-                  {JENIS[m.jenis].label}
-                </span>
-                <p className="mt-3 text-lg leading-snug font-medium text-brand">
-                  {m.testName}
-                </p>
-
-                <dl className="mt-4 space-y-2 text-sm">
-                  <div className="flex items-center justify-between gap-4">
-                    <dt className="font-normal text-brand/60">Pengerjaan</dt>
-                    <dd className="font-medium text-brand">
-                      {LABEL_ATTEMPT[m.attemptStatus ?? "not_started"] ??
-                        m.attemptStatus}
-                    </dd>
-                  </div>
-                  {m.attemptScore != null && (
-                    <div className="flex items-center justify-between gap-4">
-                      <dt className="font-normal text-brand/60">Skor akhir</dt>
-                      <dd className="font-medium text-brand-orange">
-                        {m.attemptScore}
-                      </dd>
-                    </div>
-                  )}
-                  {m.accessExpiresAt && (
-                    <div className="flex items-center justify-between gap-4">
-                      <dt className="font-normal text-brand/60">Masa akses</dt>
-                      <dd className="flex items-center gap-1.5 font-medium text-brand">
-                        <CalendarClock
-                          className="size-4 text-brand/40"
-                          aria-hidden
-                        />
-                        sampai {tanggalSingkat.format(m.accessExpiresAt)}
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-
-                <div
-                  className={`mt-auto flex flex-wrap items-center justify-between gap-3 border-t ${hairline} pt-5`}
-                >
-                  <Link
-                    href={`/peserta/pesanan/${m.id}`}
-                    className="text-sm font-normal text-brand/60 transition-colors duration-300 ease-out hover:text-brand-orange"
-                  >
-                    Rincian pesanan
-                  </Link>
-
-                  {m.attemptId && (
-                    <Link
-                      href={
-                        rampung
-                          ? `/peserta/simulasi/${m.attemptId}/hasil`
-                          : `/peserta/simulasi/${m.attemptId}`
-                      }
-                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-4 text-sm font-normal text-white transition-colors duration-300 ease-out hover:bg-brand-orange"
-                    >
-                      {rampung ? "Lihat hasil" : "Kerjakan"}
-                      <ArrowRight className="size-4" aria-hidden />
-                    </Link>
-                  )}
-                </div>
+        // Lebar kartu mengikuti ruang yang tersisa di sebelah sidebar, bukan
+        // lebar jendela — sama seperti etalase.
+        <div className="@container mt-6">
+          <ul className="grid gap-5 @3xl:grid-cols-2">
+            {tampil.map((m) => (
+              <li key={m.orderId}>
+                <KartuPustaka milik={m} />
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

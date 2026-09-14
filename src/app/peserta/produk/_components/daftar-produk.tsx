@@ -1,11 +1,15 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Fragment } from "react";
 
-import { JENIS, listKatalog, type JenisProduk } from "@/lib/catalog";
+import { JENIS, listKatalog } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 
 import { KartuProduk } from "../../../_components/kartu-produk";
+import {
+  hitungJenis,
+  SaringanJenis,
+  URUTAN_JENIS,
+} from "../../_components/saringan-jenis";
 import { Korsel } from "./carousel";
 
 const hairline = "border-[#105C78]/20";
@@ -16,8 +20,6 @@ const hairline = "border-[#105C78]/20";
 const SOROTAN = 3;
 
 const slide = "w-full shrink-0 snap-start sm:w-[calc(50%-0.5rem)]";
-
-const URUTAN_JENIS = Object.keys(JENIS) as JenisProduk[];
 
 /**
  * Etalase produk: korsel sorotan, penyaring jenis, lalu daftarnya. Tinggal di
@@ -31,15 +33,6 @@ export async function DaftarProduk({ jenis }: { jenis?: string }) {
   // ditautkan dan tetap jalan tanpa JavaScript.
   const aktif = URUTAN_JENIS.find((j) => j === jenis) ?? null;
   const tampil = aktif ? produk.filter((p) => p.jenis === aktif) : produk;
-
-  const saringan = [
-    { kunci: null, label: "Semua", jumlah: produk.length },
-    ...URUTAN_JENIS.map((j) => ({
-      kunci: j,
-      label: JENIS[j].label,
-      jumlah: produk.filter((p) => p.jenis === j).length,
-    })),
-  ];
 
   return (
     <>
@@ -81,38 +74,12 @@ export async function DaftarProduk({ jenis }: { jenis?: string }) {
         </Korsel>
       )}
 
-      <div
-        className={`mt-8 flex flex-wrap items-center gap-2 border-b ${hairline} pb-5`}
-      >
-        {saringan.map(({ kunci, label, jumlah }) => {
-          const dipakai = kunci === aktif;
-
-          return (
-            <Fragment key={label}>
-              {/* Garis pemisah menandai batas antara "semua" dan penyaring
-                  jenis produk. */}
-              {kunci === URUTAN_JENIS[0] && (
-                <span className="mx-1 h-5 w-px bg-brand/20" aria-hidden />
-              )}
-
-              <Link
-                href={kunci ? `/peserta?jenis=${kunci}` : "/peserta"}
-                aria-current={dipakai ? "page" : undefined}
-                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-normal transition-colors ${
-                  dipakai
-                    ? "border-brand bg-brand text-white"
-                    : `${hairline} bg-white text-brand hover:border-brand-orange`
-                }`}
-              >
-                {label}
-                <span className={dipakai ? "text-white/60" : "text-brand/40"}>
-                  {jumlah}
-                </span>
-              </Link>
-            </Fragment>
-          );
-        })}
-      </div>
+      <SaringanJenis
+        dasar="/peserta"
+        aktif={aktif}
+        jumlah={hitungJenis(produk)}
+        total={produk.length}
+      />
 
       {tampil.length === 0 ? (
         <div

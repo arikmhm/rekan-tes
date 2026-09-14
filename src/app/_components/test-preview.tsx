@@ -21,7 +21,7 @@ import {
 
 const hairline = "border-[#105C78]/20";
 
-const DURASI = 300; // 5 menit untuk 5 soal, sama ritmenya dengan subtes asli.
+const DURASI = 600; // 10 menit untuk 10 soal, seritme subtes sungguhan.
 
 const soal = [
   {
@@ -86,6 +86,58 @@ const soal = [
     kunci: 1,
     pembahasan:
       "Keterangan waktu 'three months ago' menunjuk titik waktu lampau yang selesai, jadi yang dipakai simple past: launched. Present perfect tidak dipakai bersama keterangan waktu lampau yang spesifik.",
+  },
+  {
+    subtes: "Numerik",
+    singkat: "Numerik",
+    prompt:
+      "Sebuah cabang menyalurkan kredit Rp450 juta pada Januari dan Rp540 juta pada Februari. Berapa persen kenaikannya?",
+    opsi: ["16%", "18%", "20%", "24%"],
+    kunci: 2,
+    pembahasan:
+      "Kenaikannya 540 − 450 = 90 juta. Dibandingkan angka Januari: 90/450 = 0,2 alias 20%. Pembaginya selalu angka periode awal, bukan periode akhir.",
+  },
+  {
+    subtes: "Verbal",
+    singkat: "Verbal",
+    prompt: 'Kata yang paling berlawanan makna dengan "likuid" adalah?',
+    opsi: ["Lancar", "Beku", "Tunai", "Encer"],
+    kunci: 1,
+    pembahasan:
+      "Dalam konteks keuangan, likuid berarti mudah dicairkan. Lawannya beku: dana yang tidak bisa ditarik atau dipakai. Lancar dan tunai justru searti, encer hanya makna harfiahnya.",
+  },
+  {
+    subtes: "Logika & Figural",
+    singkat: "Logika",
+    prompt: "Lanjutan deret 3, 6, 11, 18, 27, ... adalah?",
+    opsi: ["34", "36", "38", "40"],
+    kunci: 2,
+    pembahasan:
+      "Selisih antarsuku naik sebagai bilangan ganjil: 3, 5, 7, 9. Selisih berikutnya 11, jadi 27 + 11 = 38.",
+  },
+  {
+    subtes: "Ketelitian",
+    singkat: "Ketelitian",
+    prompt: "Mana pasangan nama dan NIK yang penulisannya TIDAK sama persis?",
+    opsi: [
+      "RAHMAWATI DEWI · 3174026109910004",
+      "BAGUS PRASETYO · 3275011204880012",
+      "SITI NURHALIZA · 3671054503950007",
+      "ANDI SAPUTRA · 7371060810920031",
+    ],
+    kunci: 1,
+    pembahasan:
+      "Pada pilihan B nama tertulis BAGUS PRASETYO sementara pasangan datanya BAGUS PRASTEYO — huruf T dan E tertukar. Sisanya sama persis.",
+  },
+  {
+    subtes: "Bahasa Inggris",
+    singkat: "Inggris",
+    prompt:
+      "Please make sure the report is submitted ____ Friday, otherwise the audit team cannot review it.",
+    opsi: ["until", "since", "by", "during"],
+    kunci: 2,
+    pembahasan:
+      "'By' menandai batas waktu paling lambat sebuah pekerjaan selesai. 'Until' dipakai untuk keadaan yang berlangsung sampai satu titik, bukan tenggat penyerahan.",
   },
 ];
 
@@ -225,13 +277,36 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
         statis ? "w-full" : "mx-auto w-full max-w-6xl"
       }`}
     >
+      <div
+        className={`mb-4 flex items-center justify-between gap-4 rounded-xl border ${hairline} bg-white px-4 py-3 sm:px-5`}
+      >
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-brand">
+            Simulasi percobaan · Tes masuk bank
+          </p>
+          <p className="mt-0.5 truncate text-xs font-normal text-brand/60">
+            Mode coba-coba. Jawaban tidak disimpan.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span
+            role="timer"
+            aria-live="off"
+            className="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-2 font-mono text-sm font-medium tabular-nums text-white"
+          >
+            <Clock className="size-4" aria-hidden />
+            {menitDetik(sisa)}
+          </span>
+          {onTutup && <TombolTutup onTutup={onTutup} />}
+        </div>
+      </div>
+
       {selesai ? (
         <Hasil
           jawaban={jawaban}
           benar={benar}
           kosong={kosong}
           onUlangi={ulangi}
-          onTutup={onTutup}
         />
       ) : (
         <div className="flex flex-1 flex-col gap-4 lg:flex-row lg:items-start">
@@ -239,7 +314,7 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
             className={`flex-1 rounded-xl border ${hairline} bg-white p-5 sm:p-7`}
           >
             <p className="text-xs font-medium text-brand/60">
-              Soal {nomor + 1} dari {soal.length}
+              Soal {nomor + 1} dari {soal.length} · {s.subtes}
             </p>
             <p className="mt-3 text-base leading-7 font-normal text-brand sm:text-lg sm:leading-8">
               {s.prompt}
@@ -304,11 +379,8 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
           <Navigasi
             jawaban={jawaban}
             nomor={nomor}
-            subtes={s.subtes}
-            sisa={sisa}
             onPilihSoal={setNomor}
             onKirim={() => setDikirim(true)}
-            onTutup={onTutup}
           />
         </div>
       )}
@@ -325,61 +397,22 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
 function Navigasi({
   jawaban,
   nomor,
-  subtes,
-  sisa,
   onPilihSoal,
   onKirim,
-  onTutup,
 }: {
   jawaban: (number | null)[];
   nomor: number;
-  subtes: string;
-  sisa: number;
   onPilihSoal: (i: number) => void;
   onKirim: () => void;
-  onTutup?: () => void;
 }) {
   const terjawab = jawaban.filter((j) => j !== null).length;
 
   return (
     <aside
-      aria-label="Keterangan dan navigasi soal"
+      aria-label="Navigasi soal"
       className={`shrink-0 rounded-xl border ${hairline} bg-white p-5 lg:sticky lg:top-8 lg:w-72`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-brand">
-            Simulasi percobaan
-          </p>
-          <p className="mt-0.5 truncate text-xs font-normal text-brand/60">
-            Subtes {subtes}
-          </p>
-        </div>
-        {onTutup && <TombolTutup onTutup={onTutup} />}
-      </div>
-
-      <div className="mt-4 flex items-center gap-2 rounded-lg bg-brand px-3 py-2.5 text-white">
-        <Clock className="size-4 shrink-0" aria-hidden />
-        <span
-          role="timer"
-          aria-live="off"
-          className="font-mono text-lg font-medium tabular-nums"
-        >
-          {menitDetik(sisa)}
-        </span>
-        <span className="ml-auto text-xs font-normal text-white/70">
-          sisa waktu
-        </span>
-      </div>
-      <p className="mt-2 text-xs leading-5 font-normal text-brand/60">
-        Mode coba-coba. Jawaban tidak disimpan.
-      </p>
-
-      <p
-        className={`mt-4 border-t ${hairline} pt-4 text-xs font-medium text-brand/60`}
-      >
-        Navigasi soal
-      </p>
+      <p className="text-xs font-medium text-brand/60">Navigasi soal</p>
 
       <div className="mt-3 grid grid-cols-5 gap-2">
         {jawaban.map((j, i) => {
@@ -457,69 +490,63 @@ function Hasil({
   benar,
   kosong,
   onUlangi,
-  onTutup,
 }: {
   jawaban: (number | null)[];
   benar: number;
   kosong: number;
   onUlangi: () => void;
-  onTutup?: () => void;
 }) {
   return (
-    <div className="space-y-4 pb-4">
-      <div className="grid gap-4 lg:grid-cols-[1fr_22rem] lg:items-start">
-        <div className={`rounded-xl border ${hairline} bg-white p-5 sm:p-7`}>
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm font-medium text-brand">Hasil percobaan</p>
-            {onTutup && <TombolTutup onTutup={onTutup} />}
-          </div>
-          <p className="mt-1 text-4xl font-medium tracking-[-0.01em] text-brand">
-            {benar}
-            <span className="text-xl text-brand/50"> / {soal.length}</span>
-          </p>
-          <dl className="mt-5 grid grid-cols-3 gap-2.5">
-            {[
-              ["Benar", benar],
-              ["Salah", soal.length - benar - kosong],
-              ["Kosong", kosong],
-            ].map(([label, nilai]) => (
-              <div key={label} className="rounded-lg bg-cream p-3 text-center">
-                <dt className="text-xs font-normal text-brand/60">{label}</dt>
-                <dd className="mt-0.5 text-lg font-medium text-brand">
-                  {nilai}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
-            Ini contoh tampilan hasil. Pada simulasi sungguhan skor dihitung per
-            subtes dengan bobot soal, dan riwayatnya tersimpan di akunmu.
-          </p>
-          <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
-            <Link
-              href="/tes"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
-            >
-              Lihat katalog simulasi
-              <ArrowRight className="size-4" aria-hidden />
-            </Link>
-            <button
-              type="button"
-              onClick={onUlangi}
-              className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg border ${hairline} px-5 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
-            >
-              <RotateCcw className="size-4" aria-hidden />
-              Ulangi
-            </button>
-          </div>
-        </div>
+    <div className="max-w-4xl space-y-4 pb-4">
+      <div className={`rounded-xl border ${hairline} bg-white p-5 sm:p-7`}>
+        <p className="text-sm font-medium text-brand">Hasil percobaan</p>
 
         <SebaranSubtes jawaban={jawaban} />
+
+        <p
+          className={`mt-6 border-t ${hairline} pt-6 text-4xl font-medium tracking-[-0.01em] text-brand`}
+        >
+          {benar}
+          <span className="text-xl text-brand/50"> / {soal.length}</span>
+        </p>
+        <dl className="mt-5 grid grid-cols-3 gap-2.5">
+          {[
+            ["Benar", benar],
+            ["Salah", soal.length - benar - kosong],
+            ["Kosong", kosong],
+          ].map(([label, nilai]) => (
+            <div key={label} className="rounded-lg bg-cream p-3 text-center">
+              <dt className="text-xs font-normal text-brand/60">{label}</dt>
+              <dd className="mt-0.5 text-lg font-medium text-brand">{nilai}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
+          Ini contoh tampilan hasil. Pada simulasi sungguhan skor dihitung per
+          subtes dengan bobot soal, dan riwayatnya tersimpan di akunmu.
+        </p>
+        <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
+          <Link
+            href="/tes"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
+          >
+            Lihat katalog simulasi
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
+          <button
+            type="button"
+            onClick={onUlangi}
+            className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg border ${hairline} px-5 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
+          >
+            <RotateCcw className="size-4" aria-hidden />
+            Ulangi
+          </button>
+        </div>
       </div>
 
-      {/* Pembahasannya sengaja lebih sempit dari area tes: baris teks selebar
-          6xl terlalu panjang untuk dibaca. */}
-      <div className="max-w-4xl space-y-4">
+      {/* Hasil dan pembahasan sengaja lebih sempit dari area tes: baris teks
+          selebar 6xl terlalu panjang untuk dibaca. */}
+      <div className="space-y-4">
         <p className="px-1 pt-2 text-sm font-medium text-brand">Pembahasan</p>
 
         {soal.map((s, i) => {
@@ -598,26 +625,30 @@ const konfigSebaran = {
 } satisfies ChartConfig;
 
 /**
- * Sebaran benar-salah per subtes. Di simulasi berbayar tiap subtes berisi
- * puluhan soal; di percobaan ini satu subtes diwakili satu soal, jadi bentuknya
- * runcing — gunanya memperlihatkan bagian mana yang perlu dikejar, bukan
- * mengukur kemampuan.
+ * Sebaran nilai per subtes: persentase soal yang benar di tiap subtes. Grafiknya
+ * jadi bagian atas kartu hasil karena keduanya menjawab pertanyaan yang sama —
+ * bagian mana yang sudah aman, bagian mana yang perlu dikejar.
  */
 function SebaranSubtes({ jawaban }: { jawaban: (number | null)[] }) {
-  const data = soal.map((s, i) => ({
-    subtes: s.singkat,
-    nilai: jawaban[i] === s.kunci ? 100 : 0,
+  const perSubtes = new Map<string, { benar: number; total: number }>();
+
+  soal.forEach((s, i) => {
+    const catatan = perSubtes.get(s.singkat) ?? { benar: 0, total: 0 };
+    catatan.total += 1;
+    if (jawaban[i] === s.kunci) catatan.benar += 1;
+    perSubtes.set(s.singkat, catatan);
+  });
+
+  const data = [...perSubtes].map(([subtes, { benar, total }]) => ({
+    subtes,
+    nilai: Math.round((benar / total) * 100),
   }));
 
   return (
-    <div className={`rounded-xl border ${hairline} bg-white p-5 sm:p-6`}>
-      <p className="text-sm font-medium text-brand">Sebaran per subtes</p>
-      <p className="mt-1 text-xs leading-5 font-normal text-brand/60">
-        Satu soal mewakili satu subtes di mode percobaan.
-      </p>
+    <>
       <ChartContainer
         config={konfigSebaran}
-        className="mx-auto mt-2 aspect-square w-full max-w-64"
+        className="mx-auto mt-4 aspect-square w-full max-w-72"
       >
         <RadarChart data={data} outerRadius="68%">
           <ChartTooltip
@@ -642,7 +673,10 @@ function SebaranSubtes({ jawaban }: { jawaban: (number | null)[] }) {
           />
         </RadarChart>
       </ChartContainer>
-    </div>
+      <p className="text-center text-xs font-normal text-brand/60">
+        Persentase jawaban benar di tiap subtes.
+      </p>
+    </>
   );
 }
 

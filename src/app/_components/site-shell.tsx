@@ -1,4 +1,3 @@
-import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { emailAddress } from "@/lib/email";
@@ -57,14 +56,6 @@ export const tautanNav =
   "relative py-1 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-brand-orange after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100";
 
 /**
- * Sorotan tautan "Coba gratis": garis oranye yang menyapu dari kiri ke kanan
- * sementara tanda panahnya ikut bergeser, jadi sorotannya terbaca sebagai satu
- * gerakan yang searah dengan arah tautannya.
- */
-const tautanCoba =
-  "group relative inline-flex shrink-0 items-center gap-1 py-1 whitespace-nowrap text-brand-orange after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-brand-orange after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100";
-
-/**
  * Header publik, satu untuk semua halaman termasuk landing page. Di layar lebar
  * seluruh tautan tampil berjajar; di ponsel tempatnya tidak cukup, jadi isinya
  * pindah ke panel hamburger.
@@ -90,12 +81,8 @@ export function SiteHeader() {
           <Link className={tautanNav} href="/tes">
             Katalog
           </Link>
-          <Link className={tautanCoba} href="/simulasi">
-            Coba gratis
-            <ChevronRight
-              className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1"
-              aria-hidden
-            />
+          <Link className={tautanNav} href="/simulasi">
+            Simulasi gratis
           </Link>
           <span className="h-4 w-px bg-brand/20" aria-hidden />
           <AccountNav />

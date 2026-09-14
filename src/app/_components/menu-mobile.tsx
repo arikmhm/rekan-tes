@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -65,15 +64,8 @@ export function MenuMobile() {
           <Link className="py-2" href="/tes">
             Katalog
           </Link>
-          <Link
-            className="group inline-flex w-fit items-center gap-1 py-2 text-brand-orange"
-            href="/simulasi"
-          >
-            Coba gratis
-            <ChevronRight
-              className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1"
-              aria-hidden
-            />
+          <Link className="py-2" href="/simulasi">
+            Simulasi gratis
           </Link>
           <div className="mt-2 flex flex-wrap items-center gap-4 border-t border-[#105C78]/20 pt-4">
             <AccountNav />

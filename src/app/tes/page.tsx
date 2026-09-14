@@ -115,7 +115,7 @@ export default async function KatalogPage({
             <ul className="mt-6 grid gap-5 lg:grid-cols-2">
               {tampil.map((p) => (
                 <li key={p.slug} className="only:lg:col-span-2">
-                  <KartuProduk produk={p} />
+                  <KartuProduk produk={p} href={`/tes/${p.slug}`} />
                 </li>
               ))}
             </ul>

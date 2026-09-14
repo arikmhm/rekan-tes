@@ -1,9 +1,10 @@
 import { ArrowRight, TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
 
 import { requireUser } from "@/lib/authz";
-import { JENIS, listKatalog } from "@/lib/catalog";
+import { JENIS, listKatalog, type JenisProduk } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 
 import { KartuProduk } from "../_components/kartu-produk";
@@ -23,9 +24,30 @@ const SOROTAN = 2;
 
 const slide = "w-full shrink-0 snap-start sm:w-[calc(50%-0.5rem)]";
 
-export default async function PesertaPage() {
+const URUTAN_JENIS = Object.keys(JENIS) as JenisProduk[];
+
+export default async function PesertaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ jenis?: string }>;
+}) {
   const user = await requireUser();
   const produk = await listKatalog();
+
+  // Penyaring hidup di URL, sama seperti katalog publik: hasilnya bisa
+  // ditautkan dan tetap jalan tanpa JavaScript.
+  const dipilih = (await searchParams).jenis;
+  const aktif = URUTAN_JENIS.find((j) => j === dipilih) ?? null;
+  const tampil = aktif ? produk.filter((p) => p.jenis === aktif) : produk;
+
+  const saringan = [
+    { kunci: null, label: "Semua", jumlah: produk.length },
+    ...URUTAN_JENIS.map((j) => ({
+      kunci: j,
+      label: JENIS[j].label,
+      jumlah: produk.filter((p) => p.jenis === j).length,
+    })),
+  ];
 
   return (
     <div className="mx-auto w-full max-w-6xl p-4 pt-5 sm:p-6 sm:pt-6">
@@ -94,7 +116,7 @@ export default async function PesertaPage() {
                   {formatPrice(p.harga)}
                 </p>
                 <Link
-                  href={`/tes/${p.slug}`}
+                  href={`/peserta/produk/${p.slug}`}
                   className="group flex items-center gap-2 text-sm font-normal text-brand transition-colors duration-300 ease-out hover:text-brand-orange"
                 >
                   Lihat detail
@@ -109,30 +131,66 @@ export default async function PesertaPage() {
         ))}
       </Korsel>
 
-      {produk.length === 0 ? (
+      <div
+        className={`mt-8 flex flex-wrap items-center gap-2 border-b ${hairline} pb-5`}
+      >
+        {saringan.map(({ kunci, label, jumlah }) => {
+          const dipakai = kunci === aktif;
+
+          return (
+            <Fragment key={label}>
+              {/* Garis pemisah menandai batas antara "semua" dan penyaring
+                  jenis produk. */}
+              {kunci === URUTAN_JENIS[0] && (
+                <span className="mx-1 h-5 w-px bg-brand/20" aria-hidden />
+              )}
+
+              <Link
+                href={kunci ? `/peserta?jenis=${kunci}` : "/peserta"}
+                aria-current={dipakai ? "page" : undefined}
+                className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-normal transition-colors ${
+                  dipakai
+                    ? "border-brand bg-brand text-white"
+                    : `${hairline} bg-white text-brand hover:border-brand-orange`
+                }`}
+              >
+                {label}
+                <span className={dipakai ? "text-white/60" : "text-brand/40"}>
+                  {jumlah}
+                </span>
+              </Link>
+            </Fragment>
+          );
+        })}
+      </div>
+
+      {tampil.length === 0 ? (
         <div
           className={`mt-8 rounded-2xl border border-dashed ${hairline} bg-white p-10 text-center`}
         >
           <h2 className="text-lg font-medium text-brand">
-            Belum ada produk yang terbit.
+            {aktif
+              ? `Belum ada produk ${JENIS[aktif].label.toLowerCase()}.`
+              : "Belum ada produk yang terbit."}
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 font-normal text-brand/60">
-            Produk pertama sedang disusun. Sementara menunggu, simulasi gratis
-            sudah bisa dikerjakan.
+            {aktif
+              ? JENIS[aktif].ringkas
+              : "Produk pertama sedang disusun. Sementara menunggu, simulasi gratis sudah bisa dikerjakan."}
           </p>
           <Link
-            href="/simulasi"
+            href={aktif ? "/peserta" : "/simulasi"}
             className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
           >
-            Coba simulasi gratis
+            {aktif ? "Lihat semua produk" : "Coba simulasi gratis"}
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>
       ) : (
-        <ul className="mt-8 grid gap-5 xl:grid-cols-2">
-          {produk.map((p) => (
+        <ul className="mt-6 grid gap-5 xl:grid-cols-2">
+          {tampil.map((p) => (
             <li key={p.slug} className="only:xl:col-span-2">
-              <KartuProduk produk={p} />
+              <KartuProduk produk={p} href={`/peserta/produk/${p.slug}`} />
             </li>
           ))}
         </ul>

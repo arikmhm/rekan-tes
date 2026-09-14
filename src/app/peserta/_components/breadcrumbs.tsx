@@ -17,6 +17,7 @@ const label: Record<string, string> = {
   pesanan: "Pesanan",
   pustaka: "Pustaka",
   profil: "Profil",
+  produk: "Produk",
   simulasi: "Simulasi",
   hasil: "Hasil",
 };
@@ -65,6 +66,12 @@ export function PesertaBreadcrumbs() {
       teks: label[segmen[0]],
     };
     remah.unshift(induk);
+  }
+
+  // Daftar produk tinggal di /peserta, bukan di /peserta/produk — remah
+  // pertamanya karena itu menunjuk ke halaman depan ruang peserta.
+  if (segmen[0] === "produk") {
+    remah[0] = { href: "/peserta", teks: "Produk" };
   }
 
   if (segmen[0] === "pustaka" && jenis && labelJenis[jenis]) {

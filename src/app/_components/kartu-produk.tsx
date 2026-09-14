@@ -27,10 +27,18 @@ const IKON: Record<FaktaProduk["ikon"], typeof Layers> = {
  * Satu kartu katalog. Dipakai katalog publik maupun daftar produk di ruang
  * peserta — keduanya menampilkan produk yang sama, jadi tampilannya pun satu.
  */
-export function KartuProduk({ produk }: { produk: ProdukKatalog }) {
+export function KartuProduk({
+  produk,
+  href,
+}: {
+  produk: ProdukKatalog;
+  /** Tujuan kartu: katalog publik dan ruang peserta punya halaman detailnya
+      masing-masing, isi kartunya sama. */
+  href: string;
+}) {
   return (
     <Link
-      href={`/tes/${produk.slug}`}
+      href={href}
       className={`group flex h-full flex-col rounded-2xl border ${hairline} bg-white p-6 transition-colors hover:border-brand-orange sm:p-7`}
     >
       <div className="flex items-start justify-between gap-4">

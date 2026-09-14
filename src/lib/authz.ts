@@ -67,13 +67,16 @@ export async function requireAdminMutation() {
 
 /**
  * User yang sudah memverifikasi email. Dipakai pada jalur pembelian (RT-009):
- * PRD mewajibkan verifikasi sebelum membeli, bukan sebelum login.
+ * PRD mewajibkan verifikasi sebelum membeli, bukan sebelum login. Yang belum
+ * terverifikasi diarahkan ke profilnya sendiri — di sana tombol kirim ulang
+ * tautannya sudah ada, dan ia tidak terlempar keluar dari ruang peserta di
+ * tengah pembelian.
  */
 export async function requireVerifiedUser() {
   const user = await requireUser();
 
   if (!user.emailVerified) {
-    redirect("/verifikasi-dibutuhkan");
+    redirect("/peserta/profil");
   }
 
   return user;

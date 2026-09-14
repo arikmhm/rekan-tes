@@ -175,7 +175,7 @@ export default async function PesananDetailPage({
           Kode QRIS untuk pesanan ini sudah kedaluwarsa.{" "}
           <Link
             className="font-medium text-brand hover:text-brand-orange"
-            href={`/tes/${order.testSlug}`}
+            href={`/peserta/produk/${order.testSlug}`}
           >
             Mulai pembayaran baru
           </Link>
@@ -218,7 +218,7 @@ export default async function PesananDetailPage({
         notifikasi resmi DOKU.{" "}
         <Link
           className="font-medium text-brand hover:text-brand-orange"
-          href={`/tes/${order.testSlug}`}
+          href={`/peserta/produk/${order.testSlug}`}
         >
           Lihat detail produk
         </Link>

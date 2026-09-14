@@ -175,10 +175,9 @@ export default async function Home() {
 
       <footer className={`border-t ${hairline} bg-white`}>
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-brand/60 sm:px-8">
-          <LegalLinks />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
-            <p>Fokus kami sekarang: simulasi tes masuk kerja di bank.</p>
+            <LegalLinks />
           </div>
         </div>
       </footer>

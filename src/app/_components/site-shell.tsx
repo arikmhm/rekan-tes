@@ -38,9 +38,17 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Header publik, satu untuk semua halaman termasuk landing page. Isinya sengaja
- * pendek — simulasi gratis, katalog, dan akun — supaya muat utuh di ponsel
- * maupun layar lebar tanpa menu tersembunyi.
+ * Sorotan tautan navigasi: garis tipis yang tumbuh dari tengah ke samping.
+ * Warnanya sengaja tidak berubah saat disorot — hanya garisnya yang muncul,
+ * jadi teksnya tidak berkedip warna setiap kali kursor lewat.
+ */
+export const tautanNav =
+  "relative py-1 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-brand-orange after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100";
+
+/**
+ * Header publik, satu untuk semua halaman termasuk landing page. Isinya pendek
+ * supaya muat utuh tanpa menu tersembunyi: beranda, katalog, simulasi gratis,
+ * lalu akun.
  */
 export function SiteHeader() {
   return (
@@ -51,16 +59,24 @@ export function SiteHeader() {
       >
         <Link
           href="/"
-          className="text-lg font-semibold tracking-tight text-brand transition-opacity hover:opacity-70"
+          className="shrink-0 text-lg font-semibold tracking-tight whitespace-nowrap text-brand transition-opacity hover:opacity-70"
         >
           Rekan Tes
         </Link>
         <div className="flex items-center gap-3 text-sm font-normal text-brand sm:gap-5">
-          <Link className="transition hover:text-brand-orange" href="/simulasi">
-            Coba gratis
+          {/* Beranda dilepas di ponsel: nama situs di kiri sudah menuju ke sana,
+              dan tempatnya dibutuhkan tautan yang tidak punya pengganti. */}
+          <Link className={`hidden sm:inline ${tautanNav}`} href="/">
+            Beranda
           </Link>
-          <Link className="transition hover:text-brand-orange" href="/tes">
+          <Link className={tautanNav} href="/tes">
             Katalog
+          </Link>
+          <Link
+            className="shrink-0 rounded-full border border-brand-orange/40 px-2.5 py-1.5 whitespace-nowrap text-brand-orange transition-colors hover:bg-brand-orange/10 sm:px-3"
+            href="/simulasi"
+          >
+            Coba gratis
           </Link>
           <span className="h-4 w-px bg-brand/20" aria-hidden />
           <AccountNav />

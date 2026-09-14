@@ -9,6 +9,21 @@ import { TestPreview } from "./_components/test-preview";
 import { LegalLinks } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
+const langkah = [
+  {
+    judul: "Pilih simulasi",
+    isi: "Katalog berisi simulasi tes masuk bank beserta rincian subtes, jumlah soal, dan durasinya.",
+  },
+  {
+    judul: "Bayar sekali lewat QRIS",
+    isi: "Sekali bayar untuk satu simulasi. Akses pengerjaan aktif begitu pembayaran terkonfirmasi.",
+  },
+  {
+    judul: "Kerjakan, lalu baca pembahasan",
+    isi: "Waktu berjalan per subtes seperti tes sungguhan. Selesai mengerjakan, skor dan kunci tiap soal langsung terbuka.",
+  },
+];
+
 const hairline = "border-[#105C78]/20";
 
 export default async function Home() {
@@ -109,15 +124,50 @@ export default async function Home() {
           <TestPreview />
         </section>
 
-        <section id="status" className="px-5 pb-16 sm:px-8 sm:pb-24">
-          <div className="mx-auto flex max-w-6xl flex-col gap-4 overflow-hidden rounded-[6px] bg-brand px-7 py-10 text-white sm:px-10 sm:py-12">
-            <h2 className="text-3xl font-medium tracking-[-0.01em]">
-              Katalog & pembayaran aktif sekarang.
+        {/* Penutup halaman: alurnya dulu, baru ajakan. Pengunjung yang sudah
+            mencoba simulasi di atas tinggal perlu tahu langkah setelahnya. */}
+        <section id="cara-kerja" className="px-5 pb-16 sm:px-8 sm:pb-24">
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-[6px] bg-brand px-7 py-10 text-white sm:px-10 sm:py-14">
+            <h2 className="max-w-xl text-3xl font-medium tracking-[-0.01em] sm:text-4xl">
+              Bayar sekali per simulasi, kerjakan saat kamu siap.
             </h2>
-            <p className="max-w-2xl text-sm leading-6 font-normal text-white/80">
-              Daftar, pilih simulasi, dan bayar QRIS: semua sudah bisa. Halaman
-              pengerjaan soal masih kami siapkan.
+            <p className="mt-4 max-w-2xl text-sm leading-6 font-normal text-white/80">
+              Tanpa langganan dan tanpa paket tahunan. Tiga langkah dari memilih
+              simulasi sampai membaca pembahasan tiap soal.
             </p>
+
+            <ol className="mt-10 grid gap-px overflow-hidden rounded-[6px] bg-white/15 sm:grid-cols-3">
+              {langkah.map((l, i) => (
+                <li key={l.judul} className="bg-brand p-6 sm:p-7">
+                  <span className="font-mono text-xs font-medium text-brand-orange">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <p className="mt-3 font-medium">{l.judul}</p>
+                  <p className="mt-2 text-sm leading-6 font-normal text-white/70">
+                    {l.isi}
+                  </p>
+                </li>
+              ))}
+            </ol>
+
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+              <Link
+                className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm font-normal text-brand transition-colors hover:bg-brand-orange hover:text-white"
+                href="/tes"
+              >
+                Lihat katalog simulasi
+                <ArrowRight
+                  className="size-4 transition-transform group-hover:translate-x-1"
+                  aria-hidden
+                />
+              </Link>
+              <Link
+                className="flex h-12 items-center justify-center rounded-lg border border-white/30 px-6 text-sm font-normal text-white transition-colors hover:bg-white hover:text-brand"
+                href="/daftar"
+              >
+                Buat akun gratis
+              </Link>
+            </div>
           </div>
         </section>
       </main>

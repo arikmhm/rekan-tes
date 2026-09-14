@@ -1,6 +1,5 @@
 import {
   ArrowLeft,
-  ArrowRight,
   ClipboardList,
   Clock,
   FileText,
@@ -12,6 +11,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SiteShell } from "../../_components/site-shell";
+import { TombolMulai } from "../../_components/tombol-mulai";
 import { getPaket, isiPerSubtes, paketSimulasi } from "../data";
 
 // Paketnya statis dan sedikit, jadi seluruh rutenya bisa disiapkan saat build:
@@ -170,16 +170,11 @@ export default async function SimulasiDetailPage({
               ))}
             </dl>
 
-            <Link
+            <TombolMulai
               href={`/simulasi/${paket.slug}/mulai`}
-              className="group mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand px-6 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
-            >
-              Mulai sekarang
-              <ArrowRight
-                className="size-4 transition-transform group-hover:translate-x-1"
-                aria-hidden
-              />
-            </Link>
+              jumlahSoal={paket.soal.length}
+              menit={menit}
+            />
             <p className="mt-3 text-center text-xs leading-5 font-normal text-brand/50">
               Waktu mulai berjalan begitu halaman pengerjaan terbuka.
             </p>

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { PhoneChat } from "./_components/phone-chat";
-import { TestPreview } from "./_components/test-preview";
 import { LegalLinks, SiteHeader } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
@@ -89,11 +88,31 @@ export default async function Home() {
             </div>
           </div>
         </section>
-        <section
-          id="coba"
-          className="mx-auto py-16 px-5 sm:px-8 sm:py-24 bg-gray-50"
-        >
-          <TestPreview />
+        {/* Simulasi percobaannya sendiri tinggal di /simulasi. Menanamkannya di
+            sini berarti setiap pengunjung beranda ikut mengunduh mesin kuisnya,
+            padahal cuma sebagian yang benar-benar mencoba. */}
+        <section id="coba" className="bg-gray-50 px-5 py-16 sm:px-8 sm:py-24">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="max-w-lg text-3xl leading-[1.25] font-medium tracking-[-0.01em] text-brand sm:text-4xl">
+                Coba simulasinya sekarang — tanpa daftar.
+              </h2>
+              <p className="mt-4 max-w-xl text-base leading-7 font-normal text-brand/70">
+                Kerjakan paket contoh sampai selesai, lalu lihat skor, peta
+                kecepatan tiap soal, dan pembahasan jawabannya.
+              </p>
+            </div>
+            <Link
+              className="group flex h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
+              href="/simulasi"
+            >
+              Mulai simulasi gratis
+              <ArrowRight
+                className="size-4 transition-transform group-hover:translate-x-1"
+                aria-hidden
+              />
+            </Link>
+          </div>
         </section>
 
         {/* Penutup halaman: alurnya dulu, baru ajakan. Pengunjung yang sudah

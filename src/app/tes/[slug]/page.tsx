@@ -205,7 +205,7 @@ export default async function TesDetailPage({
             </p>
 
             <Link
-              href="/#coba"
+              href="/simulasi"
               className={`group mt-5 flex items-center justify-between gap-2 border-t ${hairline} pt-5 text-sm font-normal text-brand transition-colors hover:text-brand-orange`}
             >
               Coba 10 soal gratis dulu

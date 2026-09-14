@@ -56,7 +56,7 @@ export default async function KatalogPage() {
               percobaan di beranda sudah bisa dikerjakan.
             </p>
             <Link
-              href="/#coba"
+              href="/simulasi"
               className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
             >
               Coba 10 soal gratis
@@ -166,7 +166,7 @@ export default async function KatalogPage() {
               </p>
             </div>
             <Link
-              href="/#coba"
+              href="/simulasi"
               className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
             >
               Coba simulasi gratis

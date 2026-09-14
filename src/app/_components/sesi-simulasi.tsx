@@ -9,7 +9,6 @@ import {
   CircleX,
   ClipboardList,
   Clock,
-  Expand,
   Gauge,
   RotateCcw,
   TrendingUp,
@@ -26,226 +25,22 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 
+import type { Paket, Soal } from "../simulasi/data";
+
 const hairline = "border-[#105C78]/20";
-
-const DURASI = 600; // 10 menit untuk 10 soal, seritme subtes sungguhan.
-
-const soal = [
-  {
-    subtes: "Numerik",
-    singkat: "Numerik",
-    prompt:
-      "Sebuah nasabah menabung Rp8.000.000 dengan bunga tunggal 6% per tahun. Berapa saldonya setelah 9 bulan?",
-    opsi: ["Rp8.240.000", "Rp8.360.000", "Rp8.480.000", "Rp8.720.000"],
-    kunci: 1,
-    pembahasan:
-      "Bunga setahun 6% × 8.000.000 = 480.000. Untuk 9 bulan: 9/12 × 480.000 = 360.000. Saldo = 8.000.000 + 360.000 = Rp8.360.000.",
-  },
-  {
-    subtes: "Verbal",
-    singkat: "Verbal",
-    prompt: "SANKSI : PELANGGARAN = ... : ...",
-    opsi: [
-      "Hadiah : Prestasi",
-      "Denda : Pajak",
-      "Nilai : Ujian",
-      "Obat : Dokter",
-    ],
-    kunci: 0,
-    pembahasan:
-      "Sanksi adalah konsekuensi yang diberikan atas pelanggaran. Pola yang sama ada pada hadiah sebagai konsekuensi atas prestasi. Pilihan lain bukan hubungan konsekuensi.",
-  },
-  {
-    subtes: "Logika & Figural",
-    singkat: "Logika",
-    prompt:
-      "Semua teller wajib mengikuti pelatihan APU-PPT. Sebagian peserta pelatihan APU-PPT berasal dari kantor pusat. Kesimpulan yang pasti benar:",
-    opsi: [
-      "Semua teller berasal dari kantor pusat.",
-      "Sebagian teller berasal dari kantor pusat.",
-      "Semua teller mengikuti pelatihan APU-PPT.",
-      "Tidak ada teller di kantor pusat.",
-    ],
-    kunci: 2,
-    pembahasan:
-      "Hanya premis pertama yang bisa disimpulkan ulang secara pasti. Kata 'sebagian' pada premis kedua tidak memberi kepastian apa pun tentang asal kantor para teller.",
-  },
-  {
-    subtes: "Ketelitian",
-    singkat: "Ketelitian",
-    prompt: "Pasangan nomor rekening berikut mana yang TIDAK identik?",
-    opsi: [
-      "8820-4471-9036  |  8820-4471-9036",
-      "1907-3358-2214  |  1907-3358-2214",
-      "5043-6619-7782  |  5043-6691-7782",
-      "3376-9028-4415  |  3376-9028-4415",
-    ],
-    kunci: 2,
-    pembahasan:
-      "Pada pilihan C blok tengah berbeda: 6619 pada kolom kiri menjadi 6691 pada kolom kanan. Pasangan lainnya sama persis digit per digit.",
-  },
-  {
-    subtes: "Bahasa Inggris",
-    singkat: "Inggris",
-    prompt:
-      "The bank ____ its new mobile app three months ago, and customer complaints have dropped since then.",
-    opsi: ["has launched", "launched", "launches", "was launching"],
-    kunci: 1,
-    pembahasan:
-      "Keterangan waktu 'three months ago' menunjuk titik waktu lampau yang selesai, jadi yang dipakai simple past: launched. Present perfect tidak dipakai bersama keterangan waktu lampau yang spesifik.",
-  },
-  {
-    subtes: "Numerik",
-    singkat: "Numerik",
-    prompt:
-      "Sebuah cabang menyalurkan kredit Rp450 juta pada Januari dan Rp540 juta pada Februari. Berapa persen kenaikannya?",
-    opsi: ["16%", "18%", "20%", "24%"],
-    kunci: 2,
-    pembahasan:
-      "Kenaikannya 540 − 450 = 90 juta. Dibandingkan angka Januari: 90/450 = 0,2 alias 20%. Pembaginya selalu angka periode awal, bukan periode akhir.",
-  },
-  {
-    subtes: "Verbal",
-    singkat: "Verbal",
-    prompt: 'Kata yang paling berlawanan makna dengan "likuid" adalah?',
-    opsi: ["Lancar", "Beku", "Tunai", "Encer"],
-    kunci: 1,
-    pembahasan:
-      "Dalam konteks keuangan, likuid berarti mudah dicairkan. Lawannya beku: dana yang tidak bisa ditarik atau dipakai. Lancar dan tunai justru searti, encer hanya makna harfiahnya.",
-  },
-  {
-    subtes: "Logika & Figural",
-    singkat: "Logika",
-    prompt: "Lanjutan deret 3, 6, 11, 18, 27, ... adalah?",
-    opsi: ["34", "36", "38", "40"],
-    kunci: 2,
-    pembahasan:
-      "Selisih antarsuku naik sebagai bilangan ganjil: 3, 5, 7, 9. Selisih berikutnya 11, jadi 27 + 11 = 38.",
-  },
-  {
-    subtes: "Ketelitian",
-    singkat: "Ketelitian",
-    prompt: "Mana pasangan nama dan NIK yang penulisannya TIDAK sama persis?",
-    opsi: [
-      "RAHMAWATI DEWI · 3174026109910004",
-      "BAGUS PRASETYO · 3275011204880012",
-      "SITI NURHALIZA · 3671054503950007",
-      "ANDI SAPUTRA · 7371060810920031",
-    ],
-    kunci: 1,
-    pembahasan:
-      "Pada pilihan B nama tertulis BAGUS PRASETYO sementara pasangan datanya BAGUS PRASTEYO — huruf T dan E tertukar. Sisanya sama persis.",
-  },
-  {
-    subtes: "Bahasa Inggris",
-    singkat: "Inggris",
-    prompt:
-      "Please make sure the report is submitted ____ Friday, otherwise the audit team cannot review it.",
-    opsi: ["until", "since", "by", "during"],
-    kunci: 2,
-    pembahasan:
-      "'By' menandai batas waktu paling lambat sebuah pekerjaan selesai. 'Until' dipakai untuk keadaan yang berlangsung sampai satu titik, bukan tenggat penyerahan.",
-  },
-];
 
 const HURUF = ["A", "B", "C", "D"];
 
 /**
- * Simulasi coba-coba untuk pengunjung anonim: lima soal, bisa dikerjakan sampai
- * "dikirim", lalu hasil dan pembahasannya tampil. Semua state hidup di memori
- * peramban — tidak ada attempt, tidak ada jawaban tersimpan, tidak ada apa pun
- * yang menyentuh basis data.
- *
- * Di halaman, komponen ini cuma tampil sebagai potongan gambar produk; sesi
- * baru benar-benar berjalan setelah pengunjung membukanya ke layar penuh.
+ * Satu sesi simulasi gratis, mengisi seluruh halaman. Semua state hidup di
+ * memori peramban: tidak ada attempt, tidak ada jawaban terkirim, tidak ada
+ * yang menyentuh basis data. Paketnya datang dari props, sehingga rute yang
+ * sama melayani berapa pun jenis simulasi gratis.
  */
-export function TestPreview() {
-  const wadah = useRef<HTMLDivElement>(null);
-  const [terbuka, setTerbuka] = useState(false);
+export function SesiSimulasi({ paket }: { paket: Paket }) {
+  const soal = paket.soal;
+  const DURASI = paket.durasiDetik;
 
-  function buka() {
-    setTerbuka(true);
-    // Fullscreen asli kalau peramban mengizinkan. Kalau ditolak (Safari iOS,
-    // izin dicabut), lapisan fixed di bawah tetap menutupi layar, jadi hasil
-    // yang dilihat pengunjung sama saja.
-    wadah.current?.requestFullscreen?.().catch(() => {});
-  }
-
-  function tutup() {
-    setTerbuka(false);
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-  }
-
-  // Keluar dari fullscreen lewat Esc atau tombol peramban harus ikut menutup
-  // lapisannya, bukan meninggalkan overlay yang menggantung di layar.
-  useEffect(() => {
-    const sinkron = () => {
-      if (!document.fullscreenElement) setTerbuka(false);
-    };
-    document.addEventListener("fullscreenchange", sinkron);
-    return () => document.removeEventListener("fullscreenchange", sinkron);
-  }, []);
-
-  // Esc tetap harus menutup meski fullscreen aslinya tidak pernah aktif.
-  useEffect(() => {
-    if (!terbuka) return;
-    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setTerbuka(false);
-    document.addEventListener("keydown", onEsc);
-    return () => document.removeEventListener("keydown", onEsc);
-  }, [terbuka]);
-
-  return (
-    <div ref={wadah}>
-      <div
-        className={`relative mx-auto max-w-6xl overflow-hidden rounded-2xl border ${hairline} bg-white`}
-      >
-        <div className="flex items-start justify-between gap-6 px-6 pt-7 sm:px-9 sm:pt-9">
-          <h2 className="max-w-md text-2xl leading-tight font-medium tracking-[-0.01em] text-brand sm:text-3xl">
-            Coba sepuluh soal simulasinya sekarang — tanpa daftar.
-          </h2>
-          <span
-            aria-hidden
-            className={`grid size-11 shrink-0 place-items-center rounded-xl border ${hairline} bg-white text-brand transition-colors group-hover:border-brand-orange group-hover:bg-brand-orange group-hover:text-white`}
-          >
-            <Expand className="size-4.5" />
-          </span>
-        </div>
-
-        {/* Potongan produk: kartu sesinya sengaja lebih lebar dari wadahnya dan
-            terpotong di kanan, supaya jelas ini cuplikan, bukan tesnya sendiri. */}
-        <div className="mt-8 h-64 overflow-hidden pl-6 sm:h-88 sm:pl-9">
-          <div className="h-full rounded-tl-2xl bg-brand-orange/15 pt-7 pl-7">
-            <div
-              inert
-              className="pointer-events-none w-280 max-w-none select-none"
-            >
-              <Sesi statis />
-            </div>
-          </div>
-        </div>
-
-        {/* Seluruh kartu jadi satu tombol: ikon di pojok adalah petunjuk
-            visualnya, tapi klik di mana pun tetap membuka sesinya. */}
-        <button
-          type="button"
-          onClick={buka}
-          className="group absolute inset-0 cursor-pointer rounded-2xl focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:outline-none"
-        >
-          <span className="sr-only">Buka simulasi percobaan layar penuh</span>
-        </button>
-      </div>
-
-      {terbuka && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-cream">
-          <Sesi onTutup={tutup} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Sesi percobaannya sendiri. `statis` dipakai untuk cuplikan di kartu. */
-function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
   const [nomor, setNomor] = useState(0);
   const [jawaban, setJawaban] = useState<(number | null)[]>(() =>
     Array(soal.length).fill(null),
@@ -288,10 +83,10 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
   const selesai = dikirim || sisa === 0;
 
   useEffect(() => {
-    if (statis || selesai) return;
+    if (selesai) return;
     const tik = setInterval(() => setSisa((s) => Math.max(0, s - 1)), 1000);
     return () => clearInterval(tik);
-  }, [statis, selesai]);
+  }, [selesai]);
 
   function pilih(i: number) {
     setJawaban((j) => j.map((v, k) => (k === nomor ? i : v)));
@@ -332,7 +127,7 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
               aria-hidden
             />
             <p className="hidden truncate text-sm font-normal text-brand/70 sm:block">
-              Simulasi percobaan · Tes masuk bank
+              Simulasi gratis · {paket.nama}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -344,7 +139,13 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
               <Clock className="size-4" aria-hidden />
               {menitDetik(sisa)}
             </span>
-            {onTutup && <TombolTutup onTutup={onTutup} />}
+            <Link
+              href="/simulasi"
+              aria-label="Keluar dari simulasi"
+              className={`grid size-9 shrink-0 place-items-center rounded-lg border ${hairline} text-brand transition-colors hover:bg-brand hover:text-white`}
+            >
+              <X className="size-4" aria-hidden />
+            </Link>
           </div>
         </div>
       </header>
@@ -352,6 +153,8 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 sm:px-8 sm:py-8">
         {selesai ? (
           <Hasil
+            soal={soal}
+            durasi={DURASI}
             jawaban={jawaban}
             waktuSoal={waktuSoal}
             terpakai={DURASI - sisa}
@@ -565,6 +368,8 @@ function Navigasi({
  * tidak ada yang disimpan ke mana pun.
  */
 function Hasil({
+  soal,
+  durasi,
   jawaban,
   waktuSoal,
   terpakai,
@@ -572,6 +377,8 @@ function Hasil({
   kosong,
   onUlangi,
 }: {
+  soal: Soal[];
+  durasi: number;
   jawaban: (number | null)[];
   waktuSoal: number[];
   terpakai: number;
@@ -583,10 +390,10 @@ function Hasil({
 
   const salah = soal.length - benar - kosong;
   const akurasi = Math.round((benar / soal.length) * 100);
-  const idealPerSoal = Math.round(DURASI / soal.length);
+  const idealPerSoal = Math.round(durasi / soal.length);
   const rataPerSoal = Math.round(terpakai / soal.length);
 
-  const perSubtes = ringkasSubtes(jawaban);
+  const perSubtes = ringkasSubtes(soal, jawaban);
   // Subtes dengan persentase terendah jadi bahan rekomendasi. Kalau seri, yang
   // pertama muncul di urutan soal yang dipilih — bukan hasil acak.
   const terlemah = perSubtes.reduce((a, b) => (b.persen < a.persen ? b : a));
@@ -620,7 +427,7 @@ function Hasil({
         <Kartu
           judul="Waktu & efisiensi"
           Ikon={Clock}
-          tanda={`dari ${menitDetik(DURASI)}`}
+          tanda={`dari ${menitDetik(durasi)}`}
         >
           <p className="mt-6 text-center font-mono text-4xl font-medium tabular-nums text-brand">
             {menitDetik(terpakai)}
@@ -645,7 +452,7 @@ function Hasil({
         </Kartu>
 
         <Kartu judul="Analisis subtes" Ikon={TrendingUp} tanda="Saran">
-          <SebaranSubtes jawaban={jawaban} />
+          <SebaranSubtes soal={soal} jawaban={jawaban} />
           <p className="mt-4 rounded-xl bg-cream px-4 py-3 text-xs leading-5 font-normal text-brand/70">
             <span className="block font-medium text-brand">
               Fokus berikutnya
@@ -942,7 +749,7 @@ const KETERANGAN: [string, string][] = [
 ];
 
 /** Benar dan total tiap subtes, dipakai radar sekaligus kalimat rekomendasi. */
-function ringkasSubtes(jawaban: (number | null)[]) {
+function ringkasSubtes(soal: Soal[], jawaban: (number | null)[]) {
   const per = new Map<string, { nama: string; benar: number; total: number }>();
 
   soal.forEach((s, i) => {
@@ -971,7 +778,13 @@ const konfigSebaran = {
  * jadi bagian atas kartu hasil karena keduanya menjawab pertanyaan yang sama —
  * bagian mana yang sudah aman, bagian mana yang perlu dikejar.
  */
-function SebaranSubtes({ jawaban }: { jawaban: (number | null)[] }) {
+function SebaranSubtes({
+  soal,
+  jawaban,
+}: {
+  soal: Soal[];
+  jawaban: (number | null)[];
+}) {
   const perSubtes = new Map<string, { benar: number; total: number }>();
 
   soal.forEach((s, i) => {
@@ -1019,20 +832,6 @@ function SebaranSubtes({ jawaban }: { jawaban: (number | null)[] }) {
         Persentase jawaban benar di tiap subtes.
       </p>
     </>
-  );
-}
-
-/** Satu-satunya jalan keluar dari layar penuh, jadi selalu ikut dirender. */
-function TombolTutup({ onTutup }: { onTutup: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onTutup}
-      aria-label="Tutup simulasi percobaan"
-      className={`grid size-8 shrink-0 place-items-center rounded-lg border ${hairline} text-brand transition-colors hover:bg-brand hover:text-white`}
-    >
-      <X className="size-4" aria-hidden />
-    </button>
   );
 }
 

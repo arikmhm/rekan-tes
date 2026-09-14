@@ -28,19 +28,16 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Footer publik, satu untuk semua halaman. Satu baris saja: hak cipta yang
- * sekaligus menyatakan independensi platform, lalu ketiga dokumen legal.
- * Rincian bahwa pembayaran tidak menjamin kelulusan ada di syarat layanan
- * yang ditautkan di sini.
+ * Footer publik, satu untuk semua halaman. Satu baris saja: hak cipta lalu
+ * ketiga dokumen legal. Penyangkalan selengkapnya — platform ini independen,
+ * bukan mitra resmi rekrutmen bank, dan pembayaran tidak menjamin kelulusan —
+ * dimuat syarat layanan yang ditautkan di sini.
  */
 export function SiteFooter() {
   return (
     <footer className="border-t border-[#105C78]/20 bg-white">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-brand/60 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <p>
-          © 2026 Rekan Tes. Platform simulasi independen, bukan mitra resmi
-          rekrutmen bank.
-        </p>
+        <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
         <LegalLinks />
       </div>
     </footer>

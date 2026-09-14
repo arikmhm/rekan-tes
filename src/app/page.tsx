@@ -36,30 +36,40 @@ export default async function Home() {
       <SiteHeader />
 
       <main id="top">
-        <section className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-5 py-16 text-center sm:px-8 sm:py-20">
-          <h1 className="max-w-xl text-4xl leading-[1.2] font-medium tracking-[-0.01em] text-brand sm:text-5xl lg:text-[52px]">
-            Setiap Kesempatan Layak Dipersiapkan.
-          </h1>
-          <p className="mt-6 max-w-lg text-lg leading-8 font-normal text-brand/80">
-            Persiapkan dirimu untuk kesempatan yang kamu tunggu.
-          </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link
-              className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-center text-sm font-normal text-white transition-all  hover:bg-brand-orange active:translate-y-0"
-              href="/tes"
-            >
-              Lihat katalog simulasi
-              <ArrowRight
-                className="size-4 transition-transform group-hover:translate-x-1"
-                aria-hidden
-              />
-            </Link>
-            <Link
-              className={`flex h-12 items-center justify-center rounded-lg border ${hairline} bg-white px-6 text-center text-sm font-normal text-brand transition-all  hover:bg-brand hover:text-white active:translate-y-0`}
-              href="/daftar"
-            >
-              Buat akun gratis
-            </Link>
+        <section className="relative overflow-hidden">
+          {/* Pola rasi bintang di latar hero. Opasitasnya sengaja sangat rendah
+              dan dilebur ke bawah, jadi ia memberi tekstur tanpa ikut bersaing
+              dengan judul maupun tombol di atasnya. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.09] [mask-image:linear-gradient(to_bottom,black,transparent)]"
+          />
+
+          <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-5 py-16 text-center sm:px-8 sm:py-20">
+            <h1 className="max-w-xl text-4xl leading-[1.2] font-medium tracking-[-0.01em] text-brand sm:text-5xl lg:text-[52px]">
+              Setiap Kesempatan Layak Dipersiapkan.
+            </h1>
+            <p className="mt-6 max-w-lg text-lg leading-8 font-normal text-brand/80">
+              Persiapkan dirimu untuk kesempatan yang kamu tunggu.
+            </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Link
+                className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-center text-sm font-normal text-white transition-all  hover:bg-brand-orange active:translate-y-0"
+                href="/tes"
+              >
+                Lihat katalog simulasi
+                <ArrowRight
+                  className="size-4 transition-transform group-hover:translate-x-1"
+                  aria-hidden
+                />
+              </Link>
+              <Link
+                className={`flex h-12 items-center justify-center rounded-lg border ${hairline} bg-white px-6 text-center text-sm font-normal text-brand transition-all  hover:bg-brand hover:text-white active:translate-y-0`}
+                href="/daftar"
+              >
+                Buat akun gratis
+              </Link>
+            </div>
           </div>
         </section>
 

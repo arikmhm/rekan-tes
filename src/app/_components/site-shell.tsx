@@ -18,21 +18,24 @@ export const KONTAK = emailAddress(env.EMAIL_FROM);
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <header className="border-b border-black/8 bg-background/90">
+      <header className="border-b border-[#105C78]/20 bg-white">
         <nav
           aria-label="Navigasi utama"
           className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8"
         >
-          <Link href="/" className="flex items-center gap-3 font-semibold tracking-tight">
-            <span className="grid size-9 place-items-center rounded-xl bg-brand text-sm font-bold text-white">
+          <Link
+            href="/"
+            className="flex items-center gap-3 font-semibold tracking-tight text-brand transition-opacity hover:opacity-70"
+          >
+            <span className="grid size-9 place-items-center rounded-lg bg-brand text-sm font-bold text-white">
               RT
             </span>
             <span className="text-lg">Rekan Tes</span>
           </Link>
           {/* Jarak dirapatkan di layar sempit; dengan gap-7 isi nav meluber
               melewati 375 px dan membuat seluruh halaman bisa digeser. */}
-          <div className="flex items-center gap-3 text-sm text-muted-foreground sm:gap-7">
-            <Link className="transition hover:text-ink" href="/tes">
+          <div className="flex items-center gap-3 text-sm font-normal text-brand sm:gap-7">
+            <Link className="transition hover:text-brand-orange" href="/tes">
               Katalog
             </Link>
             <AccountNav />
@@ -42,11 +45,12 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-black/8 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 text-muted-foreground sm:px-8">
+      <footer className="border-t border-[#105C78]/20 bg-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-brand/60 sm:px-8">
           <p>
-            Rekan Tes adalah platform latihan independen, bukan penyelenggara atau mitra resmi
-            rekrutmen bank. Pembayaran hanya untuk sesi simulasi dan tidak menjamin kelulusan.
+            Rekan Tes adalah platform latihan independen, bukan penyelenggara
+            atau mitra resmi rekrutmen bank. Pembayaran hanya untuk sesi
+            simulasi dan tidak menjamin kelulusan.
           </p>
           <LegalLinks />
           <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
@@ -60,13 +64,22 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 export function LegalLinks() {
   return (
     <p className="flex flex-wrap gap-x-5 gap-y-1">
-      <Link className="font-semibold transition hover:text-ink" href="/privasi">
+      <Link
+        className="font-medium transition hover:text-brand-orange"
+        href="/privasi"
+      >
         Kebijakan privasi
       </Link>
-      <Link className="font-semibold transition hover:text-ink" href="/syarat">
+      <Link
+        className="font-medium transition hover:text-brand-orange"
+        href="/syarat"
+      >
         Syarat layanan
       </Link>
-      <Link className="font-semibold transition hover:text-ink" href="/refund">
+      <Link
+        className="font-medium transition hover:text-brand-orange"
+        href="/refund"
+      >
         Kebijakan refund
       </Link>
     </p>
@@ -89,8 +102,12 @@ export function LegalDoc({
   return (
     <SiteShell>
       <article className="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-20 [&_h2]:mt-10 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_li]:mt-2 [&_p]:mt-4 [&_p]:leading-7 [&_p]:text-muted-foreground [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:leading-7 [&_ul]:text-muted-foreground">
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{title}</h1>
-        <p className="mt-4 text-sm text-muted-foreground">Terakhir diperbarui {updated}.</p>
+        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+          {title}
+        </h1>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Terakhir diperbarui {updated}.
+        </p>
         {children}
       </article>
     </SiteShell>

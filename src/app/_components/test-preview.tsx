@@ -10,6 +10,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 
 const hairline = "border-[#105C78]/20";
 
@@ -18,6 +26,7 @@ const DURASI = 300; // 5 menit untuk 5 soal, sama ritmenya dengan subtes asli.
 const soal = [
   {
     subtes: "Numerik",
+    singkat: "Numerik",
     prompt:
       "Sebuah nasabah menabung Rp8.000.000 dengan bunga tunggal 6% per tahun. Berapa saldonya setelah 9 bulan?",
     opsi: ["Rp8.240.000", "Rp8.360.000", "Rp8.480.000", "Rp8.720.000"],
@@ -27,6 +36,7 @@ const soal = [
   },
   {
     subtes: "Verbal",
+    singkat: "Verbal",
     prompt: "SANKSI : PELANGGARAN = ... : ...",
     opsi: [
       "Hadiah : Prestasi",
@@ -40,6 +50,7 @@ const soal = [
   },
   {
     subtes: "Logika & Figural",
+    singkat: "Logika",
     prompt:
       "Semua teller wajib mengikuti pelatihan APU-PPT. Sebagian peserta pelatihan APU-PPT berasal dari kantor pusat. Kesimpulan yang pasti benar:",
     opsi: [
@@ -54,6 +65,7 @@ const soal = [
   },
   {
     subtes: "Ketelitian",
+    singkat: "Ketelitian",
     prompt: "Pasangan nomor rekening berikut mana yang TIDAK identik?",
     opsi: [
       "8820-4471-9036  |  8820-4471-9036",
@@ -67,6 +79,7 @@ const soal = [
   },
   {
     subtes: "Bahasa Inggris",
+    singkat: "Inggris",
     prompt:
       "The bank ____ its new mobile app three months ago, and customer complaints have dropped since then.",
     opsi: ["has launched", "launched", "launches", "was launching"],
@@ -209,47 +222,19 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
   return (
     <div
       className={`flex min-h-full flex-col px-5 py-6 sm:px-8 sm:py-8 ${
-        statis ? "w-full" : "mx-auto max-w-3xl"
+        statis ? "w-full" : "mx-auto w-full max-w-6xl"
       }`}
     >
-      <div
-        className={`flex items-center justify-between gap-4 rounded-xl border ${hairline} bg-white px-4 py-3`}
-      >
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-brand">
-            Simulasi percobaan · {selesai ? "Selesai" : s.subtes}
-          </p>
-          <p className="mt-0.5 text-xs font-normal text-brand/60">
-            Mode coba-coba. Jawaban tidak disimpan.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-2.5 py-1.5 font-mono text-xs font-medium tabular-nums text-white">
-            <Clock className="size-3.5" aria-hidden />
-            {menitDetik(sisa)}
-          </span>
-          {onTutup && (
-            <button
-              type="button"
-              onClick={onTutup}
-              aria-label="Tutup simulasi percobaan"
-              className={`grid size-8 place-items-center rounded-lg border ${hairline} text-brand transition-colors hover:bg-brand hover:text-white`}
-            >
-              <X className="size-4" aria-hidden />
-            </button>
-          )}
-        </div>
-      </div>
-
       {selesai ? (
         <Hasil
           jawaban={jawaban}
           benar={benar}
           kosong={kosong}
           onUlangi={ulangi}
+          onTutup={onTutup}
         />
       ) : (
-        <div className="mt-4 flex flex-1 flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="flex flex-1 flex-col gap-4 lg:flex-row lg:items-start">
           <div
             className={`flex-1 rounded-xl border ${hairline} bg-white p-5 sm:p-7`}
           >
@@ -319,8 +304,11 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
           <Navigasi
             jawaban={jawaban}
             nomor={nomor}
+            subtes={s.subtes}
+            sisa={sisa}
             onPilihSoal={setNomor}
             onKirim={() => setDikirim(true)}
+            onTutup={onTutup}
           />
         </div>
       )}
@@ -337,22 +325,61 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
 function Navigasi({
   jawaban,
   nomor,
+  subtes,
+  sisa,
   onPilihSoal,
   onKirim,
+  onTutup,
 }: {
   jawaban: (number | null)[];
   nomor: number;
+  subtes: string;
+  sisa: number;
   onPilihSoal: (i: number) => void;
   onKirim: () => void;
+  onTutup?: () => void;
 }) {
   const terjawab = jawaban.filter((j) => j !== null).length;
 
   return (
     <aside
-      aria-label="Navigasi soal"
-      className={`shrink-0 rounded-xl border ${hairline} bg-white p-5 lg:w-60`}
+      aria-label="Keterangan dan navigasi soal"
+      className={`shrink-0 rounded-xl border ${hairline} bg-white p-5 lg:sticky lg:top-8 lg:w-72`}
     >
-      <p className="text-xs font-medium text-brand/60">Navigasi soal</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-brand">
+            Simulasi percobaan
+          </p>
+          <p className="mt-0.5 truncate text-xs font-normal text-brand/60">
+            Subtes {subtes}
+          </p>
+        </div>
+        {onTutup && <TombolTutup onTutup={onTutup} />}
+      </div>
+
+      <div className="mt-4 flex items-center gap-2 rounded-lg bg-brand px-3 py-2.5 text-white">
+        <Clock className="size-4 shrink-0" aria-hidden />
+        <span
+          role="timer"
+          aria-live="off"
+          className="font-mono text-lg font-medium tabular-nums"
+        >
+          {menitDetik(sisa)}
+        </span>
+        <span className="ml-auto text-xs font-normal text-white/70">
+          sisa waktu
+        </span>
+      </div>
+      <p className="mt-2 text-xs leading-5 font-normal text-brand/60">
+        Mode coba-coba. Jawaban tidak disimpan.
+      </p>
+
+      <p
+        className={`mt-4 border-t ${hairline} pt-4 text-xs font-medium text-brand/60`}
+      >
+        Navigasi soal
+      </p>
 
       <div className="mt-3 grid grid-cols-5 gap-2">
         {jawaban.map((j, i) => {
@@ -430,124 +457,206 @@ function Hasil({
   benar,
   kosong,
   onUlangi,
+  onTutup,
 }: {
   jawaban: (number | null)[];
   benar: number;
   kosong: number;
   onUlangi: () => void;
+  onTutup?: () => void;
 }) {
   return (
-    <div className="mt-4 space-y-4 pb-4">
-      <div className={`rounded-xl border ${hairline} bg-white p-5 sm:p-7`}>
-        <p className="text-sm font-medium text-brand">Hasil percobaan</p>
-        <p className="mt-1 text-4xl font-medium tracking-[-0.01em] text-brand">
-          {benar}
-          <span className="text-xl text-brand/50"> / {soal.length}</span>
-        </p>
-        <dl className="mt-5 grid grid-cols-3 gap-2.5">
-          {[
-            ["Benar", benar],
-            ["Salah", soal.length - benar - kosong],
-            ["Kosong", kosong],
-          ].map(([label, nilai]) => (
-            <div key={label} className="rounded-lg bg-cream p-3 text-center">
-              <dt className="text-xs font-normal text-brand/60">{label}</dt>
-              <dd className="mt-0.5 text-lg font-medium text-brand">{nilai}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
-          Ini contoh tampilan hasil. Pada simulasi sungguhan skor dihitung per
-          subtes dengan bobot soal, dan riwayatnya tersimpan di akunmu.
-        </p>
-        <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
-          <Link
-            href="/tes"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
-          >
-            Lihat katalog simulasi
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
-          <button
-            type="button"
-            onClick={onUlangi}
-            className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg border ${hairline} px-5 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
-          >
-            <RotateCcw className="size-4" aria-hidden />
-            Ulangi
-          </button>
+    <div className="space-y-4 pb-4">
+      <div className="grid gap-4 lg:grid-cols-[1fr_22rem] lg:items-start">
+        <div className={`rounded-xl border ${hairline} bg-white p-5 sm:p-7`}>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-medium text-brand">Hasil percobaan</p>
+            {onTutup && <TombolTutup onTutup={onTutup} />}
+          </div>
+          <p className="mt-1 text-4xl font-medium tracking-[-0.01em] text-brand">
+            {benar}
+            <span className="text-xl text-brand/50"> / {soal.length}</span>
+          </p>
+          <dl className="mt-5 grid grid-cols-3 gap-2.5">
+            {[
+              ["Benar", benar],
+              ["Salah", soal.length - benar - kosong],
+              ["Kosong", kosong],
+            ].map(([label, nilai]) => (
+              <div key={label} className="rounded-lg bg-cream p-3 text-center">
+                <dt className="text-xs font-normal text-brand/60">{label}</dt>
+                <dd className="mt-0.5 text-lg font-medium text-brand">
+                  {nilai}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
+            Ini contoh tampilan hasil. Pada simulasi sungguhan skor dihitung per
+            subtes dengan bobot soal, dan riwayatnya tersimpan di akunmu.
+          </p>
+          <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
+            <Link
+              href="/tes"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
+            >
+              Lihat katalog simulasi
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+            <button
+              type="button"
+              onClick={onUlangi}
+              className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg border ${hairline} px-5 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
+            >
+              <RotateCcw className="size-4" aria-hidden />
+              Ulangi
+            </button>
+          </div>
         </div>
+
+        <SebaranSubtes jawaban={jawaban} />
       </div>
 
-      <p className="px-1 pt-2 text-sm font-medium text-brand">Pembahasan</p>
+      {/* Pembahasannya sengaja lebih sempit dari area tes: baris teks selebar
+          6xl terlalu panjang untuk dibaca. */}
+      <div className="max-w-4xl space-y-4">
+        <p className="px-1 pt-2 text-sm font-medium text-brand">Pembahasan</p>
 
-      {soal.map((s, i) => {
-        const pilihan = jawaban[i];
-        const tepat = pilihan === s.kunci;
-        return (
-          <div
-            key={s.prompt}
-            className={`rounded-xl border ${hairline} bg-white p-5 sm:p-6`}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-medium text-brand/60">
-                Soal {i + 1} · {s.subtes}
+        {soal.map((s, i) => {
+          const pilihan = jawaban[i];
+          const tepat = pilihan === s.kunci;
+          return (
+            <div
+              key={s.prompt}
+              className={`rounded-xl border ${hairline} bg-white p-5 sm:p-6`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-medium text-brand/60">
+                  Soal {i + 1} · {s.subtes}
+                </p>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                    pilihan === null
+                      ? "bg-cream text-brand/60"
+                      : tepat
+                        ? "bg-mint text-brand-dark"
+                        : "bg-red-50 text-red-700"
+                  }`}
+                >
+                  {pilihan === null ? "Kosong" : tepat ? "Benar" : "Salah"}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-7 font-normal text-brand">
+                {s.prompt}
               </p>
-              <span
-                className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                  pilihan === null
-                    ? "bg-cream text-brand/60"
-                    : tepat
-                      ? "bg-mint text-brand-dark"
-                      : "bg-red-50 text-red-700"
-                }`}
-              >
-                {pilihan === null ? "Kosong" : tepat ? "Benar" : "Salah"}
-              </span>
+              <ul className="mt-4 space-y-2">
+                {s.opsi.map((teks, k) => {
+                  const dipilih = k === pilihan;
+                  const kunci = k === s.kunci;
+                  return (
+                    <li
+                      key={teks}
+                      className={`flex items-start gap-3 rounded-lg border p-3 text-sm ${
+                        kunci
+                          ? "border-brand/40 bg-mint/60"
+                          : dipilih
+                            ? "border-red-200 bg-red-50"
+                            : hairline
+                      }`}
+                    >
+                      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-cream text-xs font-medium text-brand">
+                        {HURUF[k]}
+                      </span>
+                      <span className="flex-1 leading-6 font-normal text-brand">
+                        {teks}
+                      </span>
+                      <span className="shrink-0 text-xs font-medium text-brand/60">
+                        {kunci && "kunci"}
+                        {dipilih && !kunci && "pilihanmu"}
+                        {dipilih && kunci && " · pilihanmu"}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="mt-4 rounded-lg bg-cream/70 p-4">
+                <p className="text-xs font-medium text-brand/60">Pembahasan</p>
+                <p className="mt-1.5 text-sm leading-7 font-normal text-brand">
+                  {s.pembahasan}
+                </p>
+              </div>
             </div>
-            <p className="mt-3 text-sm leading-7 font-normal text-brand">
-              {s.prompt}
-            </p>
-            <ul className="mt-4 space-y-2">
-              {s.opsi.map((teks, k) => {
-                const dipilih = k === pilihan;
-                const kunci = k === s.kunci;
-                return (
-                  <li
-                    key={teks}
-                    className={`flex items-start gap-3 rounded-lg border p-3 text-sm ${
-                      kunci
-                        ? "border-brand/40 bg-mint/60"
-                        : dipilih
-                          ? "border-red-200 bg-red-50"
-                          : hairline
-                    }`}
-                  >
-                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-cream text-xs font-medium text-brand">
-                      {HURUF[k]}
-                    </span>
-                    <span className="flex-1 leading-6 font-normal text-brand">
-                      {teks}
-                    </span>
-                    <span className="shrink-0 text-xs font-medium text-brand/60">
-                      {kunci && "kunci"}
-                      {dipilih && !kunci && "pilihanmu"}
-                      {dipilih && kunci && " · pilihanmu"}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="mt-4 rounded-lg bg-cream/70 p-4">
-              <p className="text-xs font-medium text-brand/60">Pembahasan</p>
-              <p className="mt-1.5 text-sm leading-7 font-normal text-brand">
-                {s.pembahasan}
-              </p>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
+  );
+}
+
+const konfigSebaran = {
+  nilai: { label: "Skor", color: "var(--color-brand-orange)" },
+} satisfies ChartConfig;
+
+/**
+ * Sebaran benar-salah per subtes. Di simulasi berbayar tiap subtes berisi
+ * puluhan soal; di percobaan ini satu subtes diwakili satu soal, jadi bentuknya
+ * runcing — gunanya memperlihatkan bagian mana yang perlu dikejar, bukan
+ * mengukur kemampuan.
+ */
+function SebaranSubtes({ jawaban }: { jawaban: (number | null)[] }) {
+  const data = soal.map((s, i) => ({
+    subtes: s.singkat,
+    nilai: jawaban[i] === s.kunci ? 100 : 0,
+  }));
+
+  return (
+    <div className={`rounded-xl border ${hairline} bg-white p-5 sm:p-6`}>
+      <p className="text-sm font-medium text-brand">Sebaran per subtes</p>
+      <p className="mt-1 text-xs leading-5 font-normal text-brand/60">
+        Satu soal mewakili satu subtes di mode percobaan.
+      </p>
+      <ChartContainer
+        config={konfigSebaran}
+        className="mx-auto mt-2 aspect-square w-full max-w-64"
+      >
+        <RadarChart data={data} outerRadius="68%">
+          <ChartTooltip
+            cursor={false}
+            content={<ChartTooltipContent hideLabel={false} />}
+          />
+          <PolarGrid stroke="var(--color-brand)" strokeOpacity={0.2} />
+          <PolarAngleAxis
+            dataKey="subtes"
+            tick={{ fill: "var(--color-brand)", fontSize: 11 }}
+          />
+          <Radar
+            dataKey="nilai"
+            // Animasi masuk recharts tidak pernah berjalan di dalam lapisan
+            // layar penuh ini dan meninggalkan poligon yang menciut di titik
+            // pusat — grafiknya jadi kosong. Digambar langsung di posisi akhir.
+            isAnimationActive={false}
+            fill="var(--color-nilai)"
+            fillOpacity={0.45}
+            stroke="var(--color-nilai)"
+            strokeWidth={2}
+          />
+        </RadarChart>
+      </ChartContainer>
+    </div>
+  );
+}
+
+/** Satu-satunya jalan keluar dari layar penuh, jadi selalu ikut dirender. */
+function TombolTutup({ onTutup }: { onTutup: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onTutup}
+      aria-label="Tutup simulasi percobaan"
+      className={`grid size-8 shrink-0 place-items-center rounded-lg border ${hairline} text-brand transition-colors hover:bg-brand hover:text-white`}
+    >
+      <X className="size-4" aria-hidden />
+    </button>
   );
 }
 

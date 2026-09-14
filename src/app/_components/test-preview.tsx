@@ -249,101 +249,179 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
           onUlangi={ulangi}
         />
       ) : (
-        <div
-          className={`mt-4 flex-1 rounded-xl border ${hairline} bg-white p-5 sm:p-7`}
-        >
-          <div className="flex items-center gap-1.5">
-            {soal.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setNomor(i)}
-                aria-label={`Soal ${i + 1}`}
-                aria-current={i === nomor}
-                className={`h-1.5 flex-1 rounded-full transition-colors ${
-                  i === nomor
-                    ? "bg-brand-orange"
-                    : jawaban[i] !== null
-                      ? "bg-brand/50"
-                      : "bg-brand/12"
-                }`}
-              />
-            ))}
-          </div>
-          <p className="mt-4 text-xs font-medium text-brand/60">
-            Soal {nomor + 1} dari {soal.length}
-          </p>
-          <p className="mt-3 text-base leading-7 font-normal text-brand sm:text-lg sm:leading-8">
-            {s.prompt}
-          </p>
+        <div className="mt-4 flex flex-1 flex-col gap-4 lg:flex-row lg:items-start">
+          <div
+            className={`flex-1 rounded-xl border ${hairline} bg-white p-5 sm:p-7`}
+          >
+            <p className="text-xs font-medium text-brand/60">
+              Soal {nomor + 1} dari {soal.length}
+            </p>
+            <p className="mt-3 text-base leading-7 font-normal text-brand sm:text-lg sm:leading-8">
+              {s.prompt}
+            </p>
 
-          <div className="mt-6 space-y-2.5">
-            {s.opsi.map((teks, i) => {
-              const aktif = jawaban[nomor] === i;
-              return (
-                <button
-                  key={teks}
-                  type="button"
-                  onClick={() => pilih(i)}
-                  aria-pressed={aktif}
-                  className={`flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors ${
-                    aktif
-                      ? "border-brand bg-brand/5"
-                      : `${hairline} bg-white hover:border-brand/40`
-                  }`}
-                >
-                  <span
-                    className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-medium ${
+            <div className="mt-6 space-y-2.5">
+              {s.opsi.map((teks, i) => {
+                const aktif = jawaban[nomor] === i;
+                return (
+                  <button
+                    key={teks}
+                    type="button"
+                    onClick={() => pilih(i)}
+                    aria-pressed={aktif}
+                    className={`flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors ${
                       aktif
-                        ? "bg-brand text-white"
-                        : "border border-brand/30 text-brand/50"
+                        ? "border-brand bg-brand/5"
+                        : `${hairline} bg-white hover:border-brand/40`
                     }`}
                   >
-                    {HURUF[i]}
-                  </span>
-                  <span className="text-sm leading-6 font-normal text-brand">
-                    {teks}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                    <span
+                      className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-medium ${
+                        aktif
+                          ? "bg-brand text-white"
+                          : "border border-brand/30 text-brand/50"
+                      }`}
+                    >
+                      {HURUF[i]}
+                    </span>
+                    <span className="text-sm leading-6 font-normal text-brand">
+                      {teks}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          <div
-            className={`mt-7 flex items-center justify-between border-t ${hairline} pt-5`}
-          >
-            <button
-              type="button"
-              onClick={() => setNomor((n) => n - 1)}
-              disabled={nomor === 0}
-              className={`inline-flex h-10 items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-40`}
+            <div
+              className={`mt-7 flex items-center justify-between border-t ${hairline} pt-5`}
             >
-              <ArrowLeft className="size-4" aria-hidden />
-              Sebelumnya
-            </button>
-            {nomor === soal.length - 1 ? (
               <button
                 type="button"
-                onClick={() => setDikirim(true)}
-                className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-orange px-5 text-sm font-normal text-white transition-colors hover:bg-brand"
+                onClick={() => setNomor((n) => n - 1)}
+                disabled={nomor === 0}
+                className={`inline-flex h-10 items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-40`}
               >
-                Kirim jawaban
-                <ArrowRight className="size-4" aria-hidden />
+                <ArrowLeft className="size-4" aria-hidden />
+                Sebelumnya
               </button>
-            ) : (
               <button
                 type="button"
                 onClick={() => setNomor((n) => n + 1)}
-                className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
+                disabled={nomor === soal.length - 1}
+                className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange disabled:pointer-events-none disabled:opacity-40"
               >
                 Berikutnya
                 <ArrowRight className="size-4" aria-hidden />
               </button>
-            )}
+            </div>
           </div>
+
+          <Navigasi
+            jawaban={jawaban}
+            nomor={nomor}
+            onPilihSoal={setNomor}
+            onKirim={() => setDikirim(true)}
+          />
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Peta soal di sisi kanan: nomor mana yang sudah dijawab, mana yang dilewati,
+ * dan mana yang sedang dibuka — plus jalan pintas melompat ke soal mana pun.
+ * Statusnya tidak hanya dibedakan lewat warna, karena warna saja tak terbaca
+ * pembaca layar maupun mata yang sulit membedakannya.
+ */
+function Navigasi({
+  jawaban,
+  nomor,
+  onPilihSoal,
+  onKirim,
+}: {
+  jawaban: (number | null)[];
+  nomor: number;
+  onPilihSoal: (i: number) => void;
+  onKirim: () => void;
+}) {
+  const terjawab = jawaban.filter((j) => j !== null).length;
+
+  return (
+    <aside
+      aria-label="Navigasi soal"
+      className={`shrink-0 rounded-xl border ${hairline} bg-white p-5 lg:w-60`}
+    >
+      <p className="text-xs font-medium text-brand/60">Navigasi soal</p>
+
+      <div className="mt-3 grid grid-cols-5 gap-2">
+        {jawaban.map((j, i) => {
+          const aktif = i === nomor;
+          const dijawab = j !== null;
+
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => onPilihSoal(i)}
+              aria-current={aktif ? "step" : undefined}
+              aria-label={`Soal ${i + 1}, ${dijawab ? "sudah dijawab" : "belum dijawab"}`}
+              className={`grid aspect-square place-items-center rounded-lg border text-sm font-medium transition-colors ${
+                aktif
+                  ? "border-brand-orange bg-brand-orange text-white"
+                  : dijawab
+                    ? "border-brand bg-brand text-white hover:bg-brand-dark"
+                    : `${hairline} bg-white text-brand/50 hover:border-brand/40`
+              }`}
+            >
+              {i + 1}
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="mt-4 text-xs font-normal text-brand/60">
+        <span className="font-medium text-brand">{terjawab}</span> dari{" "}
+        {jawaban.length} soal terjawab
+      </p>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-brand/12">
+        <div
+          className="h-full rounded-full bg-brand transition-[width]"
+          style={{ width: `${(terjawab / jawaban.length) * 100}%` }}
+        />
+      </div>
+
+      <ul className={`mt-4 space-y-1.5 border-t ${hairline} pt-4`}>
+        {[
+          ["bg-brand-orange", "Sedang dibuka"],
+          ["bg-brand", "Sudah dijawab"],
+          [`border ${hairline} bg-white`, "Belum dijawab"],
+        ].map(([kelas, teks]) => (
+          <li
+            key={teks}
+            className="flex items-center gap-2 text-xs font-normal text-brand/60"
+          >
+            <span
+              className={`size-3 shrink-0 rounded-sm ${kelas}`}
+              aria-hidden
+            />
+            {teks}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        type="button"
+        onClick={onKirim}
+        className="mt-5 flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-orange text-sm font-normal text-white transition-colors hover:bg-brand"
+      >
+        Kirim jawaban
+        <ArrowRight className="size-4" aria-hidden />
+      </button>
+      <p className="mt-2 text-center text-xs font-normal text-brand/50">
+        Soal kosong dihitung nol.
+      </p>
+    </aside>
   );
 }
 

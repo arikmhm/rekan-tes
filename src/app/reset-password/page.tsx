@@ -24,7 +24,7 @@ export default async function ResetPasswordPage({
       footer={
         <>
           Butuh tautan baru?{" "}
-          <Link className="font-semibold text-brand hover:text-brand-dark" href="/lupa-password">
+          <Link className="font-medium text-brand transition-colors duration-300 ease-out hover:text-brand-orange" href="/lupa-password">
             Minta ulang
           </Link>
         </>

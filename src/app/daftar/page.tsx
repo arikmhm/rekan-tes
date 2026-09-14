@@ -21,7 +21,7 @@ export default async function DaftarPage() {
       footer={
         <>
           Sudah punya akun?{" "}
-          <Link className="font-semibold text-brand hover:text-brand-dark" href="/masuk">
+          <Link className="font-medium text-brand transition-colors duration-300 ease-out hover:text-brand-orange" href="/masuk">
             Masuk
           </Link>
         </>

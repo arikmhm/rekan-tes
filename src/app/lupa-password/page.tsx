@@ -14,7 +14,7 @@ export default function LupaPasswordPage() {
       footer={
         <>
           Ingat password Anda?{" "}
-          <Link className="font-semibold text-brand hover:text-brand-dark" href="/masuk">
+          <Link className="font-medium text-brand transition-colors duration-300 ease-out hover:text-brand-orange" href="/masuk">
             Masuk
           </Link>
         </>

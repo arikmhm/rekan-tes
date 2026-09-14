@@ -21,11 +21,11 @@ export default async function MasukPage() {
       footer={
         <>
           Belum punya akun?{" "}
-          <Link className="font-semibold text-brand hover:text-brand-dark" href="/daftar">
+          <Link className="font-medium text-brand transition-colors duration-300 ease-out hover:text-brand-orange" href="/daftar">
             Daftar
           </Link>
           {" · "}
-          <Link className="font-semibold text-brand hover:text-brand-dark" href="/lupa-password">
+          <Link className="font-medium text-brand transition-colors duration-300 ease-out hover:text-brand-orange" href="/lupa-password">
             Lupa password
           </Link>
         </>

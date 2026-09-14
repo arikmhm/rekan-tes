@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { PhoneChat } from "./_components/phone-chat";
-import { TestPreview, TestPreviewStatis } from "./_components/test-preview";
+import { TestPreview } from "./_components/test-preview";
 import { LegalLinks, SiteHeader } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
@@ -63,6 +63,22 @@ export default async function Home() {
             </Link>
           </div>
         </section>
+
+        {/* Rekaman sesi pengerjaan sebagai gambar produk: berjalan sendiri,
+            mengulang, tanpa suara, dan tidak menerima klik sama sekali — ini
+            gambar yang bergerak, bukan pemutar video yang perlu dilayani. */}
+        <div className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
+          <video
+            src="/hero.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            aria-hidden
+            tabIndex={-1}
+            className={`pointer-events-none w-full rounded-2xl border ${hairline} bg-cream`}
+          />
+        </div>
         <section id="mulai" className={` bg-white px-5  sm:px-8`}>
           <div className="mx-auto max-w-6xl bg-brand-orange/80 px-5 pt-16 sm:pt-24 sm:px-8 rounded-t-2xl sm:rounded-t-2xl">
             <h2 className="mx-auto max-w-xl text-center text-3xl font-medium tracking-[-0.01em] text-white sm:text-4xl">
@@ -73,13 +89,6 @@ export default async function Home() {
             </div>
           </div>
         </section>
-        {/* Slot untuk video simulasi yang looping begitu asetnya tersedia.
-            Sementara ini diisi tampilan halaman pengerjaan yang sesungguhnya,
-            supaya pengunjung tetap melihat produknya, bukan kotak kosong. */}
-        {/* <div className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
-          <TestPreviewStatis />
-        </div> */}
-
         <section
           id="coba"
           className="mx-auto py-16 px-5 sm:px-8 sm:py-24 bg-gray-50"

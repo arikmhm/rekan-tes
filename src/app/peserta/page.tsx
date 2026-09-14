@@ -18,9 +18,10 @@ export const dynamic = "force-dynamic";
 
 const hairline = "border-[#105C78]/20";
 
-// Dua produk pertama ikut disorot di korsel. Lebih dari itu korsel berubah jadi
-// daftar kedua, padahal daftar aslinya ada tepat di bawahnya.
-const SOROTAN = 2;
+// Tiga produk pertama disorot di korsel: dua muat sekaligus di layar lebar,
+// jadi yang ketiga memberi korselnya sesuatu untuk digeser. Lebih dari itu ia
+// berubah jadi daftar kedua, padahal daftar aslinya ada tepat di bawahnya.
+const SOROTAN = 3;
 
 const slide = "w-full shrink-0 snap-start sm:w-[calc(50%-0.5rem)]";
 
@@ -67,69 +68,43 @@ export default async function PesertaPage({
         </Link>
       )}
 
-      <Korsel>
-        <article
-          className={`${slide} relative overflow-hidden rounded-2xl bg-brand p-7 text-white`}
-        >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.18] mask-[linear-gradient(to_bottom,black,transparent)]"
-          />
-          <div className="relative flex h-full flex-col">
-            <p className="text-xs font-medium text-brand-orange">Gratis</p>
-            <h2 className="mt-2 text-2xl leading-snug font-medium tracking-[-0.01em]">
-              Coba simulasi contoh sebelum membeli
-            </h2>
-            <p className="mt-2 max-w-sm text-sm leading-6 font-normal text-white/70">
-              Sepuluh soal, berwaktu, lengkap dengan skor dan pembahasannya.
-            </p>
-            <Link
-              href="/simulasi"
-              className="group mt-auto flex w-fit items-center gap-2 pt-6 text-sm font-normal text-white/90 transition-colors duration-300 ease-out hover:text-white"
+      {produk.length > 0 && (
+        <Korsel>
+          {produk.slice(0, SOROTAN).map((p) => (
+            <article
+              key={p.slug}
+              className={`${slide} rounded-2xl bg-brand-orange/15 p-7`}
             >
-              Mulai simulasi gratis
-              <ArrowRight
-                className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1"
-                aria-hidden
-              />
-            </Link>
-          </div>
-        </article>
-
-        {produk.slice(0, SOROTAN).map((p) => (
-          <article
-            key={p.slug}
-            className={`${slide} rounded-2xl bg-brand-orange/15 p-7`}
-          >
-            <div className="flex h-full flex-col">
-              <p className="text-xs font-medium text-brand-orange">
-                {JENIS[p.jenis].label}
-              </p>
-              <h2 className="mt-2 text-2xl leading-snug font-medium tracking-[-0.01em] text-brand">
-                {p.nama}
-              </h2>
-              <p className="mt-2 line-clamp-2 max-w-sm text-sm leading-6 font-normal text-brand/70">
-                {p.deskripsi}
-              </p>
-              <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
-                <p className="text-lg font-medium text-brand-orange">
-                  {formatPrice(p.harga)}
+              <div className="flex h-full flex-col">
+                <p className="text-xs font-medium text-brand-orange">
+                  {JENIS[p.jenis].label}
                 </p>
-                <Link
-                  href={`/peserta/produk/${p.slug}`}
-                  className="group flex items-center gap-2 text-sm font-normal text-brand transition-colors duration-300 ease-out hover:text-brand-orange"
-                >
-                  Lihat detail
-                  <ArrowRight
-                    className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1"
-                    aria-hidden
-                  />
-                </Link>
+                <h2 className="mt-2 text-2xl leading-snug font-medium tracking-[-0.01em] text-brand">
+                  {p.nama}
+                </h2>
+                <p className="mt-2 line-clamp-2 max-w-sm text-sm leading-6 font-normal text-brand/70">
+                  {p.deskripsi}
+                </p>
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
+                  <p className="text-lg font-medium text-brand-orange">
+                    {formatPrice(p.harga)}
+                  </p>
+                  <Link
+                    href={`/peserta/produk/${p.slug}`}
+                    className="group flex items-center gap-2 text-sm font-normal text-brand transition-colors duration-300 ease-out hover:text-brand-orange"
+                  >
+                    Lihat detail
+                    <ArrowRight
+                      className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1"
+                      aria-hidden
+                    />
+                  </Link>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
-      </Korsel>
+            </article>
+          ))}
+        </Korsel>
+      )}
 
       <div
         className={`mt-8 flex flex-wrap items-center gap-2 border-b ${hairline} pb-5`}

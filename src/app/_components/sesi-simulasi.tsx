@@ -17,16 +17,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
-
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
 
 import type { Paket, Soal } from "../simulasi/data";
+
+import { Donat, Kartu, menitDetik, Sebaran } from "./hasil-ui";
 
 const hairline = "border-[#105C78]/20";
 
@@ -537,7 +531,12 @@ function Hasil({
         </Kartu>
 
         <Kartu judul="Analisis subtes" Ikon={TrendingUp} tanda="Saran">
-          <SebaranSubtes soal={soal} jawaban={jawaban} />
+          <Sebaran
+            data={perSubtes.map((x) => ({
+              subtes: x.singkat,
+              nilai: x.persen,
+            }))}
+          />
           <p className="mt-4 rounded-xl bg-cream px-4 py-3 text-xs leading-5 font-normal text-brand/70">
             <span className="block font-medium text-brand">
               Fokus berikutnya
@@ -697,88 +696,6 @@ function Hasil({
   );
 }
 
-/** Kartu hasil: judul kecil berikon di atas, isi bebas di bawahnya. */
-function Kartu({
-  judul,
-  Ikon,
-  tanda,
-  kelas = "",
-  children,
-}: {
-  judul: string;
-  Ikon: typeof Award;
-  tanda?: string;
-  /** Rentang kolom atau perataan tambahan saat kartu duduk di dalam grid. */
-  kelas?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className={`rounded-2xl border ${hairline} bg-white p-5 sm:p-6 ${kelas}`}
-    >
-      <div
-        className={`flex items-center justify-between gap-3 border-b ${hairline} pb-4`}
-      >
-        <p className="flex min-w-0 items-center gap-2 text-sm font-medium text-brand">
-          <Ikon className="size-4 shrink-0 text-brand-orange" aria-hidden />
-          <span className="truncate">{judul}</span>
-        </p>
-        {tanda && (
-          <span className="shrink-0 rounded-full bg-cream px-2.5 py-1 font-mono text-[11px] font-medium text-brand/70">
-            {tanda}
-          </span>
-        )}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-/** Cincin akurasi. Angkanya tetap tertulis, jadi bukan cuma bentuk. */
-function Donat({
-  persen,
-  angka,
-  dari,
-}: {
-  persen: number;
-  angka: number;
-  dari: number;
-}) {
-  const r = 52;
-  const keliling = 2 * Math.PI * r;
-
-  return (
-    <div className="relative grid size-36 place-items-center">
-      <svg viewBox="0 0 120 120" className="absolute size-36 -rotate-90">
-        <circle
-          cx="60"
-          cy="60"
-          r={r}
-          fill="none"
-          strokeWidth="10"
-          className="stroke-brand/10"
-        />
-        <circle
-          cx="60"
-          cy="60"
-          r={r}
-          fill="none"
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray={`${(persen / 100) * keliling} ${keliling}`}
-          className="stroke-brand-orange"
-        />
-      </svg>
-      <div className="text-center">
-        <p className="text-3xl font-medium text-brand">{persen}%</p>
-        <p className="mt-0.5 text-xs font-normal text-brand/60">
-          {angka} dari {dari}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 /** Warna dan label satu kotak di peta kecepatan. */
 function laraSoal(jawab: number | null, tepat: boolean, cepat: boolean) {
   if (jawab === null)
@@ -813,11 +730,15 @@ const KETERANGAN: [string, string][] = [
 
 /** Benar dan total tiap subtes, dipakai radar sekaligus kalimat rekomendasi. */
 function ringkasSubtes(soal: Soal[], jawaban: (number | null)[]) {
-  const per = new Map<string, { nama: string; benar: number; total: number }>();
+  const per = new Map<
+    string,
+    { nama: string; singkat: string; benar: number; total: number }
+  >();
 
   soal.forEach((s, i) => {
     const catatan = per.get(s.singkat) ?? {
       nama: s.subtes,
+      singkat: s.singkat,
       benar: 0,
       total: 0,
     };
@@ -830,74 +751,4 @@ function ringkasSubtes(soal: Soal[], jawaban: (number | null)[]) {
     ...c,
     persen: Math.round((c.benar / c.total) * 100),
   }));
-}
-
-const konfigSebaran = {
-  nilai: { label: "Skor", color: "var(--color-brand-orange)" },
-} satisfies ChartConfig;
-
-/**
- * Sebaran nilai per subtes: persentase soal yang benar di tiap subtes. Grafiknya
- * jadi bagian atas kartu hasil karena keduanya menjawab pertanyaan yang sama —
- * bagian mana yang sudah aman, bagian mana yang perlu dikejar.
- */
-function SebaranSubtes({
-  soal,
-  jawaban,
-}: {
-  soal: Soal[];
-  jawaban: (number | null)[];
-}) {
-  const perSubtes = new Map<string, { benar: number; total: number }>();
-
-  soal.forEach((s, i) => {
-    const catatan = perSubtes.get(s.singkat) ?? { benar: 0, total: 0 };
-    catatan.total += 1;
-    if (jawaban[i] === s.kunci) catatan.benar += 1;
-    perSubtes.set(s.singkat, catatan);
-  });
-
-  const data = [...perSubtes].map(([subtes, { benar, total }]) => ({
-    subtes,
-    nilai: Math.round((benar / total) * 100),
-  }));
-
-  return (
-    <>
-      <ChartContainer
-        config={konfigSebaran}
-        className="mx-auto mt-4 aspect-square w-full max-w-72"
-      >
-        <RadarChart data={data} outerRadius="68%">
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel={false} />}
-          />
-          <PolarGrid stroke="var(--color-brand)" strokeOpacity={0.2} />
-          <PolarAngleAxis
-            dataKey="subtes"
-            tick={{ fill: "var(--color-brand)", fontSize: 11 }}
-          />
-          <Radar
-            dataKey="nilai"
-            // Animasi masuk recharts tidak pernah berjalan di dalam lapisan
-            // layar penuh ini dan meninggalkan poligon yang menciut di titik
-            // pusat — grafiknya jadi kosong. Digambar langsung di posisi akhir.
-            isAnimationActive={false}
-            fill="var(--color-nilai)"
-            fillOpacity={0.45}
-            stroke="var(--color-nilai)"
-            strokeWidth={2}
-          />
-        </RadarChart>
-      </ChartContainer>
-      <p className="text-center text-xs font-normal text-brand/60">
-        Persentase jawaban benar di tiap subtes.
-      </p>
-    </>
-  );
-}
-
-function menitDetik(detik: number) {
-  return `${String(Math.floor(detik / 60)).padStart(2, "0")}:${String(detik % 60).padStart(2, "0")}`;
 }

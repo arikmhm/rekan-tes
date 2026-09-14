@@ -127,7 +127,7 @@ export default async function PustakaPage({
                   className={`mt-auto flex flex-wrap items-center justify-between gap-3 border-t ${hairline} pt-5`}
                 >
                   <Link
-                    href={`/order/${m.id}`}
+                    href={`/peserta/pesanan/${m.id}`}
                     className="text-sm font-normal text-brand/60 transition-colors duration-300 ease-out hover:text-brand-orange"
                   >
                     Rincian pesanan
@@ -137,8 +137,8 @@ export default async function PustakaPage({
                     <Link
                       href={
                         rampung
-                          ? `/attempt/${m.attemptId}/hasil`
-                          : `/attempt/${m.attemptId}`
+                          ? `/peserta/simulasi/${m.attemptId}/hasil`
+                          : `/peserta/simulasi/${m.attemptId}`
                       }
                       className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-4 text-sm font-normal text-white transition-colors duration-300 ease-out hover:bg-brand-orange"
                     >

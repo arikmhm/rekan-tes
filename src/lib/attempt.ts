@@ -61,6 +61,10 @@ export async function getAttempt(id: string) {
       id: schema.attemptSubtests.id,
       status: schema.attemptSubtests.status,
       startedAt: schema.attemptSubtests.startedAt,
+      // Dipakai halaman hasil untuk menghitung waktu yang benar-benar terpakai
+      // tiap subtes, bukan rentang dari mulai sampai kumpul yang ikut memuat
+      // jeda di antara subtes.
+      submittedAt: schema.attemptSubtests.submittedAt,
     })
     .from(schema.testSubtests)
     .innerJoin(schema.subtests, eq(schema.subtests.id, schema.testSubtests.subtestId))
@@ -340,7 +344,7 @@ export async function startAttempt(_prev: string | null, form: FormData) {
     );
   });
 
-  revalidatePath(`/attempt/${attempt.id}`);
+  revalidatePath(`/peserta/simulasi/${attempt.id}`);
   return null;
 }
 
@@ -407,7 +411,7 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
     await finalizeAttempt(tx, attempt.id);
   });
 
-  revalidatePath(`/attempt/${attempt.id}`);
+  revalidatePath(`/peserta/simulasi/${attempt.id}`);
   return null;
 }
 
@@ -454,7 +458,7 @@ export async function saveAnswer(_prev: string | null, form: FormData) {
       set: { selectedOptionId: optionId, answeredAt: now, updatedAt: now },
     });
 
-  revalidatePath(`/attempt/${attempt.id}`);
+  revalidatePath(`/peserta/simulasi/${attempt.id}`);
   return null;
 }
 

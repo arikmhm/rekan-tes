@@ -59,7 +59,7 @@ export default async function PesananPage() {
           {pesanan.map((p) => (
             <li key={p.id}>
               <Link
-                href={`/order/${p.id}`}
+                href={`/peserta/pesanan/${p.id}`}
                 className={`group flex flex-wrap items-center justify-between gap-4 rounded-2xl border ${hairline} bg-white px-5 py-4 transition-colors hover:border-brand-orange`}
               >
                 <div className="min-w-0">

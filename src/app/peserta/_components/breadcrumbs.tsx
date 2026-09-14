@@ -17,6 +17,17 @@ const label: Record<string, string> = {
   pesanan: "Pesanan",
   pustaka: "Pustaka",
   profil: "Profil",
+  simulasi: "Simulasi",
+  hasil: "Hasil",
+};
+
+/**
+ * Sesi pengerjaan tinggal di /peserta/simulasi/<id>, padahal daftar simulasi
+ * miliknya ada di pustaka. Remah "Simulasi" karena itu menunjuk ke sana, bukan
+ * ke /peserta/simulasi yang memang bukan halaman.
+ */
+const INDUK: Record<string, { href: string; teks: string }> = {
+  simulasi: { href: "/peserta/pustaka", teks: "Pustaka" },
 };
 
 const labelJenis: Record<string, string> = {
@@ -42,8 +53,19 @@ export function PesertaBreadcrumbs() {
       ? [{ href: "/peserta", teks: "Produk" }]
       : segmen.map((s, i) => ({
           href: `/peserta/${segmen.slice(0, i + 1).join("/")}`,
-          teks: label[s] ?? s,
+          // Segmen id tidak punya nama yang terbaca di sini; memuat datanya
+          // ulang cuma demi remah tidak sepadan, jadi cukup disebut "Rincian".
+          teks: label[s] ?? (s.length > 20 ? "Rincian" : s),
         }));
+
+  const induk = INDUK[segmen[0]];
+  if (induk) {
+    remah[0] = {
+      href: `/peserta/pustaka?jenis=${segmen[0]}`,
+      teks: label[segmen[0]],
+    };
+    remah.unshift(induk);
+  }
 
   if (segmen[0] === "pustaka" && jenis && labelJenis[jenis]) {
     remah.push({

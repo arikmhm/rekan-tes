@@ -59,7 +59,7 @@ export async function startCheckout(_prev: string | null, form: FormData) {
       .orderBy(desc(schema.payments.createdAt))
       .limit(1);
 
-    if (hidup?.qrContent) redirect(`/order/${pending.id}`);
+    if (hidup?.qrContent) redirect(`/peserta/pesanan/${pending.id}`);
   }
 
   // Order lama mempertahankan harganya; katalog boleh berubah setelahnya.
@@ -114,7 +114,7 @@ export async function startCheckout(_prev: string | null, form: FormData) {
 
   // QR ditampilkan di halaman kami sendiri; peserta tidak pernah keluar dari
   // aplikasi, jadi tidak ada redirect yang perlu dipercaya sebagai bukti bayar.
-  redirect(`/order/${orderId}`);
+  redirect(`/peserta/pesanan/${orderId}`);
 }
 
 /**
@@ -132,7 +132,7 @@ export async function checkPaymentStatus(_prev: string | null, form: FormData) {
   if (!order) return "Pesanan tidak ditemukan.";
 
   if (order.status !== "pending") {
-    revalidatePath(`/order/${orderId}`);
+    revalidatePath(`/peserta/pesanan/${orderId}`);
     return null;
   }
 
@@ -152,7 +152,7 @@ export async function checkPaymentStatus(_prev: string | null, form: FormData) {
     return "Gagal menghubungi DOKU. Coba lagi beberapa saat.";
   }
 
-  revalidatePath(`/order/${orderId}`);
+  revalidatePath(`/peserta/pesanan/${orderId}`);
 
   if (hasil.result === "still_pending") {
     return "Belum terbaca sebagai lunas. Pastikan pembayaran sudah selesai, lalu coba lagi.";

@@ -34,22 +34,25 @@ export function AnswerOptions({
   const [terpilih, pilihOptimistis] = useOptimistic(selectedOptionId);
   const [pernahKirim, setPernahKirim] = useState(false);
 
-  const [galat, action, pending] = useActionState(async (_prev: string | null, form: FormData) => {
-    pilihOptimistis(String(form.get("optionId") ?? ""));
-    setPernahKirim(true);
+  const [galat, action, pending] = useActionState(
+    async (_prev: string | null, form: FormData) => {
+      pilihOptimistis(String(form.get("optionId") ?? ""));
+      setPernahKirim(true);
 
-    try {
-      return await saveAnswer(null, form);
-    } catch {
-      // Aksi gagal terkirim sama sekali (koneksi putus, server mati). Tanpa
-      // tangkapan ini React melempar ke error boundary dan seluruh halaman
-      // pengerjaan hilang bersama sisa waktu yang sedang berjalan.
-      return "Jawaban belum tersimpan karena koneksi bermasalah. Pilih lagi setelah koneksi pulih.";
-    }
-  }, null);
+      try {
+        return await saveAnswer(null, form);
+      } catch {
+        // Aksi gagal terkirim sama sekali (koneksi putus, server mati). Tanpa
+        // tangkapan ini React melempar ke error boundary dan seluruh halaman
+        // pengerjaan hilang bersama sisa waktu yang sedang berjalan.
+        return "Jawaban belum tersimpan karena koneksi bermasalah. Pilih lagi setelah koneksi pulih.";
+      }
+    },
+    null,
+  );
 
   return (
-    <form action={action} className="mt-6 space-y-3">
+    <form action={action} className="mt-6 space-y-2.5">
       <input type="hidden" name="attemptId" value={attemptId} />
       <input type="hidden" name="assignmentId" value={assignmentId} />
 
@@ -63,18 +66,24 @@ export function AnswerOptions({
             name="optionId"
             value={o.id}
             aria-pressed={aktif}
-            className={`flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition ${
-              aktif ? "border-brand bg-mint/60" : "border-black/12 bg-white hover:border-brand/30"
+            className={`flex w-full cursor-pointer items-start gap-3 rounded-lg border p-3.5 text-left transition-colors ${
+              aktif
+                ? "border-brand bg-brand/5"
+                : "border-[#105C78]/20 bg-white hover:border-brand/40"
             }`}
           >
             <span
-              className={`grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold ${
-                aktif ? "bg-brand text-white" : "bg-cream text-ink"
+              className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-medium ${
+                aktif
+                  ? "bg-brand text-white"
+                  : "border border-brand/30 text-brand/50"
               }`}
             >
               {o.label}
             </span>
-            <span className="text-sm leading-6">{o.content}</span>
+            <span className="text-sm leading-6 font-normal text-brand">
+              {o.content}
+            </span>
           </button>
         );
       })}
@@ -83,12 +92,15 @@ export function AnswerOptions({
           `galat` masih berisi hasil percobaan sebelumnya — menampilkannya akan
           mengabarkan kegagalan yang sedang dicoba ulang saat itu juga. */}
       {!pending && galat ? (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
           {galat}
         </p>
       ) : (
         // Ruangnya tetap ada agar teks status tidak menggeser daftar opsi.
-        <p role="status" className="min-h-5 text-xs font-semibold text-muted-foreground">
+        <p role="status" className="min-h-5 text-xs font-medium text-brand/50">
           {pending ? "Menyimpan…" : pernahKirim ? "Tersimpan" : ""}
         </p>
       )}

@@ -17,7 +17,7 @@ export function CheckoutButton({ slug }: { slug: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="h-12 w-full rounded-lg bg-brand px-6 text-sm font-normal text-white transition-colors hover:bg-brand-orange disabled:opacity-60 sm:w-auto"
+        className="h-12 w-full rounded-lg bg-brand px-6 text-sm font-normal text-white transition-colors hover:bg-brand-orange disabled:opacity-60"
       >
         {pending ? "Menyiapkan QRIS…" : "Bayar dengan QRIS"}
       </button>

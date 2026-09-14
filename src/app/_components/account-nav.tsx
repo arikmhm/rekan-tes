@@ -6,9 +6,9 @@ import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
-const linkClass = "transition hover:text-ink";
+const linkClass = "transition hover:text-brand-orange";
 const buttonClass =
-  "rounded-full border border-black/10 bg-white px-4 py-2 font-semibold text-ink shadow-sm transition hover:border-brand/30";
+  "rounded-lg border border-[#105C78]/20 bg-white px-4 py-2 font-normal text-brand transition-colors hover:bg-brand hover:text-white";
 
 /**
  * Dipakai dari halaman statis, sehingga session dibaca di browser agar landing
@@ -48,7 +48,7 @@ export function AccountNav() {
         </Link>
       )}
       {/* Identitas sudah diwakili tautan "Akun" di layar sempit. */}
-      <span className="hidden font-semibold text-ink sm:inline">
+      <span className="hidden font-medium text-brand sm:inline">
         {session.user.username ?? session.user.name}
       </span>
       <button

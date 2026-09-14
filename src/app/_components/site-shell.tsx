@@ -18,30 +18,7 @@ export const KONTAK = emailAddress(env.EMAIL_FROM);
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <header className="border-b border-[#105C78]/20 bg-white">
-        <nav
-          aria-label="Navigasi utama"
-          className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8"
-        >
-          <Link
-            href="/"
-            className="flex items-center gap-3 font-semibold tracking-tight text-brand transition-opacity hover:opacity-70"
-          >
-            <span className="grid size-9 place-items-center rounded-lg bg-brand text-sm font-bold text-white">
-              RT
-            </span>
-            <span className="text-lg">Rekan Tes</span>
-          </Link>
-          {/* Jarak dirapatkan di layar sempit; dengan gap-7 isi nav meluber
-              melewati 375 px dan membuat seluruh halaman bisa digeser. */}
-          <div className="flex items-center gap-3 text-sm font-normal text-brand sm:gap-7">
-            <Link className="transition hover:text-brand-orange" href="/tes">
-              Katalog
-            </Link>
-            <AccountNav />
-          </div>
-        </nav>
-      </header>
+      <SiteHeader />
 
       <main className="flex-1">{children}</main>
 
@@ -57,6 +34,36 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         </div>
       </footer>
     </>
+  );
+}
+
+/**
+ * Header publik, satu untuk semua halaman termasuk landing page. Isinya sengaja
+ * cuma nama, katalog, dan akun: sama persis di ponsel maupun layar lebar,
+ * sehingga tidak ada tautan yang hilang tergantung lebar layar.
+ */
+export function SiteHeader() {
+  return (
+    <header className="relative z-10 border-b border-[#105C78]/20 bg-white">
+      <nav
+        aria-label="Navigasi utama"
+        className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8"
+      >
+        <Link
+          href="/"
+          className="text-lg font-semibold tracking-tight text-brand transition-opacity hover:opacity-70"
+        >
+          Rekan Tes
+        </Link>
+        <div className="flex items-center gap-3 text-sm font-normal text-brand sm:gap-5">
+          <Link className="transition hover:text-brand-orange" href="/tes">
+            Katalog
+          </Link>
+          <span className="h-4 w-px bg-brand/20" aria-hidden />
+          <AccountNav />
+        </div>
+      </nav>
+    </header>
   );
 }
 

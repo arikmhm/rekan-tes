@@ -2,10 +2,9 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { AccountNav } from "./_components/account-nav";
 import { PhoneChat } from "./_components/phone-chat";
 import { TestPreview, TestPreviewStatis } from "./_components/test-preview";
-import { LegalLinks } from "./_components/site-shell";
+import { LegalLinks, SiteHeader } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
 const langkah = [
@@ -35,40 +34,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white text-brand">
-      <header className={`relative z-10 border-b ${hairline} bg-white`}>
-        <nav
-          aria-label="Navigasi utama"
-          className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8"
-        >
-          <a
-            href="#top"
-            className="flex items-center gap-3 font-semibold tracking-tight transition-opacity hover:opacity-70"
-          >
-            <span className="grid size-9 place-items-center rounded-lg bg-brand text-sm font-bold text-white">
-              RT
-            </span>
-            <span className="text-lg">Rekan Tes</span>
-          </a>
-          <div className="flex items-center gap-3 text-sm font-normal text-brand sm:gap-7">
-            <Link className="transition hover:text-brand-orange" href="/tes">
-              Katalog
-            </Link>
-            <a
-              className="hidden transition hover:text-brand-orange sm:inline"
-              href="#mulai"
-            >
-              Mulai
-            </a>
-            <a
-              className="hidden transition hover:text-brand-orange sm:inline"
-              href="#coba"
-            >
-              Coba gratis
-            </a>
-            <AccountNav />
-          </div>
-        </nav>
-      </header>
+      <SiteHeader />
 
       <main id="top">
         <section className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-5 py-16 text-center sm:px-8 sm:py-20">
@@ -97,19 +63,8 @@ export default async function Home() {
             </Link>
           </div>
         </section>
-
-        {/* Slot untuk video simulasi yang looping begitu asetnya tersedia.
-            Sementara ini diisi tampilan halaman pengerjaan yang sesungguhnya,
-            supaya pengunjung tetap melihat produknya, bukan kotak kosong. */}
-        <div className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
-          <TestPreviewStatis />
-        </div>
-
-        <section
-          id="mulai"
-          className={`border-b ${hairline} bg-white px-5 pt-16 sm:px-8 sm:pt-20`}
-        >
-          <div className="mx-auto max-w-6xl bg-brand-orange/80 px-5 pt-16 sm:pt-8 sm:px-8 rounded-t-2xl sm:rounded-t-xl">
+        <section id="mulai" className={` bg-white px-5  sm:px-8`}>
+          <div className="mx-auto max-w-6xl bg-brand-orange/80 px-5 pt-16 sm:pt-24 sm:px-8 rounded-t-2xl sm:rounded-t-2xl">
             <h2 className="mx-auto max-w-xl text-center text-3xl font-medium tracking-[-0.01em] text-white sm:text-4xl">
               Bingung Harus Mulai dari Mana?
             </h2>
@@ -118,15 +73,24 @@ export default async function Home() {
             </div>
           </div>
         </section>
+        {/* Slot untuk video simulasi yang looping begitu asetnya tersedia.
+            Sementara ini diisi tampilan halaman pengerjaan yang sesungguhnya,
+            supaya pengunjung tetap melihat produknya, bukan kotak kosong. */}
+        {/* <div className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
+          <TestPreviewStatis />
+        </div> */}
 
-        <section id="coba" className="mx-auto py-16 px-5 sm:px-8 sm:py-24">
+        <section
+          id="coba"
+          className="mx-auto py-16 px-5 sm:px-8 sm:py-24 bg-gray-50"
+        >
           <TestPreview />
         </section>
 
         {/* Penutup halaman: alurnya dulu, baru ajakan. Pengunjung yang sudah
             mencoba simulasi di atas tinggal perlu tahu langkah setelahnya. */}
         <section id="cara-kerja" className="px-5 pb-16 sm:px-8 sm:pb-24">
-          <div className="mx-auto max-w-6xl overflow-hidden rounded-[6px] bg-brand px-7 py-10 text-white sm:px-10 sm:py-14">
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-brand px-7 py-10 text-white sm:px-10 sm:py-14">
             <h2 className="max-w-xl text-3xl font-medium tracking-[-0.01em] sm:text-4xl">
               Bayar sekali per simulasi, kerjakan saat kamu siap.
             </h2>

@@ -67,7 +67,7 @@ export default async function Home() {
         {/* Rekaman sesi pengerjaan sebagai gambar produk: berjalan sendiri,
             mengulang, tanpa suara, dan tidak menerima klik sama sekali — ini
             gambar yang bergerak, bukan pemutar video yang perlu dilayani. */}
-        <div className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
+        <div className="mx-auto w-full max-w-6xl pb-16 px-5 sm:px-0 md:px-0 sm:pb-20">
           <video
             src="/hero.mp4"
             autoPlay
@@ -76,7 +76,7 @@ export default async function Home() {
             playsInline
             aria-hidden
             tabIndex={-1}
-            className={`pointer-events-none w-full rounded-2xl border ${hairline} bg-cream`}
+            className={`pointer-events-none w-full rounded-lg border ${hairline} bg-cream`}
           />
         </div>
         <section id="mulai" className={` bg-white px-5  sm:px-8`}>
@@ -98,7 +98,7 @@ export default async function Home() {
 
         {/* Penutup halaman: alurnya dulu, baru ajakan. Pengunjung yang sudah
             mencoba simulasi di atas tinggal perlu tahu langkah setelahnya. */}
-        <section id="cara-kerja" className="px-5 pb-16 sm:px-8 sm:pb-24">
+        <section id="cara-kerja" className="px-5 py-16 sm:px-8 sm:pb-24">
           <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-brand px-7 py-10 text-white sm:px-10 sm:py-14">
             <h2 className="max-w-xl text-3xl font-medium tracking-[-0.01em] sm:text-4xl">
               Bayar sekali per simulasi, kerjakan saat kamu siap.

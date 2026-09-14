@@ -12,6 +12,7 @@ import {
   Gauge,
   RotateCcw,
   TrendingUp,
+  TriangleAlert,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -55,6 +56,7 @@ export function SesiSimulasi({ paket }: { paket: Paket }) {
   // waktuSoal setiap kali peserta berpindah — tanpa ini peta kecepatan di layar
   // hasil tidak punya bahan.
   const masuk = useRef(0);
+  const dialogKirim = useRef<HTMLDialogElement>(null);
 
   // Jam mulai dipasang setelah sesi terpasang, bukan saat render: membaca jam
   // di badan komponen membuat hasil render bergantung pada waktu.
@@ -108,10 +110,80 @@ export function SesiSimulasi({ paket }: { paket: Paket }) {
   const terjawab = jawaban.filter((j) => j !== null).length;
 
   return (
-    <div className="flex min-h-full flex-col">
-      {/* Header dan footer membingkai sesi seperti aplikasi ujian sungguhan:
-          identitas dan sisa waktu selalu di atas, kendali perpindahan soal
-          selalu di bawah — keduanya tidak ikut tergulir bersama soal. */}
+    <div className="flex flex-1 flex-col">
+      {/* Konfirmasi kirim memakai <dialog> bawaan peramban: modalitas, jebakan
+          fokus, dan tombol Esc datang dari platform. Ditaruh di luar <main>
+          supaya tidak ikut tersapu saat isi berganti ke layar hasil. */}
+      <dialog
+        ref={dialogKirim}
+        aria-labelledby="judul-kirim"
+        className={`m-auto w-[min(26rem,calc(100vw-2.5rem))] rounded-2xl border ${hairline} bg-white p-0 text-brand shadow-[0_24px_60px_rgba(16,92,120,0.22)] backdrop:bg-brand/40`}
+      >
+        <div className="p-6 sm:p-7">
+          <h2
+            id="judul-kirim"
+            className="text-xl font-medium tracking-[-0.01em] text-brand"
+          >
+            Kirim jawaban sekarang?
+          </h2>
+          <p className="mt-2 text-sm leading-6 font-normal text-brand/70">
+            Setelah dikirim, jawaban tidak bisa diubah lagi dan skor beserta
+            pembahasannya langsung terbuka.
+          </p>
+
+          <dl
+            className={`mt-5 flex flex-wrap gap-x-6 gap-y-2 border-y ${hairline} py-4 text-sm font-normal text-brand/70`}
+          >
+            <div className="flex items-center gap-2">
+              <dt>Terjawab</dt>
+              <dd className="font-medium text-brand">
+                {terjawab} dari {soal.length}
+              </dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <dt>Sisa waktu</dt>
+              <dd className="font-mono font-medium text-brand tabular-nums">
+                {menitDetik(sisa)}
+              </dd>
+            </div>
+          </dl>
+
+          {kosong > 0 && (
+            <p className="mt-4 flex items-start gap-2 text-xs leading-5 font-normal text-brand/60">
+              <TriangleAlert
+                className="mt-0.5 size-4 shrink-0 text-brand-orange"
+                aria-hidden
+              />
+              Masih ada {kosong} soal kosong. Soal kosong dihitung nol.
+            </p>
+          )}
+
+          <div className="mt-6 flex flex-col gap-2.5 sm:flex-row-reverse">
+            <button
+              type="button"
+              onClick={() => {
+                dialogKirim.current?.close();
+                kirim();
+              }}
+              className="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-orange px-5 text-sm font-normal text-white transition-colors hover:bg-brand"
+            >
+              Ya, kirim
+              <ArrowRight className="size-4" aria-hidden />
+            </button>
+            <form method="dialog" className="flex-1">
+              <button
+                type="submit"
+                className={`h-11 w-full cursor-pointer rounded-lg border ${hairline} text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
+              >
+                Periksa lagi
+              </button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+
+      {/* Header menempel seperti aplikasi ujian sungguhan: identitas sesi dan
+          sisa waktu tidak boleh ikut tergulir bersama soal. */}
       <header
         className={`sticky top-0 z-10 border-b ${hairline} bg-white/95 backdrop-blur`}
       >
@@ -205,61 +277,42 @@ export function SesiSimulasi({ paket }: { paket: Paket }) {
                   );
                 })}
               </div>
+
+              {/* Kendali perpindahan menempel di bawah soalnya sendiri, sejalan
+                  dengan arah baca: baca soal, pilih jawaban, lanjut. */}
+              <div
+                className={`mt-7 flex items-center justify-between border-t ${hairline} pt-5`}
+              >
+                <button
+                  type="button"
+                  onClick={() => pindah(nomor - 1)}
+                  disabled={nomor === 0}
+                  className={`inline-flex h-10 items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-40`}
+                >
+                  <ArrowLeft className="size-4" aria-hidden />
+                  Sebelumnya
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pindah(nomor + 1)}
+                  disabled={nomor === soal.length - 1}
+                  className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange disabled:pointer-events-none disabled:opacity-40"
+                >
+                  Berikutnya
+                  <ArrowRight className="size-4" aria-hidden />
+                </button>
+              </div>
             </div>
 
             <Navigasi
               jawaban={jawaban}
               nomor={nomor}
               onPilihSoal={pindah}
-              onKirim={kirim}
+              onKirim={() => dialogKirim.current?.showModal()}
             />
           </div>
         )}
       </main>
-
-      <footer
-        className={`sticky bottom-0 border-t ${hairline} bg-white/95 backdrop-blur`}
-      >
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
-          <p className="min-w-0 truncate text-xs leading-5 font-normal text-brand/60">
-            {selesai
-              ? "Hasil percobaan. Jawaban dan skor ini tidak disimpan."
-              : `Soal ${nomor + 1} dari ${soal.length} · ${terjawab} terjawab`}
-          </p>
-
-          {selesai ? (
-            <button
-              type="button"
-              onClick={ulangi}
-              className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
-            >
-              <RotateCcw className="size-4" aria-hidden />
-              Ulangi
-            </button>
-          ) : (
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                onClick={() => pindah(nomor - 1)}
-                disabled={nomor === 0}
-                className={`inline-flex h-10 items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-40`}
-              >
-                <ArrowLeft className="size-4" aria-hidden />
-                <span className="hidden sm:inline">Sebelumnya</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => pindah(nomor + 1)}
-                disabled={nomor === soal.length - 1}
-                className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange disabled:pointer-events-none disabled:opacity-40"
-              >
-                <span className="hidden sm:inline">Berikutnya</span>
-                <ArrowRight className="size-4" aria-hidden />
-              </button>
-            </div>
-          )}
-        </div>
-      </footer>
     </div>
   );
 }
@@ -289,6 +342,9 @@ function Navigasi({
       className={`shrink-0 rounded-xl border ${hairline} bg-white p-5 lg:sticky lg:top-8 lg:w-72`}
     >
       <p className="text-xs font-medium text-brand/60">Navigasi soal</p>
+      <p className="mt-1 text-sm font-medium text-brand">
+        Soal {nomor + 1} dari {jawaban.length}
+      </p>
 
       <div className="mt-3 grid grid-cols-5 gap-2">
         {jawaban.map((j, i) => {

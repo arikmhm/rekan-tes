@@ -42,7 +42,7 @@ export default async function Home() {
               dengan judul maupun tombol di atasnya. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.09] [mask-image:linear-gradient(to_bottom,black,transparent)]"
+            className="pointer-events-none absolute inset-0 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.09] mask-[linear-gradient(to_bottom,black,transparent)]"
           />
 
           <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-5 py-16 text-center sm:px-8 sm:py-20">
@@ -104,7 +104,7 @@ export default async function Home() {
         <section id="coba" className="bg-gray-50 px-5 py-16 sm:px-8 sm:py-24">
           <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div>
-              <h2 className="max-w-lg text-3xl leading-[1.25] font-medium tracking-[-0.01em] text-brand sm:text-4xl">
+              <h2 className="max-w-lg text-3xl leading-tight font-medium tracking-[-0.01em] text-brand sm:text-4xl">
                 Coba simulasinya sekarang — tanpa daftar.
               </h2>
               <p className="mt-4 max-w-xl text-base leading-7 font-normal text-brand/70">

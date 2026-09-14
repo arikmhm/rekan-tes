@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AccountNav } from "./account-nav";
 
@@ -18,6 +18,15 @@ const garis =
  */
 export function MenuMobile() {
   const [buka, setBuka] = useState(false);
+
+  // Header ikut menyingkir saat halaman digulir, jadi panel yang sedang terbuka
+  // akan terseret keluar layar. Lebih jujur menutupnya sekalian.
+  useEffect(() => {
+    if (!buka) return;
+    const tutup = () => setBuka(false);
+    window.addEventListener("scroll", tutup, { passive: true });
+    return () => window.removeEventListener("scroll", tutup);
+  }, [buka]);
 
   return (
     <>

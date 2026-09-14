@@ -4,6 +4,7 @@ import { emailAddress } from "@/lib/email";
 import { env } from "@/lib/env";
 
 import { AccountNav } from "./account-nav";
+import { HeaderGeser } from "./header-geser";
 import { MenuMobile } from "./menu-mobile";
 
 /** Tanggal berlaku dokumen legal. Perbarui bersama isi dokumennya. */
@@ -62,7 +63,7 @@ export const tautanNav =
  */
 export function SiteHeader() {
   return (
-    <header className="relative z-10 border-b border-[#105C78]/20 bg-white">
+    <HeaderGeser>
       <nav
         aria-label="Navigasi utama"
         className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8"
@@ -90,7 +91,7 @@ export function SiteHeader() {
 
         <MenuMobile />
       </nav>
-    </header>
+    </HeaderGeser>
   );
 }
 

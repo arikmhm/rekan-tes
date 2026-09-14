@@ -210,7 +210,7 @@ export async function getOrder(id: string) {
   return { ...order, payments };
 }
 
-/** Riwayat pesanan milik satu user, terbaru dulu. Dipakai di halaman akun. */
+/** Riwayat pesanan milik satu user, terbaru dulu. Dipakai di ruang peserta. */
 export async function listOrdersForUser(userId: string) {
   return db
     .select({
@@ -221,7 +221,7 @@ export async function listOrdersForUser(userId: string) {
       createdAt: schema.orders.createdAt,
       testName: schema.tests.name,
       testSlug: schema.tests.slug,
-      // Ikut ditampilkan di halaman akun supaya peserta melihat status
+      // Ikut ditampilkan di pustaka supaya peserta melihat status
       // pengerjaannya tanpa perlu buka satu per satu halaman pesanan.
       attemptId: schema.testAttempts.id,
       attemptStatus: schema.testAttempts.status,

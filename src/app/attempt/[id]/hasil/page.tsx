@@ -153,7 +153,7 @@ export default async function HasilPage({ params }: { params: Promise<{ id: stri
         ))}
 
         <Link
-          href="/akun"
+          href="/peserta"
           className="mt-12 inline-block text-sm font-semibold text-brand hover:text-brand-dark"
         >
           Kembali ke dashboard

@@ -28,7 +28,7 @@ export default async function Home() {
   // ke halaman kerja mereka masing-masing, bukan disodori materi promosi lagi.
   const session = await getSession();
   if (session) {
-    redirect(session.user.role === "admin" ? "/admin" : "/akun");
+    redirect(session.user.role === "admin" ? "/admin" : "/peserta");
   }
 
   return (

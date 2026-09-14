@@ -110,7 +110,7 @@ function sisaDetik(deadline: Date | null, now: Date) {
  * ponytail: penutupan terjadi saat dibaca, bukan saat waktunya benar-benar
  * habis. Attempt yang tidak pernah dibuka lagi tetap tercatat `in_progress`
  * walau seluruh deadline-nya sudah lewat, dan `final_score`-nya belum terisi.
- * Sudah ada satu pembaca langsung: daftar pesanan di `/akun` menampilkan status
+ * Sudah ada satu pembaca langsung: daftar pesanan di `/peserta/pesanan` menampilkan status
  * dan skor dari kolomnya, jadi sesi seperti itu tampil "sedang dikerjakan"
  * tanpa skor sampai peserta membukanya sekali — lalu benar dengan sendirinya.
  * Cukup untuk MVP karena tidak ada angka yang salah, hanya tertunda. Begitu

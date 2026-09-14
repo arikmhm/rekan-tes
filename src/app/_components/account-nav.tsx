@@ -44,8 +44,8 @@ export function AccountNav() {
 
   return (
     <>
-      <Link className={linkClass} href="/akun">
-        Akun
+      <Link className={linkClass} href="/peserta">
+        Dasbor
       </Link>
       {session.user.role === "admin" && (
         <Link className={linkClass} href="/admin">

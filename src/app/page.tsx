@@ -3,9 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AccountNav } from "./_components/account-nav";
-import { HeroPreview } from "./_components/hero-preview";
 import { PhoneChat } from "./_components/phone-chat";
-import { TestPreview } from "./_components/test-preview";
+import { TestPreview, TestPreviewStatis } from "./_components/test-preview";
 import { LegalLinks } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
@@ -99,11 +98,11 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Tangkapan layar ilustratif produk, biar kelihatan beneran seperti apa,
-            bukan cuma diceritakan. Tab subtesnya sungguhan bisa diklik. Slot ini
-            bisa diganti video simulasi yang looping begitu asetnya tersedia. */}
-        <div className="mx-auto w-full max-w-xl px-5 pb-16 sm:px-8 sm:pb-20">
-          <HeroPreview />
+        {/* Slot untuk video simulasi yang looping begitu asetnya tersedia.
+            Sementara ini diisi tampilan halaman pengerjaan yang sesungguhnya,
+            supaya pengunjung tetap melihat produknya, bukan kotak kosong. */}
+        <div className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
+          <TestPreviewStatis />
         </div>
 
         <section

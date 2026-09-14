@@ -144,6 +144,29 @@ const soal = [
 const HURUF = ["A", "B", "C", "D"];
 
 /**
+ * Tampilan halaman pengerjaan sebagai gambar produk, tanpa satu pun kontrol
+ * yang hidup. Dipakai di hero sebagai pengisi sementara sampai video simulasi
+ * tersedia; begitu asetnya ada, komponen ini yang ditukar videonya.
+ */
+export function TestPreviewStatis() {
+  return (
+    <div
+      className={`relative max-h-140 overflow-hidden rounded-2xl border ${hairline} bg-cream`}
+    >
+      <div inert className="pointer-events-none select-none">
+        <Sesi statis />
+      </div>
+      {/* Potongan bawah dilembutkan supaya terbaca sebagai bingkai tangkapan
+          layar, bukan halaman yang terpotong karena salah ukuran. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-cream to-transparent"
+      />
+    </div>
+  );
+}
+
+/**
  * Simulasi coba-coba untuk pengunjung anonim: lima soal, bisa dikerjakan sampai
  * "dikirim", lalu hasil dan pembahasannya tampil. Semua state hidup di memori
  * peramban — tidak ada attempt, tidak ada jawaban tersimpan, tidak ada apa pun
@@ -194,7 +217,7 @@ export function TestPreview() {
       >
         <div className="flex items-start justify-between gap-6 px-6 pt-7 sm:px-9 sm:pt-9">
           <h2 className="max-w-md text-2xl leading-tight font-medium tracking-[-0.01em] text-brand sm:text-3xl">
-            Coba lima soal simulasinya sekarang — tanpa daftar.
+            Coba sepuluh soal simulasinya sekarang — tanpa daftar.
           </h2>
           <span
             aria-hidden

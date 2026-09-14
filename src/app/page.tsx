@@ -127,8 +127,18 @@ export default async function Home() {
 
         {/* Penutup halaman: alurnya dulu, baru ajakan. Pengunjung yang sudah
             mencoba simulasi di atas tinggal perlu tahu langkah setelahnya. */}
-        <section id="cara-kerja" className="px-5 py-16 sm:px-8 sm:pb-24">
-          <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-brand px-7 py-10 text-white sm:px-10 sm:py-14">
+        <section
+          id="cara-kerja"
+          className="relative overflow-hidden px-5 py-16 sm:px-8 sm:pb-24"
+        >
+          {/* Pola yang sama dengan hero, kali ini menutup halaman: ia menebal ke
+              bawah sehingga kaki halaman tidak berakhir sebagai putih kosong. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-96 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.09] mask-[linear-gradient(to_top,black,transparent)]"
+          />
+
+          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl bg-brand px-7 py-10 text-white sm:px-10 sm:py-14">
             <h2 className="max-w-xl text-3xl font-medium tracking-[-0.01em] sm:text-4xl">
               Bayar sekali per simulasi, kerjakan saat kamu siap.
             </h2>

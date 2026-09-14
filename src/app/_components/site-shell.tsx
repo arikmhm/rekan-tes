@@ -1,9 +1,11 @@
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { emailAddress } from "@/lib/email";
 import { env } from "@/lib/env";
 
 import { AccountNav } from "./account-nav";
+import { MenuMobile } from "./menu-mobile";
 
 /** Tanggal berlaku dokumen legal. Perbarui bersama isi dokumennya. */
 export const TERAKHIR_DIPERBARUI = "13 September 2026";
@@ -55,9 +57,17 @@ export const tautanNav =
   "relative py-1 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-brand-orange after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100";
 
 /**
- * Header publik, satu untuk semua halaman termasuk landing page. Isinya pendek
- * supaya muat utuh tanpa menu tersembunyi: beranda, katalog, simulasi gratis,
- * lalu akun.
+ * Sorotan tautan "Coba gratis": garis oranye yang menyapu dari kiri ke kanan
+ * sementara tanda panahnya ikut bergeser, jadi sorotannya terbaca sebagai satu
+ * gerakan yang searah dengan arah tautannya.
+ */
+const tautanCoba =
+  "group relative inline-flex shrink-0 items-center gap-1 py-1 whitespace-nowrap text-brand-orange after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-brand-orange after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100";
+
+/**
+ * Header publik, satu untuk semua halaman termasuk landing page. Di layar lebar
+ * seluruh tautan tampil berjajar; di ponsel tempatnya tidak cukup, jadi isinya
+ * pindah ke panel hamburger.
  */
 export function SiteHeader() {
   return (
@@ -72,24 +82,26 @@ export function SiteHeader() {
         >
           Rekan Tes
         </Link>
-        <div className="flex items-center gap-3 text-sm font-normal text-brand sm:gap-5">
-          {/* Beranda dilepas di ponsel: nama situs di kiri sudah menuju ke sana,
-              dan tempatnya dibutuhkan tautan yang tidak punya pengganti. */}
-          <Link className={`hidden sm:inline ${tautanNav}`} href="/">
+
+        <div className="hidden items-center gap-5 text-sm font-normal text-brand sm:flex">
+          <Link className={tautanNav} href="/">
             Beranda
           </Link>
           <Link className={tautanNav} href="/tes">
             Katalog
           </Link>
-          <Link
-            className="shrink-0 rounded-full border border-brand-orange/40 px-2.5 py-1.5 whitespace-nowrap text-brand-orange transition-colors hover:bg-brand-orange/10 sm:px-3"
-            href="/simulasi"
-          >
+          <Link className={tautanCoba} href="/simulasi">
             Coba gratis
+            <ChevronRight
+              className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1"
+              aria-hidden
+            />
           </Link>
           <span className="h-4 w-px bg-brand/20" aria-hidden />
           <AccountNav />
         </div>
+
+        <MenuMobile />
       </nav>
     </header>
   );

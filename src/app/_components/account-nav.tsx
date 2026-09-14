@@ -10,8 +10,10 @@ import { authClient } from "@/lib/auth-client";
 // server, sedangkan komponen ini berjalan di peramban.
 const linkClass =
   "relative py-1 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-brand-orange after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100";
+// Peralihan warnanya sengaja dilambatkan dan diberi kurva keluar supaya isian
+// tombolnya terasa mengalir, bukan berkedip ganti warna.
 const buttonClass =
-  "rounded-lg border border-[#105C78]/20 bg-white px-4 py-2 font-normal text-brand transition-colors hover:bg-brand hover:text-white";
+  "rounded-lg border border-[#105C78]/20 bg-white px-4 py-2 font-normal text-brand transition-[background-color,border-color,color] duration-300 ease-out hover:border-brand hover:bg-brand hover:text-white";
 
 /**
  * Dipakai dari halaman statis, sehingga session dibaca di browser agar landing
@@ -30,9 +32,7 @@ export function AccountNav() {
   if (!session) {
     return (
       <>
-        {/* Di ponsel tempatnya habis dipakai dua tautan isi; jalan masuk tetap
-            ada lewat halaman daftar yang menautkannya. */}
-        <Link className={`hidden sm:inline ${linkClass}`} href="/masuk">
+        <Link className={linkClass} href="/masuk">
           Masuk
         </Link>
         <Link className={buttonClass} href="/daftar">
@@ -52,8 +52,7 @@ export function AccountNav() {
           Admin
         </Link>
       )}
-      {/* Identitas sudah diwakili tautan "Akun" di layar sempit. */}
-      <span className="hidden font-medium text-brand sm:inline">
+      <span className="font-medium text-brand">
         {session.user.username ?? session.user.name}
       </span>
       <button

@@ -271,90 +271,129 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
   const kosong = jawaban.filter((j) => j === null).length;
   const s = soal[nomor];
 
+  const terjawab = jawaban.filter((j) => j !== null).length;
+
   return (
-    <div
-      className={`flex min-h-full flex-col px-5 py-6 sm:px-8 sm:py-8 ${
-        statis ? "w-full" : "mx-auto w-full max-w-6xl"
-      }`}
-    >
-      <div
-        className={`mb-4 flex items-center justify-between gap-4 rounded-xl border ${hairline} bg-white px-4 py-3 sm:px-5`}
+    <div className="flex min-h-full flex-col">
+      {/* Header dan footer membingkai sesi seperti aplikasi ujian sungguhan:
+          identitas dan sisa waktu selalu di atas, kendali perpindahan soal
+          selalu di bawah — keduanya tidak ikut tergulir bersama soal. */}
+      <header
+        className={`sticky top-0 z-10 border-b ${hairline} bg-white/95 backdrop-blur`}
       >
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-brand">
-            Simulasi percobaan · Tes masuk bank
-          </p>
-          <p className="mt-0.5 truncate text-xs font-normal text-brand/60">
-            Mode coba-coba. Jawaban tidak disimpan.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span
-            role="timer"
-            aria-live="off"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-2 font-mono text-sm font-medium tabular-nums text-white"
-          >
-            <Clock className="size-4" aria-hidden />
-            {menitDetik(sisa)}
-          </span>
-          {onTutup && <TombolTutup onTutup={onTutup} />}
-        </div>
-      </div>
-
-      {selesai ? (
-        <Hasil
-          jawaban={jawaban}
-          benar={benar}
-          kosong={kosong}
-          onUlangi={ulangi}
-        />
-      ) : (
-        <div className="flex flex-1 flex-col gap-4 lg:flex-row lg:items-start">
-          <div
-            className={`flex-1 rounded-xl border ${hairline} bg-white p-5 sm:p-7`}
-          >
-            <p className="text-xs font-medium text-brand/60">
-              Soal {nomor + 1} dari {soal.length} · {s.subtes}
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="shrink-0 text-sm font-semibold tracking-tight text-brand">
+              Rekan Tes
+            </span>
+            {/* Judul sesi dilepas di layar sempit: berebut tempat dengan nama
+                situs dan hitung mundur, dan ketiganya jadi terpotong semua. */}
+            <span
+              className="hidden h-4 w-px bg-brand/20 sm:block"
+              aria-hidden
+            />
+            <p className="hidden truncate text-sm font-normal text-brand/70 sm:block">
+              Simulasi percobaan · Tes masuk bank
             </p>
-            <p className="mt-3 text-base leading-7 font-normal text-brand sm:text-lg sm:leading-8">
-              {s.prompt}
-            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <span
+              role="timer"
+              aria-live="off"
+              className="inline-flex items-center gap-2 rounded-lg bg-brand px-3 py-2 font-mono text-sm font-medium tabular-nums text-white"
+            >
+              <Clock className="size-4" aria-hidden />
+              {menitDetik(sisa)}
+            </span>
+            {onTutup && <TombolTutup onTutup={onTutup} />}
+          </div>
+        </div>
+      </header>
 
-            <div className="mt-6 space-y-2.5">
-              {s.opsi.map((teks, i) => {
-                const aktif = jawaban[nomor] === i;
-                return (
-                  <button
-                    key={teks}
-                    type="button"
-                    onClick={() => pilih(i)}
-                    aria-pressed={aktif}
-                    className={`flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors ${
-                      aktif
-                        ? "border-brand bg-brand/5"
-                        : `${hairline} bg-white hover:border-brand/40`
-                    }`}
-                  >
-                    <span
-                      className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-medium ${
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-6 sm:px-8 sm:py-8">
+        {selesai ? (
+          <Hasil
+            jawaban={jawaban}
+            benar={benar}
+            kosong={kosong}
+            onUlangi={ulangi}
+          />
+        ) : (
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+            <div
+              className={`flex-1 rounded-xl border ${hairline} bg-white p-5 sm:p-7`}
+            >
+              <p className="text-xs font-medium text-brand/60">
+                Soal {nomor + 1} dari {soal.length} · {s.subtes}
+              </p>
+              <p className="mt-3 text-base leading-7 font-normal text-brand sm:text-lg sm:leading-8">
+                {s.prompt}
+              </p>
+
+              <div className="mt-6 space-y-2.5">
+                {s.opsi.map((teks, i) => {
+                  const aktif = jawaban[nomor] === i;
+                  return (
+                    <button
+                      key={teks}
+                      type="button"
+                      onClick={() => pilih(i)}
+                      aria-pressed={aktif}
+                      className={`flex w-full items-start gap-3 rounded-lg border p-3.5 text-left transition-colors ${
                         aktif
-                          ? "bg-brand text-white"
-                          : "border border-brand/30 text-brand/50"
+                          ? "border-brand bg-brand/5"
+                          : `${hairline} bg-white hover:border-brand/40`
                       }`}
                     >
-                      {HURUF[i]}
-                    </span>
-                    <span className="text-sm leading-6 font-normal text-brand">
-                      {teks}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span
+                        className={`grid size-6 shrink-0 place-items-center rounded-full text-xs font-medium ${
+                          aktif
+                            ? "bg-brand text-white"
+                            : "border border-brand/30 text-brand/50"
+                        }`}
+                      >
+                        {HURUF[i]}
+                      </span>
+                      <span className="text-sm leading-6 font-normal text-brand">
+                        {teks}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div
-              className={`mt-7 flex items-center justify-between border-t ${hairline} pt-5`}
+            <Navigasi
+              jawaban={jawaban}
+              nomor={nomor}
+              onPilihSoal={setNomor}
+              onKirim={() => setDikirim(true)}
+            />
+          </div>
+        )}
+      </main>
+
+      <footer
+        className={`sticky bottom-0 border-t ${hairline} bg-white/95 backdrop-blur`}
+      >
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
+          <p className="min-w-0 truncate text-xs leading-5 font-normal text-brand/60">
+            {selesai
+              ? "Hasil percobaan. Jawaban dan skor ini tidak disimpan."
+              : `Soal ${nomor + 1} dari ${soal.length} · ${terjawab} terjawab`}
+          </p>
+
+          {selesai ? (
+            <button
+              type="button"
+              onClick={ulangi}
+              className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
             >
+              <RotateCcw className="size-4" aria-hidden />
+              Ulangi
+            </button>
+          ) : (
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => setNomor((n) => n - 1)}
@@ -362,7 +401,7 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
                 className={`inline-flex h-10 items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-40`}
               >
                 <ArrowLeft className="size-4" aria-hidden />
-                Sebelumnya
+                <span className="hidden sm:inline">Sebelumnya</span>
               </button>
               <button
                 type="button"
@@ -370,20 +409,13 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
                 disabled={nomor === soal.length - 1}
                 className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange disabled:pointer-events-none disabled:opacity-40"
               >
-                Berikutnya
+                <span className="hidden sm:inline">Berikutnya</span>
                 <ArrowRight className="size-4" aria-hidden />
               </button>
             </div>
-          </div>
-
-          <Navigasi
-            jawaban={jawaban}
-            nomor={nomor}
-            onPilihSoal={setNomor}
-            onKirim={() => setDikirim(true)}
-          />
+          )}
         </div>
-      )}
+      </footer>
     </div>
   );
 }

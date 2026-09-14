@@ -3,9 +3,16 @@
 import {
   ArrowLeft,
   ArrowRight,
+  Award,
+  CircleCheck,
+  CircleDashed,
+  CircleX,
+  ClipboardList,
   Clock,
   Expand,
+  Gauge,
   RotateCcw,
+  TrendingUp,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -245,6 +252,36 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
   );
   const [dikirim, setDikirim] = useState(false);
   const [sisa, setSisa] = useState(DURASI);
+  const [waktuSoal, setWaktuSoal] = useState<number[]>(() =>
+    Array(soal.length).fill(0),
+  );
+
+  // Penanda kapan soal yang sedang dibuka mulai dilihat. Dipakai untuk mengisi
+  // waktuSoal setiap kali peserta berpindah — tanpa ini peta kecepatan di layar
+  // hasil tidak punya bahan.
+  const masuk = useRef(0);
+
+  // Jam mulai dipasang setelah sesi terpasang, bukan saat render: membaca jam
+  // di badan komponen membuat hasil render bergantung pada waktu.
+  useEffect(() => {
+    masuk.current = Date.now();
+  }, []);
+
+  function catatWaktu() {
+    const detik = Math.round((Date.now() - masuk.current) / 1000);
+    masuk.current = Date.now();
+    setWaktuSoal((w) => w.map((v, i) => (i === nomor ? v + detik : v)));
+  }
+
+  function pindah(i: number) {
+    catatWaktu();
+    setNomor(i);
+  }
+
+  function kirim() {
+    catatWaktu();
+    setDikirim(true);
+  }
 
   // Waktu habis mengunci sesi sama seperti pengerjaan sungguhan, jadi statusnya
   // diturunkan dari sisa waktu — bukan disalin ke state lain lewat efek.
@@ -262,6 +299,8 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
 
   function ulangi() {
     setJawaban(Array(soal.length).fill(null));
+    setWaktuSoal(Array(soal.length).fill(0));
+    masuk.current = Date.now();
     setNomor(0);
     setSisa(DURASI);
     setDikirim(false);
@@ -314,6 +353,8 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
         {selesai ? (
           <Hasil
             jawaban={jawaban}
+            waktuSoal={waktuSoal}
+            terpakai={DURASI - sisa}
             benar={benar}
             kosong={kosong}
             onUlangi={ulangi}
@@ -366,8 +407,8 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
             <Navigasi
               jawaban={jawaban}
               nomor={nomor}
-              onPilihSoal={setNomor}
-              onKirim={() => setDikirim(true)}
+              onPilihSoal={pindah}
+              onKirim={kirim}
             />
           </div>
         )}
@@ -396,7 +437,7 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
             <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
-                onClick={() => setNomor((n) => n - 1)}
+                onClick={() => pindah(nomor - 1)}
                 disabled={nomor === 0}
                 className={`inline-flex h-10 items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-40`}
               >
@@ -405,7 +446,7 @@ function Sesi({ statis, onTutup }: { statis?: boolean; onTutup?: () => void }) {
               </button>
               <button
                 type="button"
-                onClick={() => setNomor((n) => n + 1)}
+                onClick={() => pindah(nomor + 1)}
                 disabled={nomor === soal.length - 1}
                 className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange disabled:pointer-events-none disabled:opacity-40"
               >
@@ -517,139 +558,408 @@ function Navigasi({
   );
 }
 
+/**
+ * Layar hasil: ringkasan di atas, lalu peta kecepatan yang menyetir panel
+ * pembahasan di sebelahnya, dan hitungan benar-salah-kosong sebagai penutup.
+ * Semua angkanya dihitung ulang dari jawaban dan waktu yang tercatat di sesi —
+ * tidak ada yang disimpan ke mana pun.
+ */
 function Hasil({
   jawaban,
+  waktuSoal,
+  terpakai,
   benar,
   kosong,
   onUlangi,
 }: {
   jawaban: (number | null)[];
+  waktuSoal: number[];
+  terpakai: number;
   benar: number;
   kosong: number;
   onUlangi: () => void;
 }) {
+  const [dilihat, setDilihat] = useState(0);
+
+  const salah = soal.length - benar - kosong;
+  const akurasi = Math.round((benar / soal.length) * 100);
+  const idealPerSoal = Math.round(DURASI / soal.length);
+  const rataPerSoal = Math.round(terpakai / soal.length);
+
+  const perSubtes = ringkasSubtes(jawaban);
+  // Subtes dengan persentase terendah jadi bahan rekomendasi. Kalau seri, yang
+  // pertama muncul di urutan soal yang dipilih — bukan hasil acak.
+  const terlemah = perSubtes.reduce((a, b) => (b.persen < a.persen ? b : a));
+
+  const s = soal[dilihat];
+  const pilihan = jawaban[dilihat];
+
   return (
-    <div className="max-w-4xl space-y-4 pb-4">
-      <div className={`rounded-xl border ${hairline} bg-white p-5 sm:p-7`}>
-        <p className="text-sm font-medium text-brand">Hasil percobaan</p>
+    <div className="space-y-4 pb-4">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Kartu judul="Skor akurasi" Ikon={Award} tanda="Sesi selesai">
+          <div className="mt-6 flex flex-col items-center">
+            <Donat persen={akurasi} angka={benar} dari={soal.length} />
+          </div>
+          <p
+            className={`mt-6 rounded-xl px-4 py-3 text-center text-xs leading-5 font-normal ${
+              akurasi >= 70
+                ? "bg-mint text-brand-dark"
+                : "bg-brand-orange/12 text-brand-orange"
+            }`}
+          >
+            <span className="block font-medium">
+              {akurasi >= 70 ? "Sudah kuat" : "Butuh latihan"}
+            </span>
+            {akurasi >= 70
+              ? "Pertahankan ritmenya dan rapikan subtes yang masih tertinggal."
+              : "Peluang berkembang masih lebar. Mulai dari pembahasan soal yang salah."}
+          </p>
+        </Kartu>
 
-        <SebaranSubtes jawaban={jawaban} />
-
-        <p
-          className={`mt-6 border-t ${hairline} pt-6 text-4xl font-medium tracking-[-0.01em] text-brand`}
+        <Kartu
+          judul="Waktu & efisiensi"
+          Ikon={Clock}
+          tanda={`dari ${menitDetik(DURASI)}`}
         >
-          {benar}
-          <span className="text-xl text-brand/50"> / {soal.length}</span>
-        </p>
-        <dl className="mt-5 grid grid-cols-3 gap-2.5">
-          {[
-            ["Benar", benar],
-            ["Salah", soal.length - benar - kosong],
-            ["Kosong", kosong],
-          ].map(([label, nilai]) => (
-            <div key={label} className="rounded-lg bg-cream p-3 text-center">
-              <dt className="text-xs font-normal text-brand/60">{label}</dt>
-              <dd className="mt-0.5 text-lg font-medium text-brand">{nilai}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
-          Ini contoh tampilan hasil. Pada simulasi sungguhan skor dihitung per
-          subtes dengan bobot soal, dan riwayatnya tersimpan di akunmu.
-        </p>
-        <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
-          <Link
-            href="/tes"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
-          >
-            Lihat katalog simulasi
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
-          <button
-            type="button"
-            onClick={onUlangi}
-            className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg border ${hairline} px-5 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
-          >
-            <RotateCcw className="size-4" aria-hidden />
-            Ulangi
-          </button>
-        </div>
+          <p className="mt-6 text-center font-mono text-4xl font-medium tabular-nums text-brand">
+            {menitDetik(terpakai)}
+          </p>
+          <p className="mt-2 text-center text-xs font-normal text-brand/60">
+            Rata-rata {rataPerSoal} detik per soal · ideal {idealPerSoal} detik
+          </p>
+          <p className="mt-6 rounded-xl bg-cream px-4 py-3 text-xs leading-5 font-normal text-brand/70">
+            <span className="block font-medium text-brand">
+              {rataPerSoal < idealPerSoal / 2
+                ? "Terburu-buru"
+                : rataPerSoal > idealPerSoal
+                  ? "Melebihi tempo"
+                  : "Tempo terjaga"}
+            </span>
+            {rataPerSoal < idealPerSoal / 2
+              ? "Jauh lebih cepat dari jatah waktunya. Periksa ulang sebelum berpindah soal."
+              : rataPerSoal > idealPerSoal
+                ? "Melewati jatah per soal. Lewati dulu yang berat, kembali kalau masih ada waktu."
+                : "Kecepatanmu pas dengan jatah waktu tiap soal. Pertahankan."}
+          </p>
+        </Kartu>
+
+        <Kartu judul="Analisis subtes" Ikon={TrendingUp} tanda="Saran">
+          <SebaranSubtes jawaban={jawaban} />
+          <p className="mt-4 rounded-xl bg-cream px-4 py-3 text-xs leading-5 font-normal text-brand/70">
+            <span className="block font-medium text-brand">
+              Fokus berikutnya
+            </span>
+            Nilai terendah ada di{" "}
+            <strong className="font-medium">{terlemah.nama}</strong> (
+            {terlemah.benar}/{terlemah.total} · {terlemah.persen}%). Ulangi sesi
+            ini setelah membaca pembahasan subtes tersebut.
+          </p>
+        </Kartu>
       </div>
 
-      {/* Hasil dan pembahasan sengaja lebih sempit dari area tes: baris teks
-          selebar 6xl terlalu panjang untuk dibaca. */}
-      <div className="space-y-4">
-        <p className="px-1 pt-2 text-sm font-medium text-brand">Pembahasan</p>
+      <div className="grid gap-4 lg:grid-cols-[19rem_1fr] lg:items-start">
+        <Kartu judul="Peta kecepatan soal" Ikon={Gauge}>
+          <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
+            Klik nomor soal untuk membuka pembahasannya. Warna menunjukkan
+            ketepatan, angka di bawahnya lama pengerjaan.
+          </p>
 
-        {soal.map((s, i) => {
-          const pilihan = jawaban[i];
-          const tepat = pilihan === s.kunci;
-          return (
-            <div
-              key={s.prompt}
-              className={`rounded-xl border ${hairline} bg-white p-5 sm:p-6`}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-medium text-brand/60">
-                  Soal {i + 1} · {s.subtes}
-                </p>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                    pilihan === null
-                      ? "bg-cream text-brand/60"
-                      : tepat
-                        ? "bg-mint text-brand-dark"
-                        : "bg-red-50 text-red-700"
+          <div className="mt-5 grid grid-cols-5 gap-2">
+            {soal.map((q, i) => {
+              const tepat = jawaban[i] === q.kunci;
+              const cepat = waktuSoal[i] <= idealPerSoal;
+              const status = laraSoal(jawaban[i], tepat, cepat);
+
+              return (
+                <button
+                  key={q.prompt}
+                  type="button"
+                  onClick={() => setDilihat(i)}
+                  aria-current={i === dilihat ? "true" : undefined}
+                  aria-label={`Soal ${i + 1}, ${status.label}, ${waktuSoal[i]} detik`}
+                  className={`rounded-lg border py-1.5 text-center transition-colors ${status.kelas} ${
+                    i === dilihat
+                      ? "ring-2 ring-brand-orange ring-offset-1"
+                      : ""
                   }`}
                 >
-                  {pilihan === null ? "Kosong" : tepat ? "Benar" : "Salah"}
-                </span>
-              </div>
-              <p className="mt-3 text-sm leading-7 font-normal text-brand">
-                {s.prompt}
-              </p>
-              <ul className="mt-4 space-y-2">
-                {s.opsi.map((teks, k) => {
-                  const dipilih = k === pilihan;
-                  const kunci = k === s.kunci;
-                  return (
-                    <li
-                      key={teks}
-                      className={`flex items-start gap-3 rounded-lg border p-3 text-sm ${
-                        kunci
-                          ? "border-brand/40 bg-mint/60"
-                          : dipilih
-                            ? "border-red-200 bg-red-50"
-                            : hairline
-                      }`}
-                    >
-                      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-cream text-xs font-medium text-brand">
-                        {HURUF[k]}
-                      </span>
-                      <span className="flex-1 leading-6 font-normal text-brand">
-                        {teks}
-                      </span>
-                      <span className="shrink-0 text-xs font-medium text-brand/60">
-                        {kunci && "kunci"}
-                        {dipilih && !kunci && "pilihanmu"}
-                        {dipilih && kunci && " · pilihanmu"}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-              <div className="mt-4 rounded-lg bg-cream/70 p-4">
-                <p className="text-xs font-medium text-brand/60">Pembahasan</p>
-                <p className="mt-1.5 text-sm leading-7 font-normal text-brand">
-                  {s.pembahasan}
+                  <span className="block text-sm font-medium">{i + 1}</span>
+                  <span className="block font-mono text-[10px] opacity-70">
+                    {waktuSoal[i]}s
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <ul
+            className={`mt-6 grid grid-cols-2 gap-2 border-t ${hairline} pt-5`}
+          >
+            {KETERANGAN.map(([kelas, teks]) => (
+              <li
+                key={teks}
+                className="flex items-center gap-2 text-xs font-normal text-brand/60"
+              >
+                <span
+                  className={`size-3 shrink-0 rounded-sm border ${kelas}`}
+                  aria-hidden
+                />
+                {teks}
+              </li>
+            ))}
+          </ul>
+        </Kartu>
+
+        <Kartu
+          judul={`Pembahasan soal ${dilihat + 1}`}
+          Ikon={ClipboardList}
+          tanda={`${waktuSoal[dilihat]} detik · ideal ${idealPerSoal} detik`}
+        >
+          <p className="mt-4 text-xs font-medium text-brand/60">
+            {s.subtes} ·{" "}
+            {pilihan === null
+              ? "tidak dijawab"
+              : pilihan === s.kunci
+                ? "jawabanmu benar"
+                : "jawabanmu salah"}
+          </p>
+          <div className={`mt-3 rounded-xl border ${hairline} bg-cream/60 p-5`}>
+            <p className="text-base leading-7 font-normal text-brand">
+              {s.prompt}
+            </p>
+          </div>
+
+          <ul className="mt-4 space-y-2">
+            {s.opsi.map((teks, k) => {
+              const dipilih = k === pilihan;
+              const kunci = k === s.kunci;
+
+              return (
+                <li
+                  key={teks}
+                  className={`flex items-start gap-3 rounded-xl border p-3.5 text-sm ${
+                    kunci
+                      ? "border-brand/40 bg-mint/60"
+                      : dipilih
+                        ? "border-red-200 bg-red-50"
+                        : hairline
+                  }`}
+                >
+                  <span
+                    className={`grid size-6 shrink-0 place-items-center rounded-md text-xs font-medium ${
+                      kunci
+                        ? "bg-brand text-white"
+                        : dipilih
+                          ? "bg-red-100 text-red-700"
+                          : "bg-cream text-brand/60"
+                    }`}
+                  >
+                    {HURUF[k]}
+                  </span>
+                  <span className="flex-1 leading-6 font-normal text-brand">
+                    {teks}
+                  </span>
+                  <span className="shrink-0 text-xs font-medium text-brand/60">
+                    {kunci && "kunci"}
+                    {dipilih && !kunci && "pilihanmu"}
+                    {dipilih && kunci && " · pilihanmu"}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className={`mt-5 rounded-xl border ${hairline} bg-white p-5`}>
+            <p className="text-xs font-medium text-brand/60">Pembahasan</p>
+            <p className="mt-2 text-sm leading-7 font-normal text-brand">
+              {s.pembahasan}
+            </p>
+          </div>
+        </Kartu>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          [CircleCheck, "Benar", benar, "text-brand"],
+          [CircleX, "Salah", salah, "text-brand-orange"],
+          [CircleDashed, "Kosong", kosong, "text-brand/40"],
+        ].map(([Ikon, label, nilai, warna]) => {
+          const Komponen = Ikon as typeof CircleCheck;
+          return (
+            <div
+              key={label as string}
+              className={`flex items-center gap-4 rounded-2xl border ${hairline} bg-white p-5`}
+            >
+              <Komponen className={`size-6 ${warna as string}`} aria-hidden />
+              <div>
+                <p className="text-xs font-normal text-brand/60">
+                  {label as string}
+                </p>
+                <p className="text-2xl font-medium text-brand">
+                  {nilai as number}
                 </p>
               </div>
             </div>
           );
         })}
       </div>
+
+      <div
+        className={`flex flex-col gap-2.5 border-t ${hairline} pt-5 sm:flex-row`}
+      >
+        <Link
+          href="/tes"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
+        >
+          Lihat katalog simulasi
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
+        <button
+          type="button"
+          onClick={onUlangi}
+          className={`inline-flex h-11 items-center justify-center gap-2 rounded-lg border ${hairline} px-5 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
+        >
+          <RotateCcw className="size-4" aria-hidden />
+          Ulangi sesi
+        </button>
+        <p className="text-xs leading-[2.75rem] font-normal text-brand/50 sm:ml-auto">
+          Contoh tampilan hasil. Di simulasi berbayar skor dihitung berbobot dan
+          riwayatnya tersimpan di akunmu.
+        </p>
+      </div>
     </div>
   );
+}
+
+/** Kartu hasil: judul kecil berikon di atas, isi bebas di bawahnya. */
+function Kartu({
+  judul,
+  Ikon,
+  tanda,
+  children,
+}: {
+  judul: string;
+  Ikon: typeof Award;
+  tanda?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`rounded-2xl border ${hairline} bg-white p-5 sm:p-6`}>
+      <div
+        className={`flex items-center justify-between gap-3 border-b ${hairline} pb-4`}
+      >
+        <p className="flex min-w-0 items-center gap-2 text-sm font-medium text-brand">
+          <Ikon className="size-4 shrink-0 text-brand-orange" aria-hidden />
+          <span className="truncate">{judul}</span>
+        </p>
+        {tanda && (
+          <span className="shrink-0 rounded-full bg-cream px-2.5 py-1 font-mono text-[11px] font-medium text-brand/70">
+            {tanda}
+          </span>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** Cincin akurasi. Angkanya tetap tertulis, jadi bukan cuma bentuk. */
+function Donat({
+  persen,
+  angka,
+  dari,
+}: {
+  persen: number;
+  angka: number;
+  dari: number;
+}) {
+  const r = 52;
+  const keliling = 2 * Math.PI * r;
+
+  return (
+    <div className="relative grid size-36 place-items-center">
+      <svg viewBox="0 0 120 120" className="absolute size-36 -rotate-90">
+        <circle
+          cx="60"
+          cy="60"
+          r={r}
+          fill="none"
+          strokeWidth="10"
+          className="stroke-brand/10"
+        />
+        <circle
+          cx="60"
+          cy="60"
+          r={r}
+          fill="none"
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={`${(persen / 100) * keliling} ${keliling}`}
+          className="stroke-brand-orange"
+        />
+      </svg>
+      <div className="text-center">
+        <p className="text-3xl font-medium text-brand">{persen}%</p>
+        <p className="mt-0.5 text-xs font-normal text-brand/60">
+          {angka} dari {dari}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/** Warna dan label satu kotak di peta kecepatan. */
+function laraSoal(jawab: number | null, tepat: boolean, cepat: boolean) {
+  if (jawab === null)
+    return { label: "kosong", kelas: `${hairline} bg-white text-brand/40` };
+  if (tepat && cepat)
+    return {
+      label: "benar & cepat",
+      kelas: "border-brand bg-brand text-white",
+    };
+  if (tepat)
+    return {
+      label: "benar & lambat",
+      kelas: "border-brand/30 bg-mint text-brand-dark",
+    };
+  if (cepat)
+    return {
+      label: "salah & cepat",
+      kelas: "border-brand-orange bg-brand-orange text-white",
+    };
+  return {
+    label: "salah & lambat",
+    kelas: "border-brand-orange/40 bg-brand-orange/15 text-brand-orange",
+  };
+}
+
+const KETERANGAN: [string, string][] = [
+  ["border-brand bg-brand", "Benar & cepat"],
+  ["border-brand/30 bg-mint", "Benar & lambat"],
+  ["border-brand-orange bg-brand-orange", "Salah & cepat"],
+  ["border-brand-orange/40 bg-brand-orange/15", "Salah & lambat"],
+];
+
+/** Benar dan total tiap subtes, dipakai radar sekaligus kalimat rekomendasi. */
+function ringkasSubtes(jawaban: (number | null)[]) {
+  const per = new Map<string, { nama: string; benar: number; total: number }>();
+
+  soal.forEach((s, i) => {
+    const catatan = per.get(s.singkat) ?? {
+      nama: s.subtes,
+      benar: 0,
+      total: 0,
+    };
+    catatan.total += 1;
+    if (jawaban[i] === s.kunci) catatan.benar += 1;
+    per.set(s.singkat, catatan);
+  });
+
+  return [...per.values()].map((c) => ({
+    ...c,
+    persen: Math.round((c.benar / c.total) * 100),
+  }));
 }
 
 const konfigSebaran = {

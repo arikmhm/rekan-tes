@@ -5,17 +5,9 @@ import { redirect } from "next/navigation";
 import { AccountNav } from "./_components/account-nav";
 import { HeroPreview } from "./_components/hero-preview";
 import { PhoneChat } from "./_components/phone-chat";
+import { TestPreview } from "./_components/test-preview";
 import { LegalLinks } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
-
-const materi = [
-  { nama: "Numerik", uji: "Hitung cepat dan logika angka" },
-  { nama: "Verbal", uji: "Sinonim, antonim, analogi kata" },
-  { nama: "Logika & Figural", uji: "Pola dan penalaran visual" },
-  { nama: "Ketelitian", uji: "Akurasi dan kecepatan mengoreksi" },
-  { nama: "Bahasa Inggris", uji: "Grammar dan reading dasar" },
-  { nama: "Pengetahuan Perbankan", uji: "Istilah dan konsep dasar bank" },
-];
 
 const hairline = "border-[#105C78]/20";
 
@@ -55,9 +47,9 @@ export default async function Home() {
             </a>
             <a
               className="hidden transition hover:text-brand-orange sm:inline"
-              href="#materi"
+              href="#coba"
             >
-              Materi
+              Coba gratis
             </a>
             <AccountNav />
           </div>
@@ -69,12 +61,12 @@ export default async function Home() {
           <h1 className="max-w-xl text-4xl leading-[1.2] font-medium tracking-[-0.01em] text-brand sm:text-5xl lg:text-[52px]">
             Setiap Kesempatan Layak Dipersiapkan.
           </h1>
-          <p className="mt-6 max-w-md text-lg leading-8 font-normal text-brand/80">
+          <p className="mt-6 max-w-lg text-lg leading-8 font-normal text-brand/80">
             Persiapkan dirimu untuk kesempatan yang kamu tunggu.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link
-              className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-center text-sm font-normal text-white transition-all hover:-translate-y-0.5 hover:bg-brand-orange active:translate-y-0"
+              className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-center text-sm font-normal text-white transition-all  hover:bg-brand-orange active:translate-y-0"
               href="/tes"
             >
               Lihat katalog simulasi
@@ -84,7 +76,7 @@ export default async function Home() {
               />
             </Link>
             <Link
-              className={`flex h-12 items-center justify-center rounded-lg border ${hairline} bg-white px-6 text-center text-sm font-normal text-brand transition-all hover:-translate-y-0.5 hover:bg-brand hover:text-white active:translate-y-0`}
+              className={`flex h-12 items-center justify-center rounded-lg border ${hairline} bg-white px-6 text-center text-sm font-normal text-brand transition-all  hover:bg-brand hover:text-white active:translate-y-0`}
               href="/daftar"
             >
               Buat akun gratis
@@ -103,8 +95,8 @@ export default async function Home() {
           id="mulai"
           className={`border-b ${hairline} bg-white px-5 pt-16 sm:px-8 sm:pt-20`}
         >
-          <div className="mx-auto max-w-6xl bg-brand-orange/80">
-            <h2 className="mx-auto max-w-lg text-center text-3xl font-medium tracking-[-0.01em] text-white sm:text-4xl">
+          <div className="mx-auto max-w-6xl bg-brand-orange/80 px-5 pt-16 sm:pt-8 sm:px-8 rounded-t-2xl sm:rounded-t-xl">
+            <h2 className="mx-auto max-w-xl text-center text-3xl font-medium tracking-[-0.01em] text-white sm:text-4xl">
               Bingung Harus Mulai dari Mana?
             </h2>
             <div className="mt-8 flex justify-center">
@@ -113,28 +105,8 @@ export default async function Home() {
           </div>
         </section>
 
-        <section
-          id="materi"
-          className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24"
-        >
-          <h2 className="max-w-2xl text-3xl font-medium tracking-[-0.01em] text-brand sm:text-4xl">
-            Yang sering diuji saat seleksi kerja bank.
-          </h2>
-          <div
-            className={`mt-10 overflow-hidden rounded-[6px] border ${hairline}`}
-          >
-            {materi.map((m, i) => (
-              <div
-                key={m.nama}
-                className={`flex flex-col justify-between gap-1 px-5 py-4 sm:flex-row sm:items-center sm:gap-6 ${
-                  i > 0 ? `border-t ${hairline}` : ""
-                }`}
-              >
-                <p className="font-medium text-brand">{m.nama}</p>
-                <p className="text-sm font-normal text-brand/60">{m.uji}</p>
-              </div>
-            ))}
-          </div>
+        <section id="coba" className="mx-auto max-w-6xl py-16  sm:py-24">
+          <TestPreview />
         </section>
 
         <section id="status" className="px-5 pb-16 sm:px-8 sm:pb-24">

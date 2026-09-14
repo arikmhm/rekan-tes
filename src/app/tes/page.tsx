@@ -7,9 +7,9 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
 
 import {
-  ACCESS_DAYS,
   JENIS,
   listKatalog,
   type FaktaProduk,
@@ -68,16 +68,14 @@ export default async function KatalogPage({
 
   return (
     <SiteShell>
-      <div className="relative overflow-hidden">
-        <div className="relative mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      {/* Mengisi sisa tinggi layar lewat <main>, jadi halaman tetap menjejak
+          penuh meski produknya baru sedikit dan pola di kakinya tidak
+          terangkat ke tengah layar. */}
+      <div className="relative flex flex-1 flex-col overflow-hidden">
+        <div className="relative mx-auto w-full max-w-6xl flex-1 px-5 py-10 sm:px-8 sm:py-14">
           <h1 className="text-3xl font-medium tracking-[-0.01em] text-brand">
             Katalog
           </h1>
-          <p className="mt-2 text-sm leading-6 font-normal text-brand/60">
-            Dijual satuan: bayar sekali, akses {ACCESS_DAYS} hari, tanpa
-            langganan.
-          </p>
-
           <div
             className={`mt-7 flex flex-wrap items-center gap-2 border-b ${hairline} pb-5`}
           >
@@ -85,21 +83,30 @@ export default async function KatalogPage({
               const dipakai = kunci === aktif;
 
               return (
-                <Link
-                  key={label}
-                  href={kunci ? `/tes?jenis=${kunci}` : "/tes"}
-                  aria-current={dipakai ? "page" : undefined}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-normal transition-colors ${
-                    dipakai
-                      ? "border-brand bg-brand text-white"
-                      : `${hairline} bg-white text-brand hover:border-brand-orange`
-                  }`}
-                >
-                  {label}
-                  <span className={dipakai ? "text-white/60" : "text-brand/40"}>
-                    {jumlah}
-                  </span>
-                </Link>
+                <Fragment key={label}>
+                  {/* Garis pemisah menandai batas antara "semua" dan penyaring
+                      jenis produk. */}
+                  {kunci === URUTAN_JENIS[0] && (
+                    <span className="mx-1 h-5 w-px bg-brand/20" aria-hidden />
+                  )}
+
+                  <Link
+                    href={kunci ? `/tes?jenis=${kunci}` : "/tes"}
+                    aria-current={dipakai ? "page" : undefined}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-normal transition-colors ${
+                      dipakai
+                        ? "border-brand bg-brand text-white"
+                        : `${hairline} bg-white text-brand hover:border-brand-orange`
+                    }`}
+                  >
+                    {label}
+                    <span
+                      className={dipakai ? "text-white/60" : "text-brand/40"}
+                    >
+                      {jumlah}
+                    </span>
+                  </Link>
+                </Fragment>
               );
             })}
           </div>
@@ -231,7 +238,7 @@ export default async function KatalogPage({
             harus dilewati sebelum sampai ke daftar produknya. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-[url('/patterns/jigsaw.svg')] bg-repeat opacity-[0.05] mask-[linear-gradient(to_top,black,transparent)]"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.07] mask-[linear-gradient(to_top,black,transparent)]"
         />
       </div>
     </SiteShell>

@@ -20,7 +20,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <>
       <SiteHeader />
 
-      <main className="flex-1">{children}</main>
+      {/* Kolom fleks supaya halaman yang ingin menjejak penuh cukup memakai
+          flex-1, tanpa menghitung tinggi header dan footer sendiri. */}
+      <main className="flex flex-1 flex-col">{children}</main>
 
       <SiteFooter />
     </>

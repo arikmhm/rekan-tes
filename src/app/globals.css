@@ -57,6 +57,10 @@
 
 html {
   scroll-behavior: smooth;
+  /* Batang gulir selalu tampil di sisi kanan. Tanpa ini lebar isi melompat
+     beberapa piksel setiap berpindah antara halaman yang isinya melebihi layar
+     dan yang tidak. */
+  overflow-y: scroll;
 }
 
 ::selection {

@@ -39,8 +39,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
 /**
  * Header publik, satu untuk semua halaman termasuk landing page. Isinya sengaja
- * cuma nama, katalog, dan akun: sama persis di ponsel maupun layar lebar,
- * sehingga tidak ada tautan yang hilang tergantung lebar layar.
+ * pendek — simulasi gratis, katalog, dan akun — supaya muat utuh di ponsel
+ * maupun layar lebar tanpa menu tersembunyi.
  */
 export function SiteHeader() {
   return (
@@ -56,6 +56,9 @@ export function SiteHeader() {
           Rekan Tes
         </Link>
         <div className="flex items-center gap-3 text-sm font-normal text-brand sm:gap-5">
+          <Link className="transition hover:text-brand-orange" href="/simulasi">
+            Coba gratis
+          </Link>
           <Link className="transition hover:text-brand-orange" href="/tes">
             Katalog
           </Link>

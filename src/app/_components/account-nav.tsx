@@ -27,7 +27,9 @@ export function AccountNav() {
   if (!session) {
     return (
       <>
-        <Link className={linkClass} href="/masuk">
+        {/* Di ponsel tempatnya habis dipakai dua tautan isi; jalan masuk tetap
+            ada lewat halaman daftar yang menautkannya. */}
+        <Link className={`hidden sm:inline ${linkClass}`} href="/masuk">
           Masuk
         </Link>
         <Link className={buttonClass} href="/daftar">

@@ -236,3 +236,11 @@ export function getPaket(slug: string) {
 export function daftarSubtes(paket: Paket) {
   return [...new Set(paket.soal.map((s) => s.subtes))];
 }
+
+/** Isi paket per subtes, berurutan seperti kemunculannya di daftar soal. */
+export function isiPerSubtes(paket: Paket) {
+  const per = new Map<string, number>();
+  for (const s of paket.soal) per.set(s.subtes, (per.get(s.subtes) ?? 0) + 1);
+
+  return [...per].map(([nama, jumlah]) => ({ nama, jumlah }));
+}

@@ -73,7 +73,7 @@ export default function SimulasiPage() {
                 </div>
 
                 <span className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-sm font-normal text-white transition-colors group-hover:bg-brand-orange">
-                  Mulai simulasi
+                  Lihat detail
                   <ArrowRight
                     className="size-4 transition-transform group-hover:translate-x-1"
                     aria-hidden

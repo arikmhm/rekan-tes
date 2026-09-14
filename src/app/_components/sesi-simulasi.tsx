@@ -140,7 +140,7 @@ export function SesiSimulasi({ paket }: { paket: Paket }) {
               {menitDetik(sisa)}
             </span>
             <Link
-              href="/simulasi"
+              href={`/simulasi/${paket.slug}`}
               aria-label="Keluar dari simulasi"
               className={`grid size-9 shrink-0 place-items-center rounded-lg border ${hairline} text-brand transition-colors hover:bg-brand hover:text-white`}
             >

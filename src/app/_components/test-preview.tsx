@@ -190,7 +190,7 @@ export function TestPreview() {
   return (
     <div ref={wadah}>
       <div
-        className={`relative overflow-hidden rounded-2xl border ${hairline} bg-white`}
+        className={`relative mx-auto max-w-6xl overflow-hidden rounded-2xl border ${hairline} bg-white`}
       >
         <div className="flex items-start justify-between gap-6 px-6 pt-7 sm:px-9 sm:pt-9">
           <h2 className="max-w-md text-2xl leading-tight font-medium tracking-[-0.01em] text-brand sm:text-3xl">

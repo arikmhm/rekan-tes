@@ -120,7 +120,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="coba" className="mx-auto max-w-6xl py-16  sm:py-24">
+        <section id="coba" className="mx-auto py-16 px-5 sm:px-8 sm:py-24">
           <TestPreview />
         </section>
 

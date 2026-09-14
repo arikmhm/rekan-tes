@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { SesiSimulasi } from "../../../_components/sesi-simulasi";
-import { LegalLinks } from "../../../_components/site-shell";
+import { SiteFooter } from "../../../_components/site-shell";
 import { getPaket, paketSimulasi } from "../../data";
 
 // Paketnya statis dan sedikit, jadi seluruh rutenya bisa disiapkan saat build:
@@ -45,12 +45,7 @@ export default async function SesiPage({
     <div className="flex min-h-screen flex-col bg-cream">
       <SesiSimulasi paket={paket} />
 
-      <footer className="border-t border-[#105C78]/20 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-brand/60 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
-          <LegalLinks />
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

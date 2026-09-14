@@ -22,18 +22,28 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-[#105C78]/20 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-brand/60 sm:px-8">
-          <p>
-            Rekan Tes adalah platform latihan independen, bukan penyelenggara
-            atau mitra resmi rekrutmen bank. Pembayaran hanya untuk sesi
-            simulasi dan tidak menjamin kelulusan.
-          </p>
-          <LegalLinks />
-          <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
+  );
+}
+
+/**
+ * Footer publik, satu untuk semua halaman. Satu baris saja: hak cipta yang
+ * sekaligus menyatakan independensi platform, lalu ketiga dokumen legal.
+ * Rincian bahwa pembayaran tidak menjamin kelulusan ada di syarat layanan
+ * yang ditautkan di sini.
+ */
+export function SiteFooter() {
+  return (
+    <footer className="border-t border-[#105C78]/20 bg-white">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-brand/60 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <p>
+          © 2026 Rekan Tes. Platform simulasi independen, bukan mitra resmi
+          rekrutmen bank.
+        </p>
+        <LegalLinks />
+      </div>
+    </footer>
   );
 }
 

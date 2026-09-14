@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { PhoneChat } from "./_components/phone-chat";
-import { LegalLinks, SiteHeader } from "./_components/site-shell";
+import { SiteFooter, SiteHeader } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
 const langkah = [
@@ -173,14 +173,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className={`border-t ${hairline} bg-white`}>
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-7 text-xs leading-5 font-normal text-brand/60 sm:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p>© 2026 Rekan Tes. Platform simulasi independen.</p>
-            <LegalLinks />
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

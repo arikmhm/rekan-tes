@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireUser } from "@/lib/authz";
-import { JENIS, type JenisProduk } from "@/lib/catalog";
+import { JENIS, type JenisProduk } from "@/lib/produk";
 import { listOrdersForUser } from "@/lib/order";
 
 import {

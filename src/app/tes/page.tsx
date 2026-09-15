@@ -3,18 +3,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Fragment } from "react";
 
-import { JENIS, listKatalog, type JenisProduk } from "@/lib/catalog";
+import { JENIS, listProduk, type JenisProduk } from "@/lib/produk";
 
 import { KartuProduk } from "../_components/kartu-produk";
 import { SiteShell } from "../_components/site-shell";
 
 export const metadata: Metadata = {
-  title: "Katalog",
+  title: "Produk",
   description:
     "Produk latihan yang tersedia beserta isi dan harganya. Bayar satuan, tanpa langganan.",
 };
 
-// Katalog membaca database pada setiap permintaan. Tanpa ini halaman ikut
+// Daftar produk membaca database pada setiap permintaan. Tanpa ini halaman ikut
 // ter-prerender saat build dan daftarnya membeku sampai deploy berikutnya.
 export const dynamic = "force-dynamic";
 
@@ -22,12 +22,12 @@ const hairline = "border-[#105C78]/20";
 
 const URUTAN_JENIS = Object.keys(JENIS) as JenisProduk[];
 
-export default async function KatalogPage({
+export default async function ProdukPage({
   searchParams,
 }: {
   searchParams: Promise<{ jenis?: string }>;
 }) {
-  const produk = await listKatalog();
+  const produk = await listProduk();
 
   // Penyaring hidup di URL, bukan di state peramban: hasilnya bisa ditautkan,
   // dibuka di tab baru, dan tetap jalan tanpa JavaScript.
@@ -52,7 +52,7 @@ export default async function KatalogPage({
       <div className="relative flex flex-1 flex-col overflow-hidden">
         <div className="relative mx-auto w-full max-w-6xl flex-1 px-5 py-10 sm:px-8 sm:py-14">
           <h1 className="text-3xl font-medium tracking-[-0.01em] text-brand">
-            Katalog
+            Produk
           </h1>
           <div
             className={`mt-7 flex flex-wrap items-center gap-2 border-b ${hairline} pb-5`}

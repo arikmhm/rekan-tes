@@ -86,7 +86,7 @@ export default async function Home() {
                 className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-center text-sm font-normal text-white transition-all  hover:bg-brand-orange active:translate-y-0"
                 href="/tes"
               >
-                Lihat katalog simulasi
+                Lihat produk
                 <ArrowRight
                   className="size-4 transition-transform group-hover:translate-x-1"
                   aria-hidden
@@ -206,7 +206,7 @@ export default async function Home() {
         {/* Penutup halaman: alurnya dulu, baru ajakan. Pengunjung yang sudah
             mencoba simulasi di atas tinggal perlu tahu langkah setelahnya. */}
         {/* Etalase singkat di kaki beranda: apa saja yang dijual, satu
-            kalimat masing-masing. Rinciannya urusan katalog. */}
+            kalimat masing-masing. Rinciannya urusan halaman produk. */}
         <section
           id="produk"
           className="relative overflow-hidden px-5 py-16 sm:px-8 sm:pb-24"
@@ -255,7 +255,7 @@ export default async function Home() {
                     href="/tes"
                     className="group mt-5 inline-flex items-center gap-2 text-sm font-medium text-brand transition-colors hover:text-brand-orange"
                   >
-                    Lihat katalog
+                    Lihat produk
                     <ArrowRight
                       className="size-4 transition-transform group-hover:translate-x-1"
                       aria-hidden

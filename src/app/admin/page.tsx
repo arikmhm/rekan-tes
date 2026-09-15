@@ -145,7 +145,7 @@ export default async function AdminPage() {
               render={<Link href="/tes" />}
               className="w-full"
             >
-              Lihat katalog publik
+              Lihat halaman produk
             </Button>
           </CardContent>
         </Card>

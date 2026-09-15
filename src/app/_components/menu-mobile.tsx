@@ -71,7 +71,7 @@ export function MenuMobile() {
             Beranda
           </Link>
           <Link className="py-2" href="/tes">
-            Katalog
+            Produk
           </Link>
           <Link className="py-2" href="/simulasi">
             Simulasi gratis

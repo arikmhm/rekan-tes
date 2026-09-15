@@ -19,7 +19,7 @@ Pembayaran harus jelas terpisah dari proses rekrutmen resmi. Pengguna membayar s
 
 ## Solution
 
-Rekan Tes menyediakan katalog simulasi tes kerja dengan fokus awal perbankan. Pengguna membuat akun, memilih tes, membayar satu sesi, mengerjakan subtes secara berurutan, lalu menerima hasil dan pembahasan.
+Rekan Tes menyediakan produk simulasi tes kerja dengan fokus awal perbankan. Pengguna membuat akun, memilih tes, membayar satu sesi, mengerjakan subtes secara berurutan, lalu menerima hasil dan pembahasan.
 
 Admin mengelola kategori, bank soal, subtes, dan produk tes. Setiap soal memiliki satu kategori tetapi berdiri independen dari tes dan subtes. Admin menugaskan soal ke konfigurasi subtes sehingga soal yang sama dapat digunakan pada beberapa tes tanpa duplikasi.
 
@@ -32,7 +32,7 @@ MVP mendukung soal pilihan ganda dengan satu jawaban benar, pembayaran per sesi,
 1. Sebagai peserta, saya ingin mendaftar menggunakan username, email, dan password, sehingga saya dapat memiliki akun Rekan Tes.
 2. Sebagai peserta, saya ingin memverifikasi email, sehingga akun dan transaksi saya terhubung ke alamat yang valid.
 3. Sebagai peserta, saya ingin login, logout, dan mereset password, sehingga saya dapat mengakses akun dengan aman.
-4. Sebagai peserta, saya ingin melihat katalog tes yang tersedia, sehingga saya dapat memilih latihan yang relevan.
+4. Sebagai peserta, saya ingin melihat produk yang tersedia, sehingga saya dapat memilih latihan yang relevan.
 5. Sebagai peserta, saya ingin melihat harga, subtes, jumlah soal, dan estimasi durasi sebelum membeli, sehingga saya memahami produk yang dibeli.
 6. Sebagai peserta, saya ingin melihat pernyataan bahwa produk adalah simulasi independen, sehingga saya tidak menganggap pembayaran sebagai biaya rekrutmen bank.
 7. Sebagai peserta, saya ingin membayar satu sesi tes melalui payment gateway, sehingga akses dapat diberikan otomatis setelah pembayaran berhasil.

@@ -1,7 +1,7 @@
 import { ArrowRight, CalendarClock, Gauge, PlayCircle } from "lucide-react";
 import Link from "next/link";
 
-import { JENIS, type JenisProduk } from "@/lib/catalog";
+import { JENIS, type JenisProduk } from "@/lib/produk";
 
 import {
   LABEL_ATTEMPT,

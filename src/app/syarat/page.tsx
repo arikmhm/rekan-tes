@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ACCESS_DAYS } from "@/lib/catalog";
+import { ACCESS_DAYS } from "@/lib/produk";
 
 import { KONTAK, LegalDoc, TERAKHIR_DIPERBARUI } from "../_components/site-shell";
 
@@ -40,7 +40,7 @@ export default function SyaratPage() {
         <li>Satu pembelian memberikan satu kali pengerjaan untuk satu produk tes.</li>
         <li>
           Harga yang berlaku adalah harga yang ditampilkan saat checkout dan dikunci pada order
-          tersebut, meski harga katalog berubah kemudian.
+          tersebut, meski harga produk berubah kemudian.
         </li>
         <li>
           Akses berlaku {ACCESS_DAYS} hari sejak pembayaran berhasil. Setelah itu sesi yang belum

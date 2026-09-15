@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getPublishedTest } from "@/lib/catalog";
+import { getPublishedTest } from "@/lib/produk";
 
 import { DetailProduk } from "../../../_components/detail-produk";
 
@@ -16,12 +16,12 @@ export async function generateMetadata({
   return { title: tes.name };
 }
 
-// Katalog dibaca ulang tiap permintaan; harga dan isi produk boleh berubah
+// Daftar produk dibaca ulang tiap permintaan; harga dan isi produk boleh berubah
 // tanpa menunggu deploy berikutnya.
 export const dynamic = "force-dynamic";
 
 /**
- * Detail produk di dalam ruang peserta. Halamannya sama dengan katalog publik,
+ * Detail produk di dalam ruang peserta. Halamannya sama dengan daftar produk publik,
  * hanya tanpa kerangka pengunjung — peserta yang sudah masuk tidak perlu
  * dikeluarkan dari dasbornya hanya untuk membaca rincian dan membayar.
  */

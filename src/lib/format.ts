@@ -1,5 +1,5 @@
 /**
- * Format angka untuk pembaca Indonesia. Dipakai katalog, detail tes, dan admin
+ * Format angka untuk pembaca Indonesia. Dipakai halaman produk, detail tes, dan admin
  * agar harga serta durasi tampil sama di seluruh aplikasi.
  */
 

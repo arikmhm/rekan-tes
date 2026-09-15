@@ -102,7 +102,7 @@ export default function SimulasiPage() {
               href="/tes"
               className={`group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-lg border ${hairline} bg-white px-6 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
             >
-              Lihat katalog
+              Lihat produk
               <ArrowRight
                 className="size-4 transition-transform group-hover:translate-x-1"
                 aria-hidden
@@ -111,7 +111,7 @@ export default function SimulasiPage() {
           </div>
         </div>
 
-        {/* Pola yang sama dengan katalog dan beranda, duduk di kaki halaman. */}
+        {/* Pola yang sama dengan halaman produk dan beranda, duduk di kaki halaman. */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.07] mask-[linear-gradient(to_top,black,transparent)]"

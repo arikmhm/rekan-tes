@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { JENIS, type FaktaProduk, type ProdukKatalog } from "@/lib/catalog";
+import { JENIS, type FaktaProduk, type Produk } from "@/lib/produk";
 import { formatPrice } from "@/lib/format";
 
 const hairline = "border-[#105C78]/20";
@@ -24,15 +24,15 @@ const IKON: Record<FaktaProduk["ikon"], typeof Layers> = {
 };
 
 /**
- * Satu kartu katalog. Dipakai katalog publik maupun daftar produk di ruang
+ * Satu kartu produk. Dipakai daftar produk publik maupun daftar produk di ruang
  * peserta — keduanya menampilkan produk yang sama, jadi tampilannya pun satu.
  */
 export function KartuProduk({
   produk,
   href,
 }: {
-  produk: ProdukKatalog;
-  /** Tujuan kartu: katalog publik dan ruang peserta punya halaman detailnya
+  produk: Produk;
+  /** Tujuan kartu: daftar produk publik dan ruang peserta punya halaman detailnya
       masing-masing, isi kartunya sama. */
   href: string;
 }) {

@@ -2,11 +2,11 @@
  * Paket simulasi gratis: soal contoh yang bisa dikerjakan siapa saja tanpa akun.
  * Isinya sengaja ditulis di berkas ini, bukan di basis data — tidak ada attempt,
  * tidak ada jawaban tersimpan, dan halamannya tidak perlu menyentuh database
- * sama sekali. Simulasi berbayar yang sesungguhnya hidup di katalog /tes.
+ * sama sekali. Simulasi berbayar yang sesungguhnya hidup di halaman produk /tes.
  */
 
 export type Soal = {
-  /** Nama subtes seperti yang dipakai di katalog. */
+  /** Nama subtes seperti yang dipakai di halaman produk. */
   subtes: string;
   /** Versi pendek nama subtes, dipakai sebagai label sumbu radar hasil. */
   singkat: string;

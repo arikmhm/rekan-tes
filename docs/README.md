@@ -20,7 +20,7 @@ Dokumen di direktori ini adalah sumber keputusan produk dan teknis untuk MVP Rek
 - Better Auth, halaman daftar/masuk, dan otorisasi role sudah tersedia.
 - Verifikasi email dan reset password sudah berjalan lewat Resend.
 - Admin kategori, bank soal, subtes, dan produk tes sudah tersedia di `/admin`, termasuk validasi publikasi tes.
-- Katalog publik `/tes` dan detail tes sudah tersedia untuk produk berstatus `published`.
+- Daftar produk publik `/tes` dan detail produk sudah tersedia untuk produk berstatus `published`.
 - Kebijakan privasi, syarat layanan, dan kebijakan refund tersedia di `/privasi`, `/syarat`, dan `/refund`.
 - Order dan pembayaran QRIS lewat DOKU SNAP sudah tersedia; kredensialnya diisi lewat variabel `DOKU_*` di `.env.local`.
 - Webhook DOKU sudah mengaktifkan order dan memberi satu attempt setelah notifikasi QRIS valid.

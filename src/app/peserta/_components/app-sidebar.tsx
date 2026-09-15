@@ -45,7 +45,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 
 /**
- * Jenis produk di sidebar. Nilainya sama dengan `JenisProduk` di lib/catalog,
+ * Jenis produk di sidebar. Nilainya sama dengan `JenisProduk` di lib/produk,
  * disalin karena berkas itu server-only sedangkan sidebar berjalan di peramban.
  */
 const jenisProduk = [

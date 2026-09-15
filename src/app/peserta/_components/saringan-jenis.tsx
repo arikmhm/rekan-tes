@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Fragment } from "react";
 
-import { JENIS, type JenisProduk } from "@/lib/catalog";
+import { JENIS, type JenisProduk } from "@/lib/produk";
 
 const hairline = "border-[#105C78]/20";
 

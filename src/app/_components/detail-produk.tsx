@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { ACCESS_DAYS, getPublishedTest, JENIS } from "@/lib/catalog";
+import { ACCESS_DAYS, getPublishedTest, JENIS } from "@/lib/produk";
 import { formatDuration, formatPrice } from "@/lib/format";
 
 import { CheckoutButton } from "./checkout-button";
@@ -18,7 +18,7 @@ const hairline = "border-[#105C78]/20";
 type Tes = NonNullable<Awaited<ReturnType<typeof getPublishedTest>>>;
 
 /**
- * Halaman detail satu produk beserta tombol belinya. Dipakai katalog publik
+ * Halaman detail satu produk beserta tombol belinya. Dipakai daftar produk publik
  * maupun ruang peserta: produknya sama, jadi halamannya satu — yang berbeda
  * hanya kemana tombol kembali menuju dan pernik di sekelilingnya.
  */

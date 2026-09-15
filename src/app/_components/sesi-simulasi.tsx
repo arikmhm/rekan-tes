@@ -676,7 +676,7 @@ function Hasil({
           href="/tes"
           className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
         >
-          Lihat katalog simulasi
+          Lihat produk
           <ArrowRight className="size-4" aria-hidden />
         </Link>
         <button

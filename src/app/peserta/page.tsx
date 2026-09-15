@@ -8,7 +8,7 @@ import { DaftarProduk } from "./produk/_components/daftar-produk";
 
 export const metadata: Metadata = { title: "Produk" };
 
-// Katalog dibaca ulang tiap permintaan; tanpa ini daftarnya membeku sampai
+// Daftar produk dibaca ulang tiap permintaan; tanpa ini daftarnya membeku sampai
 // deploy berikutnya.
 export const dynamic = "force-dynamic";
 

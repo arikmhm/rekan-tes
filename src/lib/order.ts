@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { db, schema } from "@/db";
 
 import { assertOwner, requireVerifiedUser } from "./authz";
-import { getPublishedTest } from "./catalog";
+import { getPublishedTest } from "./produk";
 import { externalId, generateQris, invoiceNumber } from "./doku";
 import { parseDokuEnv } from "./env-schema";
 import { pollPaymentStatus } from "./webhook";
@@ -62,7 +62,7 @@ export async function startCheckout(_prev: string | null, form: FormData) {
     if (hidup?.qrContent) redirect(`/peserta/pesanan/${pending.id}`);
   }
 
-  // Order lama mempertahankan harganya; katalog boleh berubah setelahnya.
+  // Order lama mempertahankan harganya; daftar produk boleh berubah setelahnya.
   const amount = pending?.amount ?? tes.priceAmount;
   const orderId =
     pending?.id ??

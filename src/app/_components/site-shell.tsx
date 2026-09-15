@@ -15,7 +15,7 @@ export const KONTAK = emailAddress(env.EMAIL_FROM);
 
 /**
  * Kerangka halaman publik selain landing page. Disclaimer independensi berada
- * di footer, sehingga setiap halaman katalog dan detail selalu memuatnya.
+ * di footer, sehingga setiap halaman produk dan detail selalu memuatnya.
  */
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
@@ -80,7 +80,7 @@ export function SiteHeader() {
             Beranda
           </Link>
           <Link className={tautanNav} href="/tes">
-            Katalog
+            Produk
           </Link>
           <Link className={tautanNav} href="/simulasi">
             Simulasi gratis

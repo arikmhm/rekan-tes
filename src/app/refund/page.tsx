@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ACCESS_DAYS } from "@/lib/catalog";
+import { ACCESS_DAYS } from "@/lib/produk";
 
 import { KONTAK, LegalDoc, TERAKHIR_DIPERBARUI } from "../_components/site-shell";
 

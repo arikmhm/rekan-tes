@@ -98,7 +98,7 @@ pernah meninggalkan aplikasi, dan tidak ada halaman pemilihan kanal.
 1. Hubungkan Neon dan Drizzle, lalu buat schema serta migrasi MVP.
 2. Pasang Better Auth, alur akun, otorisasi role, dan verifikasi email.
 3. Bangun pengelolaan kategori, soal reusable, subtes, dan produk tes.
-4. Bangun katalog publik, detail produk, serta dokumen legal minimum.
+4. Bangun daftar produk publik, detail produk, serta dokumen legal minimum.
 5. Integrasikan order serta DOKU Checkout secara idempotent.
 6. Bangun test engine, autosave, scoring, hasil, dan pengujian kritis.
 

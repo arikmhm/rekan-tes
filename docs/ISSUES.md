@@ -197,7 +197,7 @@ Catatan: kelengkapan diperiksa di dalam transaksi yang sama dengan perubahan sta
 Hasil implementasi:
 
 - Halaman `/tes` (katalog) dan `/tes/[slug]` (detail), memakai `src/app/_components/site-shell.tsx` sebagai kerangka publik bersama.
-- `src/lib/catalog.ts` memuat query publik dan konstanta `ACCESS_DAYS`; RT-009 menghitung `orders.access_expires_at` dari konstanta yang sama agar angka di halaman dan di data tidak berbeda.
+- `src/lib/produk.ts` memuat query publik dan konstanta `ACCESS_DAYS`; RT-009 menghitung `orders.access_expires_at` dari konstanta yang sama agar angka di halaman dan di data tidak berbeda.
 - `src/lib/format.ts` memformat harga dan durasi untuk locale Indonesia; halaman admin produk tes ikut memakainya agar formatnya tidak bercabang.
 - `src/app/not-found.tsx` menangani slug tidak dikenal maupun route lain yang salah, lengkap dengan tautan kembali ke katalog.
 - Katalog memakai `dynamic = "force-dynamic"`. Tanpa itu Next.js ikut mem-prerender daftar saat build dan produk baru tidak pernah muncul sampai deploy berikutnya.

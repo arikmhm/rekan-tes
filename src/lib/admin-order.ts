@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { db, schema } from "@/db";
 
 import { requireAdmin, requireAdminMutation } from "./authz";
-import { ACCESS_DAYS } from "./catalog";
+import { ACCESS_DAYS } from "./produk";
 import { grantReasonProblem } from "./order-consistency";
 
 const ORDER_STATUS = ["pending", "paid", "expired", "cancelled", "refunded"] as const;

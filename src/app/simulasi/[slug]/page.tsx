@@ -195,7 +195,7 @@ export default async function SimulasiDetailPage({
                   href="/tes"
                   className="font-medium text-brand underline transition-colors hover:text-brand-orange"
                 >
-                  katalog
+                  halaman produk
                 </Link>
                 .
               </p>
@@ -203,7 +203,7 @@ export default async function SimulasiDetailPage({
           </div>
         </div>
 
-        {/* Pola yang sama dengan katalog dan beranda, duduk di kaki halaman. */}
+        {/* Pola yang sama dengan halaman produk dan beranda, duduk di kaki halaman. */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.07] mask-[linear-gradient(to_top,black,transparent)]"

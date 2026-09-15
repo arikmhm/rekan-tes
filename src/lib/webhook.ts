@@ -4,7 +4,7 @@ import { and, eq, ne } from "drizzle-orm";
 
 import { db, schema } from "@/db";
 
-import { ACCESS_DAYS } from "./catalog";
+import { ACCESS_DAYS } from "./produk";
 import { queryQris, type DokuCredentials, type QrisNotification } from "./doku";
 
 export type ActivationResult =

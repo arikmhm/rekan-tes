@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-import { JENIS, listKatalog } from "@/lib/catalog";
+import { JENIS, listProduk } from "@/lib/produk";
 import { formatPrice } from "@/lib/format";
 
 import { KartuProduk } from "../../../_components/kartu-produk";
@@ -27,9 +27,9 @@ const slide = "w-full shrink-0 snap-start sm:w-[calc(50%-0.5rem)]";
  * peserta — yang memang menampilkan etalase ini sebagai isi bawaannya.
  */
 export async function DaftarProduk({ jenis }: { jenis?: string }) {
-  const produk = await listKatalog();
+  const produk = await listProduk();
 
-  // Penyaring hidup di URL, sama seperti katalog publik: hasilnya bisa
+  // Penyaring hidup di URL, sama seperti daftar produk publik: hasilnya bisa
   // ditautkan dan tetap jalan tanpa JavaScript.
   const aktif = URUTAN_JENIS.find((j) => j === jenis) ?? null;
   const tampil = aktif ? produk.filter((p) => p.jenis === aktif) : produk;

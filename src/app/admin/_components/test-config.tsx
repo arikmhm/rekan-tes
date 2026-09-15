@@ -102,15 +102,18 @@ export function SubtestConfigForm({
 }
 
 /**
- * Menugaskan satu soal ke subtes. Daftar pilihan sudah dibatasi ke soal terbit
- * yang sekategori dengan subtes; server memeriksa ulang keduanya.
+ * Menugaskan soal ke subtes. Daftar sudah dibatasi ke soal terbit yang
+ * sekategori dengan subtes; server memeriksa ulang keduanya. Dicentang banyak
+ * sekaligus karena mengisi satu subtes bisa berarti puluhan soal.
  */
 export function AddAssignmentForm({
   testSubtestId,
   candidates,
+  kurang,
 }: {
   testSubtestId: string;
-  candidates: { id: string; prompt: string }[];
+  candidates: { id: string; prompt: string; difficulty: string }[];
+  kurang: number;
 }) {
   const [error, action, pending] = useActionState(addAssignment, null);
 
@@ -125,26 +128,37 @@ export function AddAssignmentForm({
   return (
     <form action={action} className="grid gap-3">
       <input type="hidden" name="testSubtestId" value={testSubtestId} />
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-medium">Tugaskan soal</p>
+        <p className="text-muted-foreground text-xs">
+          {kurang > 0 ? `kurang ${kurang} soal` : "target sudah terpenuhi"} &middot;{" "}
+          {candidates.length} kandidat
+        </p>
+      </div>
+      <div className="max-h-72 divide-y overflow-y-auto rounded-lg border">
+        {candidates.map((q) => (
+          <label
+            key={q.id}
+            className="hover:bg-muted/40 flex cursor-pointer items-start gap-3 p-2.5 text-sm"
+          >
+            <input
+              type="checkbox"
+              name="questionId"
+              value={q.id}
+              className="accent-primary mt-0.5 size-4 shrink-0"
+            />
+            <span className="line-clamp-2 min-w-0 flex-1">{q.prompt}</span>
+            <span className="text-muted-foreground shrink-0 font-mono text-xs">{q.difficulty}</span>
+          </label>
+        ))}
+      </div>
       <div className="flex flex-wrap items-end gap-3">
-        <div className="grid min-w-56 flex-1 gap-2">
-          <Label htmlFor={`q-${testSubtestId}`}>Soal</Label>
-          <SelectNative id={`q-${testSubtestId}`} name="questionId" required defaultValue="">
-            <option value="" disabled>
-              Pilih soal
-            </option>
-            {candidates.map((q) => (
-              <option key={q.id} value={q.id}>
-                {q.prompt.length > 80 ? `${q.prompt.slice(0, 80)}…` : q.prompt}
-              </option>
-            ))}
-          </SelectNative>
-        </div>
         <div className="grid w-24 gap-2">
           <Label htmlFor={`w-${testSubtestId}`}>Bobot</Label>
           <Input id={`w-${testSubtestId}`} name="weight" type="number" min={1} defaultValue={1} required />
         </div>
         <Button type="submit" disabled={pending}>
-          {pending ? "Menugaskan…" : "Tugaskan soal"}
+          {pending ? "Menugaskan…" : "Tugaskan soal terpilih"}
         </Button>
       </div>
       <FormError message={error} />

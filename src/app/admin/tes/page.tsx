@@ -39,7 +39,7 @@ export default async function TesPage() {
                     <Link href={`/admin/tes/${t.id}`} className="font-medium hover:underline">
                       {t.name}
                     </Link>
-                    <p className="text-muted-foreground font-mono text-xs">/tes/{t.slug}</p>
+                    <p className="text-muted-foreground font-mono text-xs">/produk/{t.slug}</p>
                   </TableCell>
                   <TableCell className="text-sm">{formatPrice(t.priceAmount)}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{t.subtestCount}</TableCell>

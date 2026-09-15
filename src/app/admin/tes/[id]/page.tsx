@@ -198,7 +198,11 @@ export default async function TesDetailPage({ params }: { params: Promise<{ id: 
                   </div>
 
                   {!tes.locked && (
-                    <AddAssignmentForm testSubtestId={s.id} candidates={s.candidates} />
+                    <AddAssignmentForm
+                      testSubtestId={s.id}
+                      candidates={s.candidates}
+                      kurang={Math.max(0, s.questionLimit - s.assignments.length)}
+                    />
                   )}
                 </div>
               </details>

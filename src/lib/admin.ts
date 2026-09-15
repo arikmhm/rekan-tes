@@ -578,12 +578,16 @@ export async function moveTestSubtest(form: FormData) {
   revalidatePath(`/admin/tes/${ini.testId}`);
 }
 
+/**
+ * Menugaskan satu atau banyak soal sekaligus. Mengisi satu subtes berarti
+ * puluhan penugasan, jadi formulirnya mengirim daftar, bukan satu soal.
+ */
 export async function addAssignment(_prev: string | null, form: FormData) {
   await requireAdminMutation();
 
   const testSubtestId = String(form.get("testSubtestId") ?? "");
-  const questionId = String(form.get("questionId") ?? "");
-  if (!questionId) return "Soal wajib dipilih.";
+  const questionIds = [...new Set(form.getAll("questionId").map(String).filter(Boolean))];
+  if (questionIds.length === 0) return "Pilih minimal satu soal.";
 
   const berat = z.coerce.number().int().positive("bobot harus lebih dari nol").safeParse(form.get("weight"));
   if (!berat.success) return pesanZod(berat.error);
@@ -598,28 +602,42 @@ export async function addAssignment(_prev: string | null, form: FormData) {
 
   // Pilihan di formulir sudah difilter, tetapi assignment tetap diperiksa di
   // server: form dapat dikirim dari mana saja.
-  const [soal] = await db
+  const soal = await db
     .select({ categoryId: schema.questions.categoryId, status: schema.questions.status })
     .from(schema.questions)
-    .where(eq(schema.questions.id, questionId));
-  if (!soal) return "Soal tidak ditemukan.";
-  if (soal.categoryId !== konfigurasi.categoryId) return "Soal harus sekategori dengan subtes.";
-  if (soal.status !== "published") return "Hanya soal berstatus published yang dapat ditugaskan.";
+    .where(inArray(schema.questions.id, questionIds));
+  if (soal.length !== questionIds.length) return "Ada soal yang tidak ditemukan.";
+  if (soal.some((q) => q.categoryId !== konfigurasi.categoryId)) {
+    return "Soal harus sekategori dengan subtes.";
+  }
+  if (soal.some((q) => q.status !== "published")) {
+    return "Hanya soal berstatus published yang dapat ditugaskan.";
+  }
+
+  // Posisi dibaca sekali lalu dinaikkan per baris. `posisiBerikutnya` tidak
+  // dipakai di sini karena subquery-nya menghasilkan angka yang sama untuk
+  // semua baris dalam satu insert, sehingga posisinya bentrok.
+  const [akhir] = await db
+    .select({
+      posisi: sql<number>`coalesce(max(${schema.testSubtestQuestions.position}), 0)::int`,
+    })
+    .from(schema.testSubtestQuestions)
+    .where(eq(schema.testSubtestQuestions.testSubtestId, testSubtestId));
 
   try {
-    await db.insert(schema.testSubtestQuestions).values({
-      testSubtestId,
-      questionId,
-      weight: berat.data,
-      position: posisiBerikutnya(
-        schema.testSubtestQuestions,
-        schema.testSubtestQuestions.position,
-        schema.testSubtestQuestions.testSubtestId,
+    await db.insert(schema.testSubtestQuestions).values(
+      questionIds.map((questionId, urutan) => ({
         testSubtestId,
-      ),
-    });
+        questionId,
+        weight: berat.data,
+        position: akhir.posisi + urutan + 1,
+      })),
+    );
   } catch (error) {
-    return kodeGanda(error, "Soal itu sudah ditugaskan ke subtes ini.");
+    return kodeGanda(
+      error,
+      "Sebagian soal itu sudah ditugaskan ke subtes ini. Muat ulang halaman lalu coba lagi.",
+    );
   }
 
   revalidatePath(`/admin/tes/${konfigurasi.testId}`);
@@ -717,6 +735,7 @@ export async function getTest(id: string) {
         .select({
           id: schema.questions.id,
           prompt: schema.questions.prompt,
+          difficulty: schema.questions.difficulty,
           categoryId: schema.questions.categoryId,
         })
         .from(schema.questions)

@@ -25,7 +25,7 @@ export default async function PesertaPage({
   const user = await requireUser();
 
   return (
-    <div className="mx-auto w-full  p-4 pt-5 sm:p-6 sm:pt-6">
+    <div className="mx-auto w-full max-w-6xl p-4 pt-5 sm:p-6 sm:pt-6">
       {!user.emailVerified && (
         <Link
           href="/peserta/profil"

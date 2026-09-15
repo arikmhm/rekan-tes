@@ -18,7 +18,7 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-2 sm:p-6 sm:pt-3">
+    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 p-4 pt-2 sm:p-6 sm:pt-3">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>

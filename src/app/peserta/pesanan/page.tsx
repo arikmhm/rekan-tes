@@ -35,7 +35,7 @@ export default async function PesananPage() {
   const pesanan = await listOrdersForUser(user.id);
 
   return (
-    <div className="mx-auto w-full p-4 pt-5 sm:p-6 sm:pt-6">
+    <div className="mx-auto w-full max-w-6xl p-4 pt-5 sm:p-6 sm:pt-6">
       {pesanan.length === 0 ? (
         <div
           className={`rounded-2xl border border-dashed ${hairline} bg-white p-10 text-center`}

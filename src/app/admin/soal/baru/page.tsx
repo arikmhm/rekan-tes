@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { listCategories } from "@/lib/admin";
 
 import { AdminShell, EmptyState } from "../../_components/shell";
-import { QuestionForm } from "../../_components/question-form";
+import { PembuatSoal } from "../_components/pembuat-soal";
 
 export const metadata: Metadata = { title: "Soal baru" };
 
@@ -15,7 +15,7 @@ export default async function SoalBaruPage() {
   return (
     <AdminShell
       title="Soal baru"
-      description="Simpan sebagai draft kapan saja. Validasi kelengkapan berlaku saat status diubah ke published."
+      description="Impor sekumpulan soal dari JSON atau tulis sendiri, periksa semuanya di satu daftar, lalu simpan sekaligus."
       action={
         <Button variant="outline" nativeButton={false} render={<Link href="/admin/soal" />}>
           Kembali ke bank soal
@@ -25,7 +25,7 @@ export default async function SoalBaruPage() {
       {kategori.length === 0 ? (
         <EmptyState>Belum ada kategori. Buat kategori lebih dulu.</EmptyState>
       ) : (
-        <QuestionForm kategori={kategori} />
+        <PembuatSoal kategori={kategori} />
       )}
     </AdminShell>
   );

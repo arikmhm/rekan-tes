@@ -10,7 +10,13 @@ import { db, schema } from "@/db";
 
 import { requireAdmin, requireAdminMutation } from "./authz";
 import { isUniqueViolation } from "./db-error";
-import { publishProblem, readOptions, type QuestionOptionInput } from "./question-input";
+import { masalahSoal, soalBaruSchema } from "./question-import";
+import {
+  OPTION_LABELS,
+  publishProblem,
+  readOptions,
+  type QuestionOptionInput,
+} from "./question-input";
 import { testPublishProblem } from "./test-publish";
 
 const STATUS = ["draft", "published", "archived"] as const;
@@ -137,6 +143,73 @@ export async function saveQuestion(_prev: string | null, form: FormData) {
 
   revalidatePath("/admin/soal");
   redirect(`/admin/soal/${questionId}`);
+}
+
+/**
+ * Menyimpan banyak soal sekaligus dari langkah pratinjau. Dipakai baik oleh
+ * impor JSON maupun penulisan manual: keduanya menghasilkan daftar yang sama,
+ * jadi hanya ada satu jalur penyimpanan yang perlu dipercaya.
+ *
+ * Menerima argumen biasa, bukan FormData: bentuknya bersarang (pilihan di
+ * dalam soal) dan meratakannya ke nama field hanya menambah dua penerjemahan
+ * yang bisa melenceng.
+ */
+export async function createQuestions(daftar: unknown, status: unknown) {
+  await requireAdminMutation();
+
+  const statusParsed = z.enum(STATUS).safeParse(status);
+  if (!statusParsed.success) return "Status tidak dikenal.";
+
+  const parsed = z
+    .array(soalBaruSchema)
+    .min(1, "Belum ada soal untuk disimpan.")
+    // ponytail: batas aman satu transaksi. Naikkan bila impor nyata melewatinya.
+    .max(200, "Maksimal 200 soal sekali simpan.")
+    .safeParse(daftar);
+
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    const nomor = typeof issue.path[0] === "number" ? `Soal ${issue.path[0] + 1}: ` : "";
+    return `${nomor}${issue.message}`;
+  }
+
+  for (const [urutan, s] of parsed.data.entries()) {
+    const masalah = masalahSoal(s);
+    if (masalah) return `Soal ${urutan + 1}: ${masalah}.`;
+  }
+
+  // Id dibuat di sini, bukan dibaca dari `returning()`: urutan baris hasil
+  // insert banyak baris tidak dijamin, sedangkan pilihan harus menempel pada
+  // soal yang benar.
+  const soal = parsed.data.map((s) => ({
+    id: crypto.randomUUID(),
+    ...s,
+    options: s.options.map((o, urutan) => ({
+      label: OPTION_LABELS[urutan],
+      content: o.content,
+      isCorrect: o.isCorrect,
+      position: urutan + 1,
+    })),
+  }));
+
+  await db.transaction(async (tx) => {
+    await tx.insert(schema.questions).values(
+      soal.map((s) => ({
+        id: s.id,
+        categoryId: s.categoryId,
+        prompt: s.prompt,
+        explanation: s.explanation,
+        difficulty: s.difficulty,
+        status: statusParsed.data,
+      })),
+    );
+    await tx.insert(schema.questionOptions).values(
+      soal.flatMap((s) => s.options.map((o) => ({ ...o, questionId: s.id }))),
+    );
+  });
+
+  revalidatePath("/admin/soal");
+  redirect("/admin/soal");
 }
 
 export async function duplicateQuestion(_prev: string | null, form: FormData) {

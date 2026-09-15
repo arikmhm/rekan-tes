@@ -15,6 +15,7 @@ const MUTATIONS = [
   "saveCategory",
   "saveQuestion",
   "duplicateQuestion",
+  "createQuestions",
   "saveSubtest",
   "saveTest",
   "addTestSubtest",

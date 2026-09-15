@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -18,6 +19,31 @@ const langkah = [
   {
     judul: "Kerjakan, lalu baca pembahasan",
     isi: "Waktu berjalan per subtes seperti tes sungguhan. Selesai mengerjakan, skor dan kunci tiap soal langsung terbuka.",
+  },
+];
+
+/**
+ * Tiga sorotan produk di section "coba". Gambarnya menyusul — lihat
+ * BingkaiLayar untuk cara menukar penampung dengan tangkapan layar sungguhan.
+ */
+const sorotan = [
+  {
+    judul: "Rasanya seperti tes beneran",
+    kalimat: "Waktu jalan terus, walau halamannya kamu tutup.",
+    tanda: ["Timer per subtes", "Peta nomor soal", "Tersimpan otomatis"],
+    gambar: { src: "/layar/simulasi.png", lebar: 1197, tinggi: 684 },
+  },
+  {
+    judul: "Nilaimu bocor di mana? Kelihatan",
+    kalimat: "Skor dan analisisnya keluar begitu kamu selesai.",
+    tanda: ["Skor per subtes", "Peta jawaban", "Tempo pengerjaan"],
+    gambar: { src: "/layar/analisis.png", lebar: 1119, tinggi: 582 },
+  },
+  {
+    judul: "Salah pun ada penjelasannya",
+    kalimat: "Kunci dan alasannya terbuka, bukan cuma skor.",
+    tanda: ["Pembahasan tiap soal", "Kunci tiap opsi", "Bisa dibaca ulang"],
+    gambar: { src: "/layar/pembahasan.png", lebar: 1112, tinggi: 600 },
   },
 ];
 
@@ -76,7 +102,7 @@ export default async function Home() {
         {/* Rekaman sesi pengerjaan sebagai gambar produk: berjalan sendiri,
             mengulang, tanpa suara, dan tidak menerima klik sama sekali — ini
             gambar yang bergerak, bukan pemutar video yang perlu dilayani. */}
-        <div className="mx-auto w-full max-w-6xl pb-16 px-5 sm:px-0 md:px-0 sm:pb-20">
+        {/* <div className="mx-auto w-full max-w-6xl pb-16 px-5 sm:px-0 md:px-0 sm:pb-20">
           <video
             src="/hero.mp4"
             autoPlay
@@ -87,7 +113,7 @@ export default async function Home() {
             tabIndex={-1}
             className={`pointer-events-none w-full rounded-lg border ${hairline} bg-cream`}
           />
-        </div>
+        </div> */}
         <section id="mulai" className={` bg-white px-5  sm:px-8`}>
           <div className="mx-auto max-w-6xl bg-brand-orange/80 px-5 pt-16 sm:pt-24 sm:px-8 rounded-t-2xl sm:rounded-t-2xl">
             <h2 className="mx-auto max-w-xl text-center text-3xl font-medium tracking-[-0.01em] text-white sm:text-4xl">
@@ -101,27 +127,76 @@ export default async function Home() {
         {/* Simulasi percobaannya sendiri tinggal di /simulasi. Menanamkannya di
             sini berarti setiap pengunjung beranda ikut mengunduh mesin kuisnya,
             padahal cuma sebagian yang benar-benar mencoba. */}
-        <section id="coba" className="bg-gray-50 px-5 py-16 sm:px-8 sm:py-24">
-          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="max-w-lg text-3xl leading-tight font-medium tracking-[-0.01em] text-brand sm:text-4xl">
-                Coba simulasinya sekarang — tanpa daftar.
-              </h2>
-              <p className="mt-4 max-w-xl text-base leading-7 font-normal text-brand/70">
-                Kerjakan paket contoh sampai selesai, lalu lihat skor, peta
-                kecepatan tiap soal, dan pembahasan jawabannya.
-              </p>
+        {/* Warna latarnya sendiri: seksi ini memamerkan produknya, jadi ia
+            perlu terbaca sebagai satu blok utuh di antara seksi putih. */}
+        <section id="coba" className="bg-mint/50 px-5 py-16 sm:px-8 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <span className="text-xs font-medium tracking-wide text-brand-orange uppercase">
+              Yang kamu dapat
+            </span>
+            <h2 className="mt-3 max-w-2xl text-3xl leading-tight font-medium tracking-[-0.01em] text-brand sm:text-4xl">
+              Latihannya semirip mungkin dengan hari-H.
+            </h2>
+
+            {/* Gambar berganti sisi tiap blok supaya mata tidak membaca tiga
+                susunan yang persis sama. */}
+            <div className="mt-12 space-y-14 sm:mt-14 sm:space-y-20">
+              {sorotan.map((s, i) => (
+                <article
+                  key={s.gambar.src}
+                  className="grid items-end gap-x-10 gap-y-5 lg:grid-cols-12"
+                >
+                  <div
+                    className={`lg:col-span-8 ${i % 2 === 1 ? "lg:order-2" : ""}`}
+                  >
+                    <BingkaiLayar gambar={s.gambar} alt={s.judul} />
+                  </div>
+
+                  <div
+                    className={`lg:col-span-4 lg:pb-6 ${i % 2 === 1 ? "lg:order-1" : ""}`}
+                  >
+                    <h3 className="text-2xl leading-snug font-medium tracking-[-0.01em] text-brand">
+                      {s.judul}
+                    </h3>
+                    <p className="mt-2 text-base leading-7 font-normal text-brand/70">
+                      {s.kalimat}
+                    </p>
+                    <ul className="mt-4 flex flex-wrap gap-1.5">
+                      {s.tanda.map((teks) => (
+                        <li
+                          key={teks}
+                          className="rounded-full bg-white px-2.5 py-1 text-xs font-normal text-brand/70"
+                        >
+                          {teks}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              ))}
             </div>
-            <Link
-              className="group flex h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
-              href="/simulasi"
+
+            {/* Ajakan baru muncul setelah pengunjung melihat barangnya. */}
+            <div
+              className={`mt-14 flex flex-col items-start gap-5 border-t ${hairline} pt-10 sm:mt-20 sm:flex-row sm:items-center sm:justify-between`}
             >
-              Mulai simulasi gratis
-              <ArrowRight
-                className="size-4 transition-transform group-hover:translate-x-1"
-                aria-hidden
-              />
-            </Link>
+              <p className="text-2xl font-medium tracking-[-0.01em] text-brand">
+                Coba dulu, gratis.{" "}
+                <span className="font-normal text-brand/60">
+                  Sepuluh soal, tanpa daftar.
+                </span>
+              </p>
+              <Link
+                className="group flex h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
+                href="/simulasi"
+              >
+                Mulai simulasi gratis
+                <ArrowRight
+                  className="size-4 transition-transform group-hover:translate-x-1"
+                  aria-hidden
+                />
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -184,6 +259,35 @@ export default async function Home() {
       </main>
 
       <SiteFooter />
+    </div>
+  );
+}
+
+/**
+ * Bingkai tangkapan layar produk: matras putih tipis dengan bayangan rendah,
+ * supaya gambar antarmuka yang latarnya juga terang tidak lumer ke latar seksi.
+ */
+function BingkaiLayar({
+  gambar,
+  alt,
+}: {
+  /** Ukuran asli berkasnya ikut dikirim agar ruangnya dipesan sebelum gambar
+      selesai diunduh — tanpa itu isi halaman melompat saat gambar mendarat. */
+  gambar: { src: string; lebar: number; tinggi: number };
+  alt: string;
+}) {
+  return (
+    <div
+      className={`overflow-hidden rounded-xl border ${hairline} bg-white p-2 shadow-[0_18px_50px_-30px_rgba(16,92,120,0.45)]`}
+    >
+      <Image
+        src={gambar.src}
+        alt={alt}
+        width={gambar.lebar}
+        height={gambar.tinggi}
+        sizes="(min-width: 1024px) 66vw, 100vw"
+        className={`w-full rounded-lg border ${hairline}`}
+      />
     </div>
   );
 }

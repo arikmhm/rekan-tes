@@ -7,21 +7,6 @@ import { PhoneChat } from "./_components/phone-chat";
 import { SiteFooter, SiteHeader } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
-const langkah = [
-  {
-    judul: "Pilih simulasi",
-    isi: "Katalog berisi simulasi tes masuk bank beserta rincian subtes, jumlah soal, dan durasinya.",
-  },
-  {
-    judul: "Bayar sekali lewat QRIS",
-    isi: "Sekali bayar untuk satu simulasi. Akses pengerjaan aktif begitu pembayaran terkonfirmasi.",
-  },
-  {
-    judul: "Kerjakan, lalu baca pembahasan",
-    isi: "Waktu berjalan per subtes seperti tes sungguhan. Selesai mengerjakan, skor dan kunci tiap soal langsung terbuka.",
-  },
-];
-
 /**
  * Tiga sorotan produk di section "coba". Gambarnya menyusul — lihat
  * BingkaiLayar untuk cara menukar penampung dengan tangkapan layar sungguhan.
@@ -48,6 +33,24 @@ const sorotan = [
 ];
 
 const hairline = "border-[#105C78]/20";
+
+/**
+ * Produk yang belum terbit. Gambarannya dibuat dari markup biasa, bukan
+ * tangkapan layar, karena halamannya memang belum ada — menampilkan layar palsu
+ * sama saja menjanjikan sesuatu yang belum bisa ditagih.
+ */
+const menyusul = [
+  {
+    judul: "Soal tes",
+    isi: "Kumpulan soal beserta pembahasannya, dikerjakan sesuka tempomu.",
+    Gambar: GambarSoal,
+  },
+  {
+    judul: "Ebook",
+    isi: "Bahan bacaan yang bisa diunduh dan dibaca kapan saja.",
+    Gambar: GambarEbook,
+  },
+];
 
 export default async function Home() {
   // Landing page ini murni untuk pengunjung anonim. Yang sudah login diarahkan
@@ -202,8 +205,10 @@ export default async function Home() {
 
         {/* Penutup halaman: alurnya dulu, baru ajakan. Pengunjung yang sudah
             mencoba simulasi di atas tinggal perlu tahu langkah setelahnya. */}
+        {/* Etalase singkat di kaki beranda: apa saja yang dijual, satu
+            kalimat masing-masing. Rinciannya urusan katalog. */}
         <section
-          id="cara-kerja"
+          id="produk"
           className="relative overflow-hidden px-5 py-16 sm:px-8 sm:pb-24"
         >
           {/* Pola yang sama dengan hero, kali ini menutup halaman: ia menebal ke
@@ -213,46 +218,79 @@ export default async function Home() {
             className="pointer-events-none absolute inset-x-0 bottom-0 h-96 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.09] mask-[linear-gradient(to_top,black,transparent)]"
           />
 
-          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl bg-brand px-7 py-10 text-white sm:px-10 sm:py-14">
-            <h2 className="max-w-xl text-3xl font-medium tracking-[-0.01em] sm:text-4xl">
-              Bayar sekali per simulasi, kerjakan saat kamu siap.
+          <div className="relative mx-auto max-w-6xl">
+            <h2 className="text-3xl leading-tight font-medium tracking-[-0.01em] text-brand sm:text-4xl">
+              Produk
             </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-6 font-normal text-white/80">
-              Tanpa langganan dan tanpa paket tahunan. Tiga langkah dari memilih
-              simulasi sampai membaca pembahasan tiap soal.
+            <p className="mt-3 text-base leading-7 font-normal text-brand/70">
+              Bayar sekali per produk. Tanpa langganan, tanpa paket tahunan.
             </p>
 
-            <ol className="mt-10 grid gap-px overflow-hidden rounded-[6px] bg-white/15 sm:grid-cols-3">
-              {langkah.map((l, i) => (
-                <li key={l.judul} className="bg-brand p-6 sm:p-7">
-                  <span className="font-mono text-xs font-medium text-brand-orange">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <p className="mt-3 font-medium">{l.judul}</p>
-                  <p className="mt-2 text-sm leading-6 font-normal text-white/70">
-                    {l.isi}
-                  </p>
-                </li>
-              ))}
-            </ol>
+            <div className="mt-10 grid gap-4 lg:grid-cols-2 lg:grid-rows-2">
+              {/* Simulasi memegang kartu besar: ia satu-satunya yang sudah
+                  bisa dibeli hari ini. */}
+              <article
+                className={`flex flex-col justify-between overflow-hidden rounded-2xl border ${hairline} bg-white lg:row-span-2`}
+              >
+                <div className="-mr-10 mt-8 ml-8 overflow-hidden rounded-tl-xl border-t border-l border-brand/20 bg-cream/40 p-2 sm:-mr-12 sm:ml-10">
+                  <Image
+                    src="/layar/simulasi.png"
+                    alt="Layar pengerjaan simulasi"
+                    width={1197}
+                    height={684}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className={`w-full rounded-tl-lg border-t border-l ${hairline}`}
+                  />
+                </div>
 
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link
-                className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm font-normal text-brand transition-colors hover:bg-brand-orange hover:text-white"
-                href="/tes"
-              >
-                Lihat katalog simulasi
-                <ArrowRight
-                  className="size-4 transition-transform group-hover:translate-x-1"
-                  aria-hidden
-                />
-              </Link>
-              <Link
-                className="flex h-12 items-center justify-center rounded-lg border border-white/30 px-6 text-sm font-normal text-white transition-colors hover:bg-white hover:text-brand"
-                href="/daftar"
-              >
-                Buat akun gratis
-              </Link>
+                <div className="p-7 sm:p-8">
+                  <h3 className="text-xl font-medium tracking-[-0.01em] text-brand">
+                    Simulasi tes
+                  </h3>
+                  <p className="mt-2 max-w-md text-sm leading-6 font-normal text-brand/70">
+                    Dikerjakan berwaktu seperti tes aslinya. Skor dan
+                    pembahasannya terbuka begitu kamu selesai.
+                  </p>
+                  <Link
+                    href="/tes"
+                    className="group mt-5 inline-flex items-center gap-2 text-sm font-medium text-brand transition-colors hover:text-brand-orange"
+                  >
+                    Lihat katalog
+                    <ArrowRight
+                      className="size-4 transition-transform group-hover:translate-x-1"
+                      aria-hidden
+                    />
+                  </Link>
+                </div>
+              </article>
+
+              {menyusul.map(({ judul, isi, Gambar }) => (
+                <article
+                  key={judul}
+                  className={`flex items-center gap-4 overflow-hidden rounded-2xl border ${hairline} bg-white`}
+                >
+                  <div className="flex-1 p-7 sm:p-8">
+                    <span className="inline-flex rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-brand/60">
+                      Segera
+                    </span>
+                    <h3 className="mt-3 text-xl font-medium tracking-[-0.01em] text-brand">
+                      {judul}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 font-normal text-brand/70">
+                      {isi}
+                    </p>
+                  </div>
+
+                  {/* Gambaran isi produk, bukan tangkapan layar: barangnya
+                      memang belum ada, jadi jangan berpura-pura sudah. */}
+                  <div
+                    className="hidden w-40 shrink-0 self-stretch sm:block lg:w-44"
+                    aria-hidden
+                  >
+                    <Gambar />
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -288,6 +326,54 @@ function BingkaiLayar({
         sizes="(min-width: 1024px) 66vw, 100vw"
         className={`w-full rounded-lg border ${hairline}`}
       />
+    </div>
+  );
+}
+
+/** Gambaran bank soal: beberapa pilihan jawaban, satu di antaranya terpilih. */
+function GambarSoal() {
+  return (
+    <div className="flex h-full flex-col justify-center gap-2 bg-cream/40 py-6 pr-6 pl-4">
+      {["A", "B", "C"].map((huruf, i) => (
+        <div
+          key={huruf}
+          className={`flex items-center gap-2 rounded-lg border bg-white px-2.5 py-2 ${
+            i === 1 ? "border-brand" : hairline
+          }`}
+        >
+          <span
+            className={`grid size-5 shrink-0 place-items-center rounded-full text-[10px] font-medium ${
+              i === 1
+                ? "bg-brand text-white"
+                : "border border-brand/30 text-brand/40"
+            }`}
+          >
+            {huruf}
+          </span>
+          <span className="h-1.5 flex-1 rounded-full bg-brand/10" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Gambaran ebook: tumpukan halaman dengan sampul di depan. */
+function GambarEbook() {
+  return (
+    <div className="relative grid h-full place-items-center bg-cream/40 py-6">
+      <div
+        className={`absolute h-28 w-20 rotate-6 rounded-lg border ${hairline} bg-white`}
+      />
+      <div
+        className={`absolute h-28 w-20 -rotate-6 rounded-lg border ${hairline} bg-white`}
+      />
+      <div
+        className={`relative flex h-28 w-20 flex-col justify-end gap-1.5 rounded-lg border ${hairline} bg-brand p-3`}
+      >
+        <span className="h-1.5 w-8 rounded-full bg-brand-orange" />
+        <span className="h-1 w-full rounded-full bg-white/30" />
+        <span className="h-1 w-2/3 rounded-full bg-white/30" />
+      </div>
     </div>
   );
 }

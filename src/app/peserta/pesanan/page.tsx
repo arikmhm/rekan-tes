@@ -2,6 +2,14 @@ import { ArrowRight, Receipt } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { requireUser } from "@/lib/authz";
 import { formatPrice } from "@/lib/format";
 import { listOrdersForUser } from "@/lib/order";
@@ -27,17 +35,10 @@ export default async function PesananPage() {
   const pesanan = await listOrdersForUser(user.id);
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-4 pt-5 sm:p-6 sm:pt-6">
-      <h1 className="text-2xl font-medium tracking-[-0.01em] text-brand">
-        Pesanan
-      </h1>
-      <p className="mt-1.5 text-sm leading-6 font-normal text-brand/60">
-        Seluruh transaksi yang pernah kamu buat, terbaru lebih dulu.
-      </p>
-
+    <div className="mx-auto w-full p-4 pt-5 sm:p-6 sm:pt-6">
       {pesanan.length === 0 ? (
         <div
-          className={`mt-7 rounded-2xl border border-dashed ${hairline} bg-white p-10 text-center`}
+          className={`rounded-2xl border border-dashed ${hairline} bg-white p-10 text-center`}
         >
           <Receipt className="mx-auto size-5 text-brand/30" aria-hidden />
           <h2 className="mt-3 text-lg font-medium text-brand">
@@ -55,40 +56,77 @@ export default async function PesananPage() {
           </Link>
         </div>
       ) : (
-        <ul className="mt-7 space-y-3">
-          {pesanan.map((p) => (
-            <li key={p.id}>
-              <Link
-                href={`/peserta/pesanan/${p.id}`}
-                className={`group flex flex-wrap items-center justify-between gap-4 rounded-2xl border ${hairline} bg-white px-5 py-4 transition-colors hover:border-brand-orange`}
-              >
-                <div className="min-w-0">
-                  <p className="font-medium text-brand">{p.testName}</p>
-                  <p className="mt-0.5 text-xs font-normal text-brand/50">
-                    {tanggal.format(p.createdAt)}
-                  </p>
-                </div>
+        /* Tabel dibungkus kartu yang sama dengan kartu di etalase dan pustaka,
+           jadi halamannya sepadan meski isinya baris, bukan kartu. Tabelnya
+           sendiri sudah menggulir mendatar saat kolomnya tidak muat. */
+        <div
+          className={`overflow-hidden rounded-2xl border ${hairline} bg-white`}
+        >
+          <Table>
+            <TableHeader>
+              <TableRow className={`${hairline} hover:bg-transparent`}>
+                <TableHead className="px-5 font-medium text-brand/60 sm:px-6">
+                  Produk
+                </TableHead>
+                <TableHead className="font-medium text-brand/60">
+                  Tanggal
+                </TableHead>
+                <TableHead className="font-medium text-brand/60">
+                  Jumlah
+                </TableHead>
+                <TableHead className="font-medium text-brand/60">
+                  Status
+                </TableHead>
+                <TableHead className="px-5 text-right font-medium text-brand/60 sm:px-6">
+                  <span className="sr-only">Rincian</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
 
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium text-brand">
+            <TableBody>
+              {pesanan.map((p) => (
+                <TableRow
+                  key={p.id}
+                  className={`${hairline} group hover:bg-cream/50`}
+                >
+                  <TableCell className="px-5 py-4 font-medium whitespace-normal text-brand sm:px-6">
+                    <Link
+                      href={`/peserta/pesanan/${p.id}`}
+                      className="transition-colors hover:text-brand-orange"
+                    >
+                      {p.testName}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="py-4 font-normal whitespace-nowrap text-brand/60">
+                    {tanggal.format(p.createdAt)}
+                  </TableCell>
+                  <TableCell className="py-4 font-medium whitespace-nowrap text-brand">
                     {formatPrice(p.amount)}
-                  </span>
-                  <span
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-                      warnaStatus[p.status] ?? "bg-cream text-brand/50"
-                    }`}
-                  >
-                    {LABEL_ORDER[p.status] ?? p.status}
-                  </span>
-                  <ArrowRight
-                    className="size-4 text-brand/30 transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:text-brand-orange"
-                    aria-hidden
-                  />
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap ${
+                        warnaStatus[p.status] ?? "bg-cream text-brand/50"
+                      }`}
+                    >
+                      {LABEL_ORDER[p.status] ?? p.status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-5 py-4 text-right sm:px-6">
+                    <Link
+                      href={`/peserta/pesanan/${p.id}`}
+                      aria-label={`Rincian pesanan ${p.testName}`}
+                      className={`inline-flex h-9 items-center gap-1.5 rounded-lg border ${hairline} px-3.5 text-sm font-normal whitespace-nowrap text-brand transition-colors group-hover:border-brand-orange group-hover:bg-brand-orange group-hover:text-white`}
+                    >
+                      Rincian
+                      <ArrowRight className="size-4" aria-hidden />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
     </div>
   );

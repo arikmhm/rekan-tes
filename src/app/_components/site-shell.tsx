@@ -79,7 +79,7 @@ export function SiteHeader() {
           <Link className={tautanNav} href="/">
             Beranda
           </Link>
-          <Link className={tautanNav} href="/tes">
+          <Link className={tautanNav} href="/produk">
             Produk
           </Link>
           <Link className={tautanNav} href="/simulasi">

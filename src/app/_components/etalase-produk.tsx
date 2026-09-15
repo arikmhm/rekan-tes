@@ -4,13 +4,9 @@ import Link from "next/link";
 import { JENIS, listProduk } from "@/lib/produk";
 import { formatPrice } from "@/lib/format";
 
-import { KartuProduk } from "../../../_components/kartu-produk";
-import {
-  hitungJenis,
-  SaringanJenis,
-  URUTAN_JENIS,
-} from "../../_components/saringan-jenis";
 import { Korsel } from "./carousel";
+import { KartuProduk } from "./kartu-produk";
+import { hitungJenis, SaringanJenis, URUTAN_JENIS } from "./saringan-jenis";
 
 const hairline = "border-[#105C78]/20";
 
@@ -22,11 +18,26 @@ const SOROTAN = 3;
 const slide = "w-full shrink-0 snap-start sm:w-[calc(50%-0.5rem)]";
 
 /**
- * Etalase produk: korsel sorotan, penyaring jenis, lalu daftarnya. Tinggal di
- * bawah produk/ bersama halaman detailnya, dan dipanggil halaman depan ruang
- * peserta — yang memang menampilkan etalase ini sebagai isi bawaannya.
+ * Etalase produk: korsel sorotan, penyaring jenis, lalu daftarnya. Satu
+ * etalase untuk dua tempat — halaman produk publik dan halaman depan ruang
+ * peserta — karena barang yang dipajang memang sama; yang berbeda cuma alamat
+ * halamannya.
  */
-export async function DaftarProduk({ jenis }: { jenis?: string }) {
+export async function EtalaseProduk({
+  jenis,
+  dasar,
+  detail,
+  sorotan = true,
+}: {
+  jenis?: string;
+  /** Halaman tempat etalase ini tinggal, dipakai penyaring jenis. */
+  dasar: string;
+  /** Awalan alamat halaman detail produk, tanpa slug di ujungnya. */
+  detail: string;
+  /** Korsel sorotan di kepala etalase; dimatikan bila halamannya sudah punya
+      korsel sendiri. */
+  sorotan?: boolean;
+}) {
   const produk = await listProduk();
 
   // Penyaring hidup di URL, sama seperti daftar produk publik: hasilnya bisa
@@ -36,7 +47,7 @@ export async function DaftarProduk({ jenis }: { jenis?: string }) {
 
   return (
     <>
-      {produk.length > 0 && (
+      {sorotan && produk.length > 0 && (
         <Korsel>
           {produk.slice(0, SOROTAN).map((p) => (
             <article
@@ -58,7 +69,7 @@ export async function DaftarProduk({ jenis }: { jenis?: string }) {
                     {formatPrice(p.harga)}
                   </p>
                   <Link
-                    href={`/peserta/produk/${p.slug}`}
+                    href={`${detail}/${p.slug}`}
                     className="group flex items-center gap-2 text-sm font-normal text-brand transition-colors duration-300 ease-out hover:text-brand-orange"
                   >
                     Lihat detail
@@ -75,7 +86,7 @@ export async function DaftarProduk({ jenis }: { jenis?: string }) {
       )}
 
       <SaringanJenis
-        dasar="/peserta"
+        dasar={dasar}
         aktif={aktif}
         jumlah={hitungJenis(produk)}
         total={produk.length}
@@ -96,7 +107,7 @@ export async function DaftarProduk({ jenis }: { jenis?: string }) {
               : "Produk pertama sedang disusun. Sementara menunggu, simulasi gratis sudah bisa dikerjakan."}
           </p>
           <Link
-            href={aktif ? "/peserta" : "/simulasi"}
+            href={aktif ? dasar : "/simulasi"}
             className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
           >
             {aktif ? "Lihat semua produk" : "Coba simulasi gratis"}
@@ -111,7 +122,7 @@ export async function DaftarProduk({ jenis }: { jenis?: string }) {
           <ul className="grid gap-5 @3xl:grid-cols-2">
             {tampil.map((p) => (
               <li key={p.slug}>
-                <KartuProduk produk={p} href={`/peserta/produk/${p.slug}`} />
+                <KartuProduk produk={p} href={`${detail}/${p.slug}`} />
               </li>
             ))}
           </ul>

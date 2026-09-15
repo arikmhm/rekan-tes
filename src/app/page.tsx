@@ -84,7 +84,7 @@ export default async function Home() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 className="group flex h-12 items-center justify-center gap-2 rounded-lg bg-brand px-6 text-center text-sm font-normal text-white transition-all  hover:bg-brand-orange active:translate-y-0"
-                href="/tes"
+                href="/produk"
               >
                 Lihat produk
                 <ArrowRight
@@ -252,7 +252,7 @@ export default async function Home() {
                     pembahasannya terbuka begitu kamu selesai.
                   </p>
                   <Link
-                    href="/tes"
+                    href="/produk"
                     className="group mt-5 inline-flex items-center gap-2 text-sm font-medium text-brand transition-colors hover:text-brand-orange"
                   >
                     Lihat produk

@@ -2,7 +2,7 @@
  * Paket simulasi gratis: soal contoh yang bisa dikerjakan siapa saja tanpa akun.
  * Isinya sengaja ditulis di berkas ini, bukan di basis data — tidak ada attempt,
  * tidak ada jawaban tersimpan, dan halamannya tidak perlu menyentuh database
- * sama sekali. Simulasi berbayar yang sesungguhnya hidup di halaman produk /tes.
+ * sama sekali. Simulasi berbayar yang sesungguhnya hidup di halaman produk /produk.
  */
 
 export type Soal = {

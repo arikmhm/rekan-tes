@@ -99,7 +99,7 @@ export default function SimulasiPage() {
               </p>
             </div>
             <Link
-              href="/tes"
+              href="/produk"
               className={`group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-lg border ${hairline} bg-white px-6 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
             >
               Lihat produk

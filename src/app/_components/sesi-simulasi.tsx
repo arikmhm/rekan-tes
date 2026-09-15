@@ -673,7 +673,7 @@ function Hasil({
         className={`flex flex-col gap-2.5 border-t ${hairline} pt-5 sm:flex-row`}
       >
         <Link
-          href="/tes"
+          href="/produk"
           className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
         >
           Lihat produk

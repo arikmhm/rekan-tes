@@ -10,7 +10,7 @@ import {
   hitungJenis,
   SaringanJenis,
   URUTAN_JENIS,
-} from "../_components/saringan-jenis";
+} from "../../_components/saringan-jenis";
 import { KartuPustaka, type MilikPeserta } from "./_components/kartu-pustaka";
 
 export const metadata: Metadata = { title: "Pustaka" };

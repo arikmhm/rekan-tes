@@ -142,7 +142,7 @@ export default async function AdminPage() {
             <Button
               variant="outline"
               nativeButton={false}
-              render={<Link href="/tes" />}
+              render={<Link href="/produk" />}
               className="w-full"
             >
               Lihat halaman produk

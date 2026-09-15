@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { requireUser } from "@/lib/authz";
 
-import { DaftarProduk } from "./produk/_components/daftar-produk";
+import { EtalaseProduk } from "../_components/etalase-produk";
 
 export const metadata: Metadata = { title: "Produk" };
 
@@ -42,7 +42,11 @@ export default async function PesertaPage({
         </Link>
       )}
 
-      <DaftarProduk jenis={(await searchParams).jenis} />
+      <EtalaseProduk
+        jenis={(await searchParams).jenis}
+        dasar="/peserta"
+        detail="/peserta/produk"
+      />
     </div>
   );
 }

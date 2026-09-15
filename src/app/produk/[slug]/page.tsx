@@ -40,7 +40,7 @@ export default async function TesDetailPage({
         <div className="relative mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
           <DetailProduk
             tes={tes}
-            kembali={{ href: "/tes", teks: "Semua produk" }}
+            kembali={{ href: "/produk", teks: "Semua produk" }}
             tautanGratis
           />
         </div>

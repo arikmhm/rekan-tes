@@ -192,7 +192,7 @@ export default async function SimulasiDetailPage({
                 Jawaban dan skornya tidak disimpan ke mana pun. Untuk riwayat
                 hasil yang tersimpan, pilih simulasi di{" "}
                 <Link
-                  href="/tes"
+                  href="/produk"
                   className="font-medium text-brand underline transition-colors hover:text-brand-orange"
                 >
                   halaman produk

@@ -55,7 +55,7 @@ export function TestForm({ tes }: { tes?: Tes }) {
             placeholder="simulasi-tes-masuk-bank"
             className="lowercase"
           />
-          <p className="text-muted-foreground text-xs">Menjadi alamat halaman: /tes/slug</p>
+          <p className="text-muted-foreground text-xs">Menjadi alamat halaman: /produk/slug</p>
         </div>
       </div>
 

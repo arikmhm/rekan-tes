@@ -70,7 +70,7 @@ export function MenuMobile() {
           <Link className="py-2" href="/">
             Beranda
           </Link>
-          <Link className="py-2" href="/tes">
+          <Link className="py-2" href="/produk">
             Produk
           </Link>
           <Link className="py-2" href="/simulasi">

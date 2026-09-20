@@ -13,7 +13,6 @@ import { FormError } from "./shell";
 
 type Tes = {
   id: string;
-  slug: string;
   name: string;
   description: string;
   priceAmount: number;
@@ -34,29 +33,20 @@ export function TestForm({ tes }: { tes?: Tes }) {
     <form action={action} className="grid gap-5">
       {tes && <input type="hidden" name="id" value={tes.id} />}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor={`tes-name-${uid}`}>Nama tes</Label>
-          <Input
-            id={`tes-name-${uid}`}
-            name="name"
-            required
-            defaultValue={tes?.name}
-            placeholder="Simulasi Tes Masuk Bank"
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor={`tes-slug-${uid}`}>Slug</Label>
-          <Input
-            id={`tes-slug-${uid}`}
-            name="slug"
-            required
-            defaultValue={tes?.slug}
-            placeholder="simulasi-tes-masuk-bank"
-            className="lowercase"
-          />
-          <p className="text-muted-foreground text-xs">Menjadi alamat halaman: /produk/slug</p>
-        </div>
+      <div className="grid gap-2">
+        <Label htmlFor={`tes-name-${uid}`}>Nama tes</Label>
+        <Input
+          id={`tes-name-${uid}`}
+          name="name"
+          required
+          defaultValue={tes?.name}
+          placeholder="Simulasi Tes Masuk Bank"
+        />
+        {!tes && (
+          <p className="text-muted-foreground text-xs">
+            Alamat halaman dibuat otomatis dari nama ini, lalu tidak berubah lagi.
+          </p>
+        )}
       </div>
 
       <div className="grid gap-2">

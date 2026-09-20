@@ -1,6 +1,6 @@
 "use server";
 
-import { and, asc, count, desc, eq, gt, ilike, inArray, lt, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, ilike, inArray, like, lt, or, sql } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -17,6 +17,7 @@ import {
   readOptions,
   type QuestionOptionInput,
 } from "./question-input";
+import { slugBebas, slugify } from "./slug";
 import { testPublishProblem } from "./test-publish";
 
 const STATUS = ["draft", "published", "archived"] as const;
@@ -430,12 +431,6 @@ class PublishError extends Error {}
 
 const testSchema = z.object({
   id: z.string().optional(),
-  slug: z
-    .string()
-    .trim()
-    .min(3, "minimal 3 karakter")
-    .max(64)
-    .regex(/^[a-z0-9-]+$/, "hanya huruf kecil, angka, dan tanda hubung"),
   name: z.string().trim().min(3, "minimal 3 karakter").max(160),
   description: z.string().trim().min(1, "deskripsi wajib diisi"),
   priceAmount: z.coerce.number().int("harga harus bilangan bulat").min(0, "harga tidak boleh negatif"),
@@ -447,7 +442,6 @@ export async function saveTest(_prev: string | null, form: FormData) {
 
   const parsed = testSchema.safeParse({
     id: form.get("id") || undefined,
-    slug: String(form.get("slug") ?? "").toLowerCase(),
     name: form.get("name"),
     description: form.get("description"),
     priceAmount: form.get("priceAmount"),
@@ -469,7 +463,22 @@ export async function saveTest(_prev: string | null, form: FormData) {
           .set({ ...nilai, updatedAt: new Date() })
           .where(eq(schema.tests.id, target));
       } else {
-        const [baru] = await tx.insert(schema.tests).values(nilai).returning();
+        // Alamat halaman diturunkan dari nama sekali saat pembuatan lalu tidak
+        // pernah diubah lagi, supaya tautan dan riwayat pesanan tidak putus.
+        const dasar = slugify(nilai.name) || "tes";
+        const serupa = await tx
+          .select({ slug: schema.tests.slug })
+          .from(schema.tests)
+          .where(or(eq(schema.tests.slug, dasar), like(schema.tests.slug, `${dasar}-%`)));
+
+        const slug = slugBebas(
+          dasar,
+          serupa.map((t) => t.slug),
+        );
+        const [baru] = await tx
+          .insert(schema.tests)
+          .values({ ...nilai, slug })
+          .returning();
         target = baru.id;
       }
 
@@ -508,7 +517,8 @@ export async function saveTest(_prev: string | null, form: FormData) {
     });
   } catch (error) {
     if (error instanceof PublishError) return error.message;
-    return kodeGanda(error, `Slug "${nilai.slug}" sudah dipakai tes lain.`);
+    // Hanya mungkin bila dua tes bernama sama disimpan pada saat yang sama.
+    return kodeGanda(error, "Alamat halaman bentrok dengan tes lain, coba simpan sekali lagi.");
   }
 
   revalidatePath("/admin/tes");

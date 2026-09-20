@@ -34,6 +34,7 @@ export default async function TesPage() {
                 <TableHead className="w-28">Harga</TableHead>
                 <TableHead className="w-20">Subtes</TableHead>
                 <TableHead className="w-28">Status</TableHead>
+                <TableHead className="w-24" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -49,6 +50,17 @@ export default async function TesPage() {
                   <TableCell className="text-muted-foreground text-sm">{t.subtestCount}</TableCell>
                   <TableCell>
                     <StatusBadge status={t.status} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {/* Mencoba produk seperti peserta, tanpa menyimpan apa pun. */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      nativeButton={false}
+                      render={<Link href={`/pratinjau/${t.id}`} />}
+                    >
+                      Coba
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

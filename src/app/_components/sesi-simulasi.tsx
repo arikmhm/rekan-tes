@@ -32,7 +32,32 @@ const HURUF = ["A", "B", "C", "D"];
  * yang menyentuh basis data. Paketnya datang dari props, sehingga rute yang
  * sama melayani berapa pun jenis simulasi gratis.
  */
-export function SesiSimulasi({ paket }: { paket: Paket }) {
+/** Tujuan tombol keluar dan penutup layar hasil; berbeda antara sesi gratis dan pratinjau admin. */
+export type JalanKeluar = {
+  keluar: string;
+  lanjutHref: string;
+  lanjutTeks: string;
+  catatan: string;
+};
+
+const JALAN_GRATIS: Omit<JalanKeluar, "keluar"> = {
+  lanjutHref: "/produk",
+  lanjutTeks: "Lihat produk",
+  catatan:
+    "Contoh tampilan hasil. Di simulasi berbayar skor dihitung berbobot dan riwayatnya tersimpan di akunmu.",
+};
+
+export function SesiSimulasi({
+  paket,
+  label = "Simulasi gratis",
+  jalan,
+}: {
+  paket: Paket;
+  label?: string;
+  jalan?: JalanKeluar;
+}) {
+  const keluar = jalan?.keluar ?? `/simulasi/${paket.slug}`;
+  const penutup = jalan ?? { ...JALAN_GRATIS, keluar };
   const soal = paket.soal;
   const DURASI = paket.durasiDetik;
 
@@ -193,7 +218,7 @@ export function SesiSimulasi({ paket }: { paket: Paket }) {
               aria-hidden
             />
             <p className="hidden truncate text-sm font-normal text-brand/70 sm:block">
-              Simulasi gratis · {paket.nama}
+              {label} · {paket.nama}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -206,7 +231,7 @@ export function SesiSimulasi({ paket }: { paket: Paket }) {
               {menitDetik(sisa)}
             </span>
             <Link
-              href={`/simulasi/${paket.slug}`}
+              href={keluar}
               aria-label="Keluar dari simulasi"
               className={`grid size-9 shrink-0 place-items-center rounded-lg border ${hairline} text-brand transition-colors hover:bg-brand hover:text-white`}
             >
@@ -227,6 +252,7 @@ export function SesiSimulasi({ paket }: { paket: Paket }) {
             benar={benar}
             kosong={kosong}
             onUlangi={ulangi}
+            penutup={penutup}
           />
         ) : (
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
@@ -426,6 +452,7 @@ function Hasil({
   benar,
   kosong,
   onUlangi,
+  penutup,
 }: {
   soal: Soal[];
   durasi: number;
@@ -435,6 +462,7 @@ function Hasil({
   benar: number;
   kosong: number;
   onUlangi: () => void;
+  penutup: JalanKeluar;
 }) {
   const [dilihat, setDilihat] = useState(0);
 
@@ -673,10 +701,10 @@ function Hasil({
         className={`flex flex-col gap-2.5 border-t ${hairline} pt-5 sm:flex-row`}
       >
         <Link
-          href="/produk"
+          href={penutup.lanjutHref}
           className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
         >
-          Lihat produk
+          {penutup.lanjutTeks}
           <ArrowRight className="size-4" aria-hidden />
         </Link>
         <button
@@ -688,8 +716,7 @@ function Hasil({
           Ulangi sesi
         </button>
         <p className="text-xs leading-[2.75rem] font-normal text-brand/50 sm:ml-auto">
-          Contoh tampilan hasil. Di simulasi berbayar skor dihitung berbobot dan
-          riwayatnya tersimpan di akunmu.
+          {penutup.catatan}
         </p>
       </div>
     </div>

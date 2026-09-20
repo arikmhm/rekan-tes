@@ -765,6 +765,107 @@ export async function listTests() {
     .orderBy(desc(schema.tests.updatedAt));
 }
 
+/**
+ * Bahan pratinjau admin: susunan soal yang benar-benar akan dikerjakan peserta,
+ * lengkap dengan kunci dan pembahasan, dibentuk sebagai paket simulasi di
+ * memori. Sengaja tidak membuat attempt — pratinjau tidak boleh meninggalkan
+ * jejak apa pun di basis data.
+ *
+ * Aturan "soal mana yang tampil" disalin dari sesi peserta: urutan `position`
+ * lalu dipotong `question_limit`, tanpa menyaring status soal, supaya admin
+ * melihat isi tesnya apa adanya sebelum diterbitkan.
+ *
+ * ponytail: satu hitung mundur untuk seluruh sesi (jumlah durasi subtes),
+ * sedangkan tes sungguhan menghitung per subtes. Cukup untuk mengoreksi isi
+ * soal; kalau pratinjau perlu meniru pergantian subtes, ia butuh runner sendiri.
+ */
+export async function getTestPreview(id: string) {
+  await requireAdmin();
+
+  const [tes] = await db
+    .select({
+      id: schema.tests.id,
+      slug: schema.tests.slug,
+      name: schema.tests.name,
+      description: schema.tests.description,
+      status: schema.tests.status,
+    })
+    .from(schema.tests)
+    .where(eq(schema.tests.id, id));
+  if (!tes) return null;
+
+  const konfigurasi = await db
+    .select({
+      id: schema.testSubtests.id,
+      nama: schema.subtests.name,
+      code: schema.subtests.code,
+      durationSeconds: schema.testSubtests.durationSeconds,
+      questionLimit: schema.testSubtests.questionLimit,
+    })
+    .from(schema.testSubtests)
+    .innerJoin(schema.subtests, eq(schema.subtests.id, schema.testSubtests.subtestId))
+    .where(eq(schema.testSubtests.testId, id))
+    .orderBy(asc(schema.testSubtests.position));
+
+  // Satu query untuk seluruh subtes, pilihan jawaban sekalian ikut di-join:
+  // paket pratinjau dibentuk sekali di sini, bukan per subtes.
+  const baris = konfigurasi.length
+    ? await db
+        .select({
+          testSubtestId: schema.testSubtestQuestions.testSubtestId,
+          questionId: schema.questions.id,
+          prompt: schema.questions.prompt,
+          explanation: schema.questions.explanation,
+          opsi: schema.questionOptions.content,
+          benar: schema.questionOptions.isCorrect,
+        })
+        .from(schema.testSubtestQuestions)
+        .innerJoin(schema.questions, eq(schema.questions.id, schema.testSubtestQuestions.questionId))
+        .innerJoin(
+          schema.questionOptions,
+          eq(schema.questionOptions.questionId, schema.questions.id),
+        )
+        .where(
+          inArray(
+            schema.testSubtestQuestions.testSubtestId,
+            konfigurasi.map((k) => k.id),
+          ),
+        )
+        .orderBy(asc(schema.testSubtestQuestions.position), asc(schema.questionOptions.position))
+    : [];
+
+  const soal = konfigurasi.flatMap((k) => {
+    const milik = baris.filter((b) => b.testSubtestId === k.id);
+    const urutan = [...new Set(milik.map((b) => b.questionId))].slice(0, k.questionLimit);
+
+    return urutan.map((questionId) => {
+      const pilihan = milik.filter((b) => b.questionId === questionId);
+
+      return {
+        subtes: k.nama,
+        // Kode subtes dipakai sebagai label sumbu radar: sudah pendek dan
+        // ditentukan admin sendiri, tidak perlu ditebak dari nama panjangnya.
+        singkat: k.code,
+        prompt: pilihan[0].prompt,
+        opsi: pilihan.map((p) => p.opsi),
+        kunci: pilihan.findIndex((p) => p.benar),
+        pembahasan: pilihan[0].explanation,
+      };
+    });
+  });
+
+  return {
+    tes,
+    paket: {
+      slug: tes.slug,
+      nama: tes.name,
+      ringkas: tes.description,
+      durasiDetik: konfigurasi.reduce((n, k) => n + k.durationSeconds, 0),
+      soal,
+    },
+  };
+}
+
 export async function getTest(id: string) {
   await requireAdmin();
 

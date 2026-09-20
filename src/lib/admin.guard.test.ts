@@ -32,6 +32,7 @@ const READS = [
   "listSubtests",
   "listTests",
   "getTest",
+  "getTestPreview",
   "adminStats",
 ];
 

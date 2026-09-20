@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listTests } from "@/lib/admin";
 import { formatPrice } from "@/lib/format";
 
 import { AdminShell, EmptyState, StatusBadge } from "../_components/shell";
-import { TestForm } from "../_components/test-form";
 
 export const metadata: Metadata = { title: "Produk tes" };
 
@@ -18,9 +17,14 @@ export default async function TesPage() {
     <AdminShell
       title="Produk tes"
       description="Produk tes menyusun subtes menjadi satu simulasi yang dijual. Susunan subtes dan soalnya diatur pada halaman detail."
+      action={
+        <Button nativeButton={false} render={<Link href="/admin/tes/baru" />}>
+          Produk baru
+        </Button>
+      }
     >
       {tes.length === 0 ? (
-        <EmptyState>Belum ada produk tes. Buat yang pertama di formulir bawah.</EmptyState>
+        <EmptyState>Belum ada produk tes. Mulai dari tombol &ldquo;Produk baru&rdquo;.</EmptyState>
       ) : (
         <div className="bg-card overflow-hidden rounded-xl border">
           <Table>
@@ -52,18 +56,6 @@ export default async function TesPage() {
           </Table>
         </div>
       )}
-
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-base">Tes baru</CardTitle>
-          <p className="text-muted-foreground text-sm">
-            Simpan sebagai draft dulu, lalu susun subtesnya sebelum menerbitkan.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <TestForm />
-        </CardContent>
-      </Card>
     </AdminShell>
   );
 }

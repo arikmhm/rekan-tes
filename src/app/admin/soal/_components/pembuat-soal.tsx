@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "../../_components/pilihan";
 import { Textarea } from "@/components/ui/textarea";
 import { createQuestions } from "@/lib/admin";
@@ -174,15 +174,15 @@ export function PembuatSoal({ kategori }: { kategori: Kategori[] }) {
               </p>
             </div>
             <div className="flex flex-wrap items-end gap-3">
-              <div className="grid w-36 gap-2">
-                <Label htmlFor="status-massal">Simpan sebagai</Label>
+              <Field className="w-36">
+                <FieldLabel htmlFor="status-massal">Simpan sebagai</FieldLabel>
                 <Pilihan
                   id="status-massal"
                   value={status}
                   onUbah={setStatus}
                   opsi={["draft", "published"].map((s) => ({ value: s, label: s }))}
                 />
-              </div>
+              </Field>
               <Button onClick={simpan} disabled={!siap || pending}>
                 {pending ? "Menyimpan…" : `Simpan ${daftar.length} soal`}
               </Button>
@@ -327,15 +327,15 @@ function SumberManual({
         </p>
       </CardHeader>
       <CardContent className="grid gap-3">
-        <div className="grid gap-2">
-          <Label htmlFor="kategori-awal">Kategori awal</Label>
+        <Field>
+          <FieldLabel htmlFor="kategori-awal">Kategori awal</FieldLabel>
           <Pilihan
             id="kategori-awal"
             value={categoryId}
             onUbah={setCategoryId}
             opsi={kategori.map((k) => ({ value: k.id, label: `${k.code} — ${k.name}` }))}
           />
-        </div>
+        </Field>
         <div>
           <Button variant="outline" onClick={() => onTulis(categoryId)}>
             Mulai menulis
@@ -382,37 +382,37 @@ function KartuDraf({
 
       <div className="grid gap-5 border-t p-4">
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor={`kat-${draf.kunci}`}>Kategori</Label>
+          <Field>
+            <FieldLabel htmlFor={`kat-${draf.kunci}`}>Kategori</FieldLabel>
             <Pilihan
               id={`kat-${draf.kunci}`}
               value={draf.categoryId}
               onUbah={(categoryId) => onUbah({ ...draf, categoryId })}
               opsi={kategori.map((k) => ({ value: k.id, label: `${k.code} — ${k.name}` }))}
             />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor={`sulit-${draf.kunci}`}>Tingkat kesulitan</Label>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor={`sulit-${draf.kunci}`}>Tingkat kesulitan</FieldLabel>
             <Pilihan
               id={`sulit-${draf.kunci}`}
               value={draf.difficulty}
               onUbah={(difficulty) => onUbah({ ...draf, difficulty })}
               opsi={DIFFICULTY.map((d) => ({ value: d, label: d }))}
             />
-          </div>
+          </Field>
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor={`tanya-${draf.kunci}`}>Isi pertanyaan</Label>
+        <Field>
+          <FieldLabel htmlFor={`tanya-${draf.kunci}`}>Isi pertanyaan</FieldLabel>
           <Textarea
             id={`tanya-${draf.kunci}`}
             rows={3}
             value={draf.prompt}
             onChange={(e) => onUbah({ ...draf, prompt: e.target.value })}
           />
-        </div>
+        </Field>
 
-        <div className="grid gap-2">
+        <Field>
           <span className="text-sm font-medium">Pilihan jawaban</span>
           <p className="text-muted-foreground text-sm">
             Slot kosong diabaikan. Tandai satu pilihan sebagai kunci jawaban.
@@ -441,17 +441,17 @@ function KartuDraf({
               />
             </div>
           ))}
-        </div>
+        </Field>
 
-        <div className="grid gap-2">
-          <Label htmlFor={`bahas-${draf.kunci}`}>Pembahasan</Label>
+        <Field>
+          <FieldLabel htmlFor={`bahas-${draf.kunci}`}>Pembahasan</FieldLabel>
           <Textarea
             id={`bahas-${draf.kunci}`}
             rows={3}
             value={draf.explanation}
             onChange={(e) => onUbah({ ...draf, explanation: e.target.value })}
           />
-        </div>
+        </Field>
 
         <div>
           <Button variant="ghost" size="sm" className="text-destructive" onClick={onHapus}>

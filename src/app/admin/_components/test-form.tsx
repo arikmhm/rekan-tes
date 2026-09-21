@@ -4,7 +4,7 @@ import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "./pilihan";
 import { Textarea } from "@/components/ui/textarea";
 import { saveTest } from "@/lib/admin";
@@ -33,8 +33,8 @@ export function TestForm({ tes }: { tes?: Tes }) {
     <form action={action} className="grid gap-5">
       {tes && <input type="hidden" name="id" value={tes.id} />}
 
-      <div className="grid gap-2">
-        <Label htmlFor={`tes-name-${uid}`}>Nama tes</Label>
+      <Field>
+        <FieldLabel htmlFor={`tes-name-${uid}`}>Nama tes</FieldLabel>
         <Input
           id={`tes-name-${uid}`}
           name="name"
@@ -43,14 +43,14 @@ export function TestForm({ tes }: { tes?: Tes }) {
           placeholder="Simulasi Tes Masuk Bank"
         />
         {!tes && (
-          <p className="text-muted-foreground text-xs">
+          <FieldDescription>
             Alamat halaman dibuat otomatis dari nama ini, lalu tidak berubah lagi.
-          </p>
+          </FieldDescription>
         )}
-      </div>
+      </Field>
 
-      <div className="grid gap-2">
-        <Label htmlFor={`tes-desc-${uid}`}>Deskripsi</Label>
+      <Field>
+        <FieldLabel htmlFor={`tes-desc-${uid}`}>Deskripsi</FieldLabel>
         <Textarea
           id={`tes-desc-${uid}`}
           name="description"
@@ -58,11 +58,11 @@ export function TestForm({ tes }: { tes?: Tes }) {
           rows={3}
           defaultValue={tes?.description}
         />
-      </div>
+      </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor={`tes-price-${uid}`}>Harga (rupiah)</Label>
+        <Field>
+          <FieldLabel htmlFor={`tes-price-${uid}`}>Harga (rupiah)</FieldLabel>
           <Input
             id={`tes-price-${uid}`}
             name="priceAmount"
@@ -72,20 +72,20 @@ export function TestForm({ tes }: { tes?: Tes }) {
             required
             defaultValue={tes?.priceAmount ?? 0}
           />
-        </div>
+        </Field>
         {/* Produk baru selalu lahir sebagai draft — server menolak status lain
             sebelum subtes dan soalnya lengkap — jadi pilihannya baru muncul
             saat menyunting. Penerbitan sendiri dilakukan di langkah terakhir. */}
         {tes && (
-          <div className="grid gap-2">
-            <Label htmlFor={`tes-status-${uid}`}>Status</Label>
+          <Field>
+            <FieldLabel htmlFor={`tes-status-${uid}`}>Status</FieldLabel>
             <Pilihan
               id={`tes-status-${uid}`}
               name="status"
               defaultValue={tes.status}
               opsi={STATUS.map((s) => ({ value: s, label: s }))}
             />
-          </div>
+          </Field>
         )}
       </div>
 

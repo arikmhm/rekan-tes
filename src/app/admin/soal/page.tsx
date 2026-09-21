@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "../_components/pilihan";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listCategories, listQuestions } from "@/lib/admin";
@@ -34,12 +34,12 @@ export default async function SoalPage({
       <Card>
         <CardContent>
           <form method="get" className="flex flex-wrap items-end gap-3">
-            <div className="grid min-w-52 flex-1 gap-2">
-              <Label htmlFor="q">Cari pertanyaan</Label>
+            <Field className="min-w-52 flex-1">
+              <FieldLabel htmlFor="q">Cari pertanyaan</FieldLabel>
               <Input id="q" name="q" defaultValue={filter.q ?? ""} placeholder="kata kunci" />
-            </div>
-            <div className="grid w-36 gap-2">
-              <Label htmlFor="categoryId">Kategori</Label>
+            </Field>
+            <Field className="w-36">
+              <FieldLabel htmlFor="categoryId">Kategori</FieldLabel>
               <Pilihan
                 id="categoryId"
                 name="categoryId"
@@ -49,9 +49,9 @@ export default async function SoalPage({
                   ...kategori.map((k) => ({ value: k.id, label: k.code })),
                 ]}
               />
-            </div>
-            <div className="grid w-36 gap-2">
-              <Label htmlFor="status">Status</Label>
+            </Field>
+            <Field className="w-36">
+              <FieldLabel htmlFor="status">Status</FieldLabel>
               <Pilihan
                 id="status"
                 name="status"
@@ -61,9 +61,9 @@ export default async function SoalPage({
                   label: s || "Semua",
                 }))}
               />
-            </div>
-            <div className="grid w-36 gap-2">
-              <Label htmlFor="difficulty">Kesulitan</Label>
+            </Field>
+            <Field className="w-36">
+              <FieldLabel htmlFor="difficulty">Kesulitan</FieldLabel>
               <Pilihan
                 id="difficulty"
                 name="difficulty"
@@ -73,7 +73,7 @@ export default async function SoalPage({
                   label: s || "Semua",
                 }))}
               />
-            </div>
+            </Field>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">
                 Terapkan

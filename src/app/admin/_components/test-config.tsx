@@ -4,7 +4,7 @@ import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "./pilihan";
 import { addAssignment, addTestSubtest, updateTestSubtest } from "@/lib/admin";
 
@@ -24,8 +24,8 @@ export function AddSubtestForm({
     <form action={action} className="grid gap-3">
       <input type="hidden" name="testId" value={testId} />
       <div className="flex flex-wrap items-end gap-3">
-        <div className="grid min-w-56 flex-1 gap-2">
-          <Label htmlFor={`add-sub-${testId}`}>Subtes</Label>
+        <Field className="min-w-56 flex-1">
+          <FieldLabel htmlFor={`add-sub-${testId}`}>Subtes</FieldLabel>
           <Pilihan
             id={`add-sub-${testId}`}
             name="subtestId"
@@ -33,15 +33,15 @@ export function AddSubtestForm({
             placeholder="Pilih subtes"
             opsi={pilihan.map((s) => ({ value: s.id, label: `${s.code} — ${s.name}` }))}
           />
-        </div>
-        <div className="grid w-32 gap-2">
-          <Label htmlFor={`add-dur-${testId}`}>Durasi (menit)</Label>
+        </Field>
+        <Field className="w-32">
+          <FieldLabel htmlFor={`add-dur-${testId}`}>Durasi (menit)</FieldLabel>
           <Input id={`add-dur-${testId}`} name="durationMinutes" type="number" min={1} defaultValue={30} required />
-        </div>
-        <div className="grid w-32 gap-2">
-          <Label htmlFor={`add-lim-${testId}`}>Jumlah soal</Label>
+        </Field>
+        <Field className="w-32">
+          <FieldLabel htmlFor={`add-lim-${testId}`}>Jumlah soal</FieldLabel>
           <Input id={`add-lim-${testId}`} name="questionLimit" type="number" min={1} defaultValue={10} required />
-        </div>
+        </Field>
         <Button type="submit" disabled={pending}>
           {pending ? "Menambahkan…" : "Tambah subtes"}
         </Button>
@@ -67,8 +67,8 @@ export function SubtestConfigForm({
     <form action={action} className="grid gap-3">
       <input type="hidden" name="id" value={id} />
       <div className="flex flex-wrap items-end gap-3">
-        <div className="grid w-32 gap-2">
-          <Label htmlFor={`dur-${id}`}>Durasi (menit)</Label>
+        <Field className="w-32">
+          <FieldLabel htmlFor={`dur-${id}`}>Durasi (menit)</FieldLabel>
           <Input
             id={`dur-${id}`}
             name="durationMinutes"
@@ -77,9 +77,9 @@ export function SubtestConfigForm({
             defaultValue={Math.round(durationSeconds / 60)}
             required
           />
-        </div>
-        <div className="grid w-32 gap-2">
-          <Label htmlFor={`lim-${id}`}>Jumlah soal</Label>
+        </Field>
+        <Field className="w-32">
+          <FieldLabel htmlFor={`lim-${id}`}>Jumlah soal</FieldLabel>
           <Input
             id={`lim-${id}`}
             name="questionLimit"
@@ -88,7 +88,7 @@ export function SubtestConfigForm({
             defaultValue={questionLimit}
             required
           />
-        </div>
+        </Field>
         <Button type="submit" variant="outline" disabled={pending}>
           {pending ? "Menyimpan…" : "Simpan konfigurasi"}
         </Button>
@@ -150,10 +150,10 @@ export function AddAssignmentForm({
         ))}
       </div>
       <div className="flex flex-wrap items-end gap-3">
-        <div className="grid w-24 gap-2">
-          <Label htmlFor={`w-${testSubtestId}`}>Bobot</Label>
+        <Field className="w-24">
+          <FieldLabel htmlFor={`w-${testSubtestId}`}>Bobot</FieldLabel>
           <Input id={`w-${testSubtestId}`} name="weight" type="number" min={1} defaultValue={1} required />
-        </div>
+        </Field>
         <Button type="submit" disabled={pending}>
           {pending ? "Menugaskan…" : "Tugaskan soal terpilih"}
         </Button>

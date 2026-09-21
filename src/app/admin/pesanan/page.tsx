@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "../_components/pilihan";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listOrdersForAdmin } from "@/lib/admin-order";
@@ -34,17 +34,17 @@ export default async function PesananPage({
       <Card>
         <CardContent>
           <form method="get" className="flex flex-wrap items-end gap-3">
-            <div className="grid min-w-64 flex-1 gap-2">
-              <Label htmlFor="q">Cari</Label>
+            <Field className="min-w-64 flex-1">
+              <FieldLabel htmlFor="q">Cari</FieldLabel>
               <Input
                 id="q"
                 name="q"
                 defaultValue={filter.q ?? ""}
                 placeholder="username, email, nomor invoice, atau id pesanan"
               />
-            </div>
-            <div className="grid w-40 gap-2">
-              <Label htmlFor="status">Status</Label>
+            </Field>
+            <Field className="w-40">
+              <FieldLabel htmlFor="status">Status</FieldLabel>
               <Pilihan
                 id="status"
                 name="status"
@@ -54,7 +54,7 @@ export default async function PesananPage({
                   label: s || "Semua",
                 }))}
               />
-            </div>
+            </Field>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">
                 Terapkan

@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "./pilihan";
 import { Textarea } from "@/components/ui/textarea";
 import { duplicateQuestion, saveQuestion } from "@/lib/admin";
@@ -55,8 +55,8 @@ export function QuestionForm({
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="grid gap-2">
-                <Label htmlFor="categoryId">Kategori</Label>
+              <Field>
+                <FieldLabel htmlFor="categoryId">Kategori</FieldLabel>
                 <Pilihan
                   id="categoryId"
                   name="categoryId"
@@ -65,31 +65,31 @@ export function QuestionForm({
                   defaultValue={soal?.categoryId ?? ""}
                   opsi={kategori.map((k) => ({ value: k.id, label: `${k.code} — ${k.name}` }))}
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="difficulty">Tingkat kesulitan</Label>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="difficulty">Tingkat kesulitan</FieldLabel>
                 <Pilihan
                   id="difficulty"
                   name="difficulty"
                   defaultValue={soal?.difficulty ?? "medium"}
                   opsi={DIFFICULTY.map((d) => ({ value: d, label: d }))}
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="status">Status</Label>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="status">Status</FieldLabel>
                 <Pilihan
                   id="status"
                   name="status"
                   defaultValue={soal?.status ?? "draft"}
                   opsi={STATUS.map((s) => ({ value: s, label: s }))}
                 />
-              </div>
+              </Field>
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="prompt">Isi pertanyaan</Label>
+            <Field>
+              <FieldLabel htmlFor="prompt">Isi pertanyaan</FieldLabel>
               <Textarea id="prompt" name="prompt" required rows={4} defaultValue={soal?.prompt} />
-            </div>
+            </Field>
           </CardContent>
         </Card>
 

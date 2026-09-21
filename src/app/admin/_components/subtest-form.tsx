@@ -4,7 +4,7 @@ import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "./pilihan";
 import { saveSubtest } from "@/lib/admin";
 
@@ -34,8 +34,8 @@ export function SubtestForm({ subtes, kategori }: { subtes?: Subtes; kategori: K
       {subtes && <input type="hidden" name="id" value={subtes.id} />}
 
       <div className="grid gap-4 sm:grid-cols-[9rem_1fr]">
-        <div className="grid gap-2">
-          <Label htmlFor={`st-code-${uid}`}>Kode</Label>
+        <Field>
+          <FieldLabel htmlFor={`st-code-${uid}`}>Kode</FieldLabel>
           <Input
             id={`st-code-${uid}`}
             name="code"
@@ -44,9 +44,9 @@ export function SubtestForm({ subtes, kategori }: { subtes?: Subtes; kategori: K
             placeholder="TIU_NUM"
             className="uppercase"
           />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor={`st-name-${uid}`}>Nama</Label>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor={`st-name-${uid}`}>Nama</FieldLabel>
           <Input
             id={`st-name-${uid}`}
             name="name"
@@ -54,22 +54,22 @@ export function SubtestForm({ subtes, kategori }: { subtes?: Subtes; kategori: K
             defaultValue={subtes?.name}
             placeholder="Kemampuan Numerik"
           />
-        </div>
+        </Field>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor={`st-desc-${uid}`}>Deskripsi</Label>
+      <Field>
+        <FieldLabel htmlFor={`st-desc-${uid}`}>Deskripsi</FieldLabel>
         <Input
           id={`st-desc-${uid}`}
           name="description"
           defaultValue={subtes?.description ?? ""}
           placeholder="Opsional, tampil pada detail tes"
         />
-      </div>
+      </Field>
 
       <div className="flex flex-wrap items-end gap-3">
-        <div className="grid min-w-56 flex-1 gap-2">
-          <Label htmlFor={`st-cat-${uid}`}>Kategori soal</Label>
+        <Field className="min-w-56 flex-1">
+          <FieldLabel htmlFor={`st-cat-${uid}`}>Kategori soal</FieldLabel>
           <Pilihan
             id={`st-cat-${uid}`}
             name="categoryId"
@@ -78,16 +78,16 @@ export function SubtestForm({ subtes, kategori }: { subtes?: Subtes; kategori: K
             defaultValue={subtes?.categoryId ?? ""}
             opsi={kategori.map((k) => ({ value: k.id, label: `${k.code} — ${k.name}` }))}
           />
-        </div>
-        <div className="grid w-40 gap-2">
-          <Label htmlFor={`st-status-${uid}`}>Status</Label>
+        </Field>
+        <Field className="w-40">
+          <FieldLabel htmlFor={`st-status-${uid}`}>Status</FieldLabel>
           <Pilihan
             id={`st-status-${uid}`}
             name="status"
             defaultValue={subtes?.status ?? "draft"}
             opsi={STATUS.map((s) => ({ value: s, label: s }))}
           />
-        </div>
+        </Field>
         <Button type="submit" disabled={pending}>
           {pending ? "Menyimpan…" : subtes ? "Simpan perubahan" : "Tambah subtes"}
         </Button>

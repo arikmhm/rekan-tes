@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "../_components/pilihan";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listUsersForAdmin } from "@/lib/admin-user";
@@ -33,12 +33,12 @@ export default async function PenggunaPage({
       <Card>
         <CardContent>
           <form method="get" className="flex flex-wrap items-end gap-3">
-            <div className="grid min-w-56 flex-1 gap-2">
-              <Label htmlFor="q">Cari</Label>
+            <Field className="min-w-56 flex-1">
+              <FieldLabel htmlFor="q">Cari</FieldLabel>
               <Input id="q" name="q" defaultValue={filter.q ?? ""} placeholder="username atau email" />
-            </div>
-            <div className="grid w-40 gap-2">
-              <Label htmlFor="role">Role</Label>
+            </Field>
+            <Field className="w-40">
+              <FieldLabel htmlFor="role">Role</FieldLabel>
               <Pilihan
                 id="role"
                 name="role"
@@ -48,9 +48,9 @@ export default async function PenggunaPage({
                   label: r || "Semua",
                 }))}
               />
-            </div>
-            <div className="grid w-40 gap-2">
-              <Label htmlFor="verified">Email</Label>
+            </Field>
+            <Field className="w-40">
+              <FieldLabel htmlFor="verified">Email</FieldLabel>
               <Pilihan
                 id="verified"
                 name="verified"
@@ -61,7 +61,7 @@ export default async function PenggunaPage({
                   { value: "belum", label: "Belum verifikasi" },
                 ]}
               />
-            </div>
+            </Field>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">
                 Terapkan

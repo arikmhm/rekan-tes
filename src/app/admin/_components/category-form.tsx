@@ -4,7 +4,7 @@ import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Pilihan } from "./pilihan";
 import { saveCategory } from "@/lib/admin";
 
@@ -30,8 +30,8 @@ export function CategoryForm({ kategori }: { kategori?: Kategori }) {
       {kategori && <input type="hidden" name="id" value={kategori.id} />}
 
       <div className="grid gap-4 sm:grid-cols-[9rem_1fr]">
-        <div className="grid gap-2">
-          <Label htmlFor={`code-${uid}`}>Kode</Label>
+        <Field>
+          <FieldLabel htmlFor={`code-${uid}`}>Kode</FieldLabel>
           <Input
             id={`code-${uid}`}
             name="code"
@@ -40,9 +40,9 @@ export function CategoryForm({ kategori }: { kategori?: Kategori }) {
             placeholder="NUM"
             className="uppercase"
           />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor={`name-${uid}`}>Nama</Label>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor={`name-${uid}`}>Nama</FieldLabel>
           <Input
             id={`name-${uid}`}
             name="name"
@@ -50,29 +50,29 @@ export function CategoryForm({ kategori }: { kategori?: Kategori }) {
             defaultValue={kategori?.name}
             placeholder="Numerik"
           />
-        </div>
+        </Field>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor={`desc-${uid}`}>Deskripsi</Label>
+      <Field>
+        <FieldLabel htmlFor={`desc-${uid}`}>Deskripsi</FieldLabel>
         <Input
           id={`desc-${uid}`}
           name="description"
           defaultValue={kategori?.description ?? ""}
           placeholder="Opsional"
         />
-      </div>
+      </Field>
 
       <div className="flex flex-wrap items-end gap-3">
-        <div className="grid w-40 gap-2">
-          <Label htmlFor={`status-${uid}`}>Status</Label>
+        <Field className="w-40">
+          <FieldLabel htmlFor={`status-${uid}`}>Status</FieldLabel>
           <Pilihan
             id={`status-${uid}`}
             name="status"
             defaultValue={kategori?.status ?? "draft"}
             opsi={STATUS.map((s) => ({ value: s, label: s }))}
           />
-        </div>
+        </Field>
         <Button type="submit" disabled={pending}>
           {pending ? "Menyimpan…" : kategori ? "Simpan perubahan" : "Tambah kategori"}
         </Button>

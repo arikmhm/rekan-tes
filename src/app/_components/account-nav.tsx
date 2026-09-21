@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import { authClient, keluar } from "@/lib/auth-client";
 
@@ -20,7 +19,6 @@ const buttonClass =
  */
 export function AccountNav() {
   const { data: session, isPending } = authClient.useSession();
-  const [signingOut, setSigningOut] = useState(false);
 
   // Menjaga tinggi baris tetap sama sebelum session diketahui.
   if (isPending) {
@@ -53,16 +51,8 @@ export function AccountNav() {
       <span className="font-medium text-brand">
         {session.user.username ?? session.user.name}
       </span>
-      <button
-        type="button"
-        disabled={signingOut}
-        className={`${buttonClass} disabled:opacity-60`}
-        onClick={async () => {
-          setSigningOut(true);
-          await keluar();
-        }}
-      >
-        {signingOut ? "Keluar…" : "Keluar"}
+      <button type="button" className={buttonClass} onClick={keluar}>
+        Keluar
       </button>
     </>
   );

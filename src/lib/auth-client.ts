@@ -19,22 +19,15 @@ export const authClient = createAuthClient({
 });
 
 /**
- * Keluar lalu pulang ke halaman depan lewat navigasi penuh, bukan
- * `router.push`.
+ * Keluar dari peramban, dipakai header situs publik. Header itu membaca session
+ * dari store `useSession` di peramban — bukan dari server — jadi `signOut()`
+ * klien harus ikut dipanggil agar store-nya ikut kosong. Sesudahnya halaman
+ * depan dimuat ulang penuh supaya tidak ada sisa cache milik sesi lama.
  *
- * Sesudah session berubah, cache router peramban masih memegang hasil render
- * milik sesi lama. Tautan "Lihat situs" di sidebar sempat mem-prefetch "/"
- * selagi masih login, dan saat itu "/" menjawab dengan pengalihan ke ruang
- * peserta — entri itulah yang dipakai ulang sesudah logout, sehingga peserta
- * terlempar kembali ke dasbornya dan logout tampak tidak terjadi.
- *
- * Navigasi penuh membuang seluruh cache itu: halaman depan diminta ulang ke
- * server tanpa cookie session.
+ * Sidebar peserta dan admin tidak memakai ini: keduanya keluar lewat Server
+ * Action di `auth-actions.ts`, yang tetap bekerja walau JavaScript gagal.
  */
 export async function keluar() {
   await authClient.signOut();
-
-  // `replace`, bukan `href`: tombol mundur tidak boleh membawa peserta kembali
-  // ke dasbor versi cache yang sudah bukan miliknya lagi.
   window.location.replace("/");
 }

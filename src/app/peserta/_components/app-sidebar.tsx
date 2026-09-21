@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
 
 import {
   Collapsible,
@@ -42,7 +41,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { keluar as keluarAkun } from "@/lib/auth-client";
+import { keluar } from "@/lib/auth-actions";
 
 /**
  * Jenis produk di sidebar. Nilainya sama dengan `JenisProduk` di lib/produk,
@@ -68,7 +67,6 @@ const belanja = [
 export function AppSidebar({ nama }: { nama: string }) {
   const pathname = usePathname();
   const jenisAktif = useSearchParams().get("jenis");
-  const [keluar, setKeluar] = useState(false);
   const diPustaka = pathname === "/peserta/pustaka";
 
   return (
@@ -204,16 +202,19 @@ export function AppSidebar({ nama }: { nama: string }) {
                   Lihat situs
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  disabled={keluar}
-                  onClick={async () => {
-                    setKeluar(true);
-                    await keluarAkun();
-                  }}
-                >
-                  <LogOut />
-                  {keluar ? "Keluar…" : "Keluar"}
-                </DropdownMenuItem>
+                {/* Form, bukan onClick: keluar harus tetap bekerja walau
+                    JavaScript-nya belum siap. `closeOnClick={false}` menjaga
+                    tombolnya tetap ada di DOM sampai formulirnya terkirim. */}
+                <form action={keluar}>
+                  <DropdownMenuItem
+                    closeOnClick={false}
+                    className="w-full"
+                    render={<button type="submit" />}
+                  >
+                    <LogOut />
+                    Keluar
+                  </DropdownMenuItem>
+                </form>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>

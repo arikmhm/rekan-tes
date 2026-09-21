@@ -75,6 +75,18 @@ html {
   outline-offset: 3px;
 }
 
+/*
+ * Kolom isian menandai fokus lewat warna bordernya sendiri, jadi garis luar di
+ * atas hanya menambah lapisan kedua di sekelilingnya.
+ *
+ * Aturan ini hidup di sini, bukan sebagai kelas di tiap komponen: `:focus-visible`
+ * di atas tidak berada dalam `@layer`, sehingga ia mengalahkan `outline-none`
+ * milik Input, Textarea, dan kawan-kawannya betapapun kelas itu ditulis.
+ */
+:is(input, textarea, select):focus-visible {
+  outline: none;
+}
+
 :root {
   /* Identitas Rekan Tes dipetakan ke token shadcn, sehingga komponen bawaan
      ikut berwarna merek tanpa perlu di-override satu per satu. */

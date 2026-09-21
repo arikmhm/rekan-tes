@@ -1,0 +1,457 @@
+[
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan tU",
+    "pembahasan": "Kunci C: tU. A beda kapital; B urutan tertukar; D beda kapital.",
+    "opsi": ["TU", "Ut", "tU", "tu"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan WS",
+    "pembahasan": "Kunci A: WS. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["WS", "Ws", "SW", "W5"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan kLm",
+    "pembahasan": "Kunci D: kLm. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["kLM", "Lkm", "kLn", "kLm"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan aQ7",
+    "pembahasan": "Kunci B: aQ7. A beda kapital; C urutan tertukar; D beda kapital.",
+    "opsi": ["AQ7", "aQ7", "Qa7", "aq7"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan rPz",
+    "pembahasan": "Kunci A: rPz. B beda kapital; C urutan tertukar; D beda kapital.",
+    "opsi": ["rPz", "rpz", "rzP", "rPZ"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan zZq",
+    "pembahasan": "Kunci D: zZq. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["zZQ", "Zzq", "zZg", "zZq"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan uJn",
+    "pembahasan": "Kunci B: uJn. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["UJn", "uJn", "Jun", "uJm"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan Cm1",
+    "pembahasan": "Kunci C: Cm1. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["CM1", "C1m", "Cm1", "Cn1"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan Nq9",
+    "pembahasan": "Kunci D: Nq9. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["nq9", "qN9", "Ng9", "Nq9"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan XcV",
+    "pembahasan": "Kunci B: XcV. A beda kapital; C urutan tertukar; D beda kapital.",
+    "opsi": ["xcV", "XcV", "cXV", "XCV"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan 9bH",
+    "pembahasan": "Kunci A: 9bH. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["9bH", "9BH", "9Hb", "96H"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan Lo0",
+    "pembahasan": "Kunci C: Lo0. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["lo0", "oL0", "Lo0", "LoO"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan 5Kf",
+    "pembahasan": "Kunci B: 5Kf. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["5kf", "5Kf", "K5f", "SKf"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan yHs",
+    "pembahasan": "Kunci C: yHs. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["yhs", "ysH", "yHs", "yH5"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "easy",
+    "pertanyaan": "Pilih jawaban yang sama dengan pW2",
+    "pembahasan": "Kunci D: pW2. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["PW2", "Wp2", "pWZ", "pW2"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan mN4d",
+    "pembahasan": "Kunci A: mN4d. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["mN4d", "mN4D", "Nm4d", "nN4d"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan gT6r",
+    "pembahasan": "Kunci C: gT6r. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["GT6r", "Tg6r", "gT6r", "9T6r"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan dEb8",
+    "pembahasan": "Kunci D: dEb8. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["deb8", "dbE8", "dE68", "dEb8"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan vRt3",
+    "pembahasan": "Kunci A: vRt3. B beda kapital; C urutan tertukar; D beda kapital.",
+    "opsi": ["vRt3", "vRT3", "vR3t", "VRt3"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan bXw2",
+    "pembahasan": "Kunci B: bXw2. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["BXw2", "bXw2", "Xbw2", "bXwZ"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan hQ5np",
+    "pembahasan": "Kunci D: hQ5np. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["HQ5np", "Qh5np", "hQSnp", "hQ5np"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan wR3 km",
+    "pembahasan": "Kunci C: wR3 km. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["wR3 Km", "wR3 mk", "wR3 km", "wR3 kn"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan jK8zt",
+    "pembahasan": "Kunci B: jK8zt. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["jK8Zt", "jK8zt", "jKz8t", "jKBzt"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan fD2qx",
+    "pembahasan": "Kunci A: fD2qx. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["fD2qx", "fD2Qx", "fD2xq", "fD2gx"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan sN7vb",
+    "pembahasan": "Kunci B: sN7vb. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["sN7vB", "sN7vb", "Ns7vb", "sN7v6"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan TR40si",
+    "pembahasan": "Kunci D: TR40si. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["Tr40si", "T4R0si", "TRA0si", "TR40si"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan gh82LM",
+    "pembahasan": "Kunci A: gh82LM. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["gh82LM", "gh82lM", "gh28LM", "ghB2LM"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan px95WQ",
+    "pembahasan": "Kunci C: px95WQ. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["px95wQ", "px9W5Q", "px95WQ", "px9SWQ"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan cV37nb",
+    "pembahasan": "Kunci A: cV37nb. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["cV37nb", "cV37Nb", "cV37bn", "cV37mb"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan zM64df",
+    "pembahasan": "Kunci B: zM64df. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["zM64dF", "zM64df", "Mz64df", "zMG4df"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan KL09tr",
+    "pembahasan": "Kunci C: KL09tr. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["kL09tr", "LK09tr", "KL09tr", "KLO9tr"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan ny53BV",
+    "pembahasan": "Kunci D: ny53BV. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["nY53BV", "n5y3BV", "nyS3BV", "ny53BV"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan qW81xz",
+    "pembahasan": "Kunci C: qW81xz. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["qW81Xz", "qW18xz", "qW81xz", "qWB1xz"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan rT47mk",
+    "pembahasan": "Kunci A: rT47mk. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["rT47mk", "rT47Mk", "rT4m7k", "rT47nk"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "medium",
+    "pertanyaan": "Pilih jawaban yang sama dengan Ud26pc",
+    "pembahasan": "Kunci D: Ud26pc. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": ["Ud26Pc", "Ud26cp", "UdZ6pc", "Ud26pc"],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan B 1729 XKJ",
+    "pembahasan": "Kunci B: B 1729 XKJ. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["B 1729 xKJ", "B 1729 XKJ", "B 1729 KXJ", "8 1729 XKJ"],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan INV-2026/0418",
+    "pembahasan": "Kunci B: INV-2026/0418. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": [
+      "iNV-2026/0418",
+      "INV-2026/0418",
+      "INV-2026/0148",
+      "INV-2026/0A18"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan Rp1.250.000",
+    "pembahasan": "Kunci A: Rp1.250.000. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["Rp1.250.000", "rp1.250.000", "Rp1.520.000", "Rp1.Z50.000"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan NIK 3374 0912",
+    "pembahasan": "Kunci C: NIK 3374 0912. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": [
+      "nIK 3374 0912",
+      "INK 3374 0912",
+      "NIK 3374 0912",
+      "NIK 3374 091Z"
+    ],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan BRI-009-77421",
+    "pembahasan": "Kunci D: BRI-009-77421. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": [
+      "bRI-009-77421",
+      "RBI-009-77421",
+      "8RI-009-77421",
+      "BRI-009-77421"
+    ],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan aX9mQ2pL7v",
+    "pembahasan": "Kunci A: aX9mQ2pL7v. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": ["aX9mQ2pL7v", "AX9mQ2pL7v", "Xa9mQ2pL7v", "aX9nQ2pL7v"],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan KTP20260418X",
+    "pembahasan": "Kunci C: KTP20260418X. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": ["KTP20260418x", "KTP20620418X", "KTP20260418X", "KTP20Z60418X"],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan Order#88-31-92",
+    "pembahasan": "Kunci D: Order#88-31-92. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": [
+      "order#88-31-92",
+      "rOder#88-31-92",
+      "0rder#88-31-92",
+      "Order#88-31-92"
+    ],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan SIM C 0912 8837",
+    "pembahasan": "Kunci B: SIM C 0912 8837. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": [
+      "sIM C 0912 8837",
+      "SIM C 0912 8837",
+      "SIM C 0912 8873",
+      "5IM C 0912 8837"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan PT Surya Abadi",
+    "pembahasan": "Kunci D: PT Surya Abadi. A beda kapital; B urutan tertukar; C karakter diganti.",
+    "opsi": [
+      "PT surya Abadi",
+      "PT uSrya Abadi",
+      "PT 5urya Abadi",
+      "PT Surya Abadi"
+    ],
+    "benar": "D"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan jl. Melati No.17",
+    "pembahasan": "Kunci B: jl. Melati No.17. A beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": [
+      "Jl. Melati No.17",
+      "jl. Melati No.17",
+      "jl. Melati No1.7",
+      "jl. Melati No.l7"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan EX-4410-BSD-09",
+    "pembahasan": "Kunci A: EX-4410-BSD-09. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": [
+      "EX-4410-BSD-09",
+      "EX-4410-bSD-09",
+      "EX-4140-BSD-09",
+      "EX-4A10-BSD-09"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan 0812-3346-9071",
+    "pembahasan": "Kunci C: 0812-3346-9071. A urutan tertukar; B karakter diganti; D urutan tertukar.",
+    "opsi": [
+      "0812-3436-9071",
+      "0812-33A6-9071",
+      "0812-3346-9071",
+      "0812-3364-9071"
+    ],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan Kode: 7G4-2H9-1K",
+    "pembahasan": "Kunci C: Kode: 7G4-2H9-1K. A beda kapital; B urutan tertukar; D karakter diganti.",
+    "opsi": [
+      "kode: 7G4-2H9-1K",
+      "oKde: 7G4-2H9-1K",
+      "Kode: 7G4-2H9-1K",
+      "K0de: 7G4-2H9-1K"
+    ],
+    "benar": "C"
+  },
+  {
+    "kategori": "KETELITIAN",
+    "tingkat": "hard",
+    "pertanyaan": "Pilih jawaban yang sama dengan VA 8810 4471 0293",
+    "pembahasan": "Kunci A: VA 8810 4471 0293. B beda kapital; C urutan tertukar; D karakter diganti.",
+    "opsi": [
+      "VA 8810 4471 0293",
+      "vA 8810 4471 0293",
+      "VA 8810 4471 0239",
+      "V4 8810 4471 0293"
+    ],
+    "benar": "A"
+  }
+]

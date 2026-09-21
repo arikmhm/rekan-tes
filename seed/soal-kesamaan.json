@@ -1,0 +1,552 @@
+[
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "AXXER : AXXRE",
+    "pembahasan": "Tidak sama, karakter ke-4 dan ke-5 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "BRTKM : BRTKM",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "KJHGF : KJHFG",
+    "pembahasan": "Tidak sama, karakter ke-4 dan ke-5 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "MNBVC : MNBVC",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "7402 : 7402",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "5138 : 5183",
+    "pembahasan": "Tidak sama, karakter ke-3 dan ke-4 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "TRDSA : TRDSA",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "GHJKL : GHJLK",
+    "pembahasan": "Tidak sama, karakter ke-4 dan ke-5 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "90210 : 90210",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "48627 : 48672",
+    "pembahasan": "Tidak sama, karakter ke-4 dan ke-5 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "budi : budi",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "sari : sarl",
+    "pembahasan": "Tidak sama, beda karakter ke-4: i vs l.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "AB12 : AB12",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "CD34 : CD43",
+    "pembahasan": "Tidak sama, karakter ke-3 dan ke-4 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "easy",
+    "pertanyaan": "ZQWSX : ZQWSX",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "QAZWSX : QAZWSX",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "EDCRFV : EDCRVF",
+    "pembahasan": "Tidak sama, karakter ke-5 dan ke-6 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "8492176 : 8492176",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "3571824 : 3571284",
+    "pembahasan": "Tidak sama, karakter ke-5 dan ke-6 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "B 1729 XKJ : B 1729 XKJ",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "D 4408 TRS : D 4480 TRS",
+    "pembahasan": "Tidak sama, karakter ke-5 dan ke-6 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "0812-3346-9071 : 0812-3346-9071",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "0857-2219-4460 : 0857-2291-4460",
+    "pembahasan": "Tidak sama, karakter ke-8 dan ke-9 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "Ahmad Rizki : Ahmad Rizki",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "Siti Aminah : Siti Amanah",
+    "pembahasan": "Tidak sama, beda karakter ke-8: i vs a.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "INV-2026/0418 : INV-2026/0418",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "INV-2026/0481 : INV-2026/0418",
+    "pembahasan": "Tidak sama, karakter ke-12 dan ke-13 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "Rp1.250.000 : Rp1.250.000",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "Rp1.520.000 : Rp1.250.000",
+    "pembahasan": "Tidak sama, karakter ke-5 dan ke-6 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "jl. Melati 17 : jl. Melati 17",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "Jl. Melati 17 : Jl. Melati 71",
+    "pembahasan": "Tidak sama, karakter ke-12 dan ke-13 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "BRI-009-77421 : BRI-009-77421",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "BNI-009-77421 : BNI-009-74421",
+    "pembahasan": "Tidak sama, beda karakter ke-10: 7 vs 4.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "kwitansi asli : kwitansi asli",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "medium",
+    "pertanyaan": "surat jalan : surat jaian",
+    "pembahasan": "Tidak sama, beda karakter ke-9: l vs i.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "3374091208950007 : 3374091208950007",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "3374091208950007 : 3374091208590007",
+    "pembahasan": "Tidak sama, karakter ke-11 dan ke-12 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "VA 8810 4471 0293 : VA 8810 4471 0293",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "VA 8810 4471 0293 : VA 8810 4417 0293",
+    "pembahasan": "Tidak sama, karakter ke-11 dan ke-12 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "PT Surya Abadi Sentosa : PT Surya Abadi Sentosa",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "PT Surya Abadi Sentosa : PT Surya Abadi Sentoso",
+    "pembahasan": "Tidak sama, beda karakter ke-22: a vs o.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "KTP20260418X : KTP2O260418X",
+    "pembahasan": "Tidak sama, beda karakter ke-5: 0 vs O.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "EX-4410-BSD-09 : EX-4410-BSD-09",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "EX-441O-BSD-09 : EX-4410-BSD-09",
+    "pembahasan": "Tidak sama, beda karakter ke-7: O vs 0.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "Order#88-31-92-01 : Order#88-31-92-01",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "Order#88-31-92-01 : Order#88-3l-92-01",
+    "pembahasan": "Tidak sama, beda karakter ke-11: 1 vs l.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "Nomor Rekening 1290887734 : Nomor Rekening 1290887734",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "Nomor Rekening 1290887734 : Nomor Rekening 1290877834",
+    "pembahasan": "Tidak sama, beda karakter ke-21: 8 vs 7, ke-23: 7 vs 8.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "Kode Pos 65145 Malang : Kode Pos 65145 Malang",
+    "pembahasan": "Sama persis.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "A"
+  },
+  {
+    "kategori": "KESAMAAN",
+    "tingkat": "hard",
+    "pertanyaan": "Kode Pos 65145 Malang : Kode Pos 65154 Malang",
+    "pembahasan": "Tidak sama, karakter ke-13 dan ke-14 tertukar.",
+    "opsi": [
+      "Sama",
+      "Tidak Sama"
+    ],
+    "benar": "B"
+  }
+]

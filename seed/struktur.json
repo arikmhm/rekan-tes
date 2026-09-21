@@ -1,0 +1,45 @@
+{
+  "catatan": "Hanya soal yang punya fitur tempel JSON. Nilai di bawah diketik lewat formulir admin, berurutan dari atas: kategori dulu, lalu subtes, lalu produk tes.",
+  "kategori": [
+    {
+      "code": "KETELITIAN",
+      "name": "Tes Ketelitian",
+      "description": "Mencocokkan deret huruf dan angka yang tertulis sama persis, termasuk besar kecilnya huruf.",
+      "status": "published"
+    },
+    {
+      "code": "KESAMAAN",
+      "name": "Tes Kesamaan",
+      "description": "Membandingkan dua deret karakter lalu menilai sama atau tidak sama.",
+      "status": "published"
+    }
+  ],
+  "subtes": [
+    {
+      "kategori": "KETELITIAN",
+      "code": "KTL-01",
+      "name": "Ketelitian Dasar",
+      "description": "Dua puluh butir pencocokan deret pendek.",
+      "status": "published"
+    },
+    {
+      "kategori": "KESAMAAN",
+      "code": "KSM-01",
+      "name": "Kesamaan Dasar",
+      "description": "Dua puluh butir perbandingan dua deret.",
+      "status": "published"
+    }
+  ],
+  "produkTes": [
+    {
+      "name": "Simulasi Tes Ketelitian dan Kesamaan",
+      "description": "Latihan dua subtes klerikal: mencocokkan deret yang identik dan membandingkan dua deret. Cocok untuk persiapan tes masuk kerja yang menguji ketelitian.",
+      "priceAmount": 25000,
+      "status": "draft",
+      "subtes": [
+        { "code": "KTL-01", "durationMinutes": 8, "questionLimit": 10 },
+        { "code": "KSM-01", "durationMinutes": 6, "questionLimit": 10 }
+      ]
+    }
+  ]
+}

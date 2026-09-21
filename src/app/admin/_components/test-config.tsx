@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "./pilihan";
 import { addAssignment, addTestSubtest, updateTestSubtest } from "@/lib/admin";
 
 import { FormError } from "./shell";
@@ -26,16 +26,13 @@ export function AddSubtestForm({
       <div className="flex flex-wrap items-end gap-3">
         <div className="grid min-w-56 flex-1 gap-2">
           <Label htmlFor={`add-sub-${testId}`}>Subtes</Label>
-          <SelectNative id={`add-sub-${testId}`} name="subtestId" required defaultValue="">
-            <option value="" disabled>
-              Pilih subtes
-            </option>
-            {pilihan.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.code} — {s.name}
-              </option>
-            ))}
-          </SelectNative>
+          <Pilihan
+            id={`add-sub-${testId}`}
+            name="subtestId"
+            required
+            placeholder="Pilih subtes"
+            opsi={pilihan.map((s) => ({ value: s.id, label: `${s.code} — ${s.name}` }))}
+          />
         </div>
         <div className="grid w-32 gap-2">
           <Label htmlFor={`add-dur-${testId}`}>Durasi (menit)</Label>

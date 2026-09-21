@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "../_components/pilihan";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listCategories, listQuestions } from "@/lib/admin";
 
@@ -40,32 +40,39 @@ export default async function SoalPage({
             </div>
             <div className="grid w-36 gap-2">
               <Label htmlFor="categoryId">Kategori</Label>
-              <SelectNative id="categoryId" name="categoryId" defaultValue={filter.categoryId ?? ""}>
-                <option value="">Semua</option>
-                {kategori.map((k) => (
-                  <option key={k.id} value={k.id}>
-                    {k.code}
-                  </option>
-                ))}
-              </SelectNative>
+              <Pilihan
+                id="categoryId"
+                name="categoryId"
+                defaultValue={filter.categoryId ?? ""}
+                opsi={[
+                  { value: "", label: "Semua" },
+                  ...kategori.map((k) => ({ value: k.id, label: k.code })),
+                ]}
+              />
             </div>
             <div className="grid w-36 gap-2">
               <Label htmlFor="status">Status</Label>
-              <SelectNative id="status" name="status" defaultValue={filter.status ?? ""}>
-                <option value="">Semua</option>
-                <option value="draft">draft</option>
-                <option value="published">published</option>
-                <option value="archived">archived</option>
-              </SelectNative>
+              <Pilihan
+                id="status"
+                name="status"
+                defaultValue={filter.status ?? ""}
+                opsi={["", "draft", "published", "archived"].map((s) => ({
+                  value: s,
+                  label: s || "Semua",
+                }))}
+              />
             </div>
             <div className="grid w-36 gap-2">
               <Label htmlFor="difficulty">Kesulitan</Label>
-              <SelectNative id="difficulty" name="difficulty" defaultValue={filter.difficulty ?? ""}>
-                <option value="">Semua</option>
-                <option value="easy">easy</option>
-                <option value="medium">medium</option>
-                <option value="hard">hard</option>
-              </SelectNative>
+              <Pilihan
+                id="difficulty"
+                name="difficulty"
+                defaultValue={filter.difficulty ?? ""}
+                opsi={["", "easy", "medium", "hard"].map((s) => ({
+                  value: s,
+                  label: s || "Semua",
+                }))}
+              />
             </div>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">

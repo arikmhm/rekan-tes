@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "../_components/pilihan";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listUsersForAdmin } from "@/lib/admin-user";
 
@@ -39,19 +39,28 @@ export default async function PenggunaPage({
             </div>
             <div className="grid w-40 gap-2">
               <Label htmlFor="role">Role</Label>
-              <SelectNative id="role" name="role" defaultValue={filter.role ?? ""}>
-                <option value="">Semua</option>
-                <option value="participant">participant</option>
-                <option value="admin">admin</option>
-              </SelectNative>
+              <Pilihan
+                id="role"
+                name="role"
+                defaultValue={filter.role ?? ""}
+                opsi={["", "participant", "admin"].map((r) => ({
+                  value: r,
+                  label: r || "Semua",
+                }))}
+              />
             </div>
             <div className="grid w-40 gap-2">
               <Label htmlFor="verified">Email</Label>
-              <SelectNative id="verified" name="verified" defaultValue={filter.verified ?? ""}>
-                <option value="">Semua</option>
-                <option value="sudah">Terverifikasi</option>
-                <option value="belum">Belum verifikasi</option>
-              </SelectNative>
+              <Pilihan
+                id="verified"
+                name="verified"
+                defaultValue={filter.verified ?? ""}
+                opsi={[
+                  { value: "", label: "Semua" },
+                  { value: "sudah", label: "Terverifikasi" },
+                  { value: "belum", label: "Belum verifikasi" },
+                ]}
+              />
             </div>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">

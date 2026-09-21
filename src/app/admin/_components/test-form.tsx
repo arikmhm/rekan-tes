@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "./pilihan";
 import { Textarea } from "@/components/ui/textarea";
 import { saveTest } from "@/lib/admin";
 
@@ -79,17 +79,12 @@ export function TestForm({ tes }: { tes?: Tes }) {
         {tes && (
           <div className="grid gap-2">
             <Label htmlFor={`tes-status-${uid}`}>Status</Label>
-            <SelectNative
+            <Pilihan
               id={`tes-status-${uid}`}
               name="status"
               defaultValue={tes.status}
-            >
-              {STATUS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </SelectNative>
+              opsi={STATUS.map((s) => ({ value: s, label: s }))}
+            />
           </div>
         )}
       </div>

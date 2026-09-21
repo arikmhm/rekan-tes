@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "./pilihan";
 import { saveSubtest } from "@/lib/admin";
 
 import { FormError, StatusBadge } from "./shell";
@@ -70,31 +70,23 @@ export function SubtestForm({ subtes, kategori }: { subtes?: Subtes; kategori: K
       <div className="flex flex-wrap items-end gap-3">
         <div className="grid min-w-56 flex-1 gap-2">
           <Label htmlFor={`st-cat-${uid}`}>Kategori soal</Label>
-          <SelectNative
+          <Pilihan
             id={`st-cat-${uid}`}
             name="categoryId"
             required
+            placeholder="Pilih kategori"
             defaultValue={subtes?.categoryId ?? ""}
-          >
-            <option value="" disabled>
-              Pilih kategori
-            </option>
-            {kategori.map((k) => (
-              <option key={k.id} value={k.id}>
-                {k.code} — {k.name}
-              </option>
-            ))}
-          </SelectNative>
+            opsi={kategori.map((k) => ({ value: k.id, label: `${k.code} — ${k.name}` }))}
+          />
         </div>
         <div className="grid w-40 gap-2">
           <Label htmlFor={`st-status-${uid}`}>Status</Label>
-          <SelectNative id={`st-status-${uid}`} name="status" defaultValue={subtes?.status ?? "draft"}>
-            {STATUS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </SelectNative>
+          <Pilihan
+            id={`st-status-${uid}`}
+            name="status"
+            defaultValue={subtes?.status ?? "draft"}
+            opsi={STATUS.map((s) => ({ value: s, label: s }))}
+          />
         </div>
         <Button type="submit" disabled={pending}>
           {pending ? "Menyimpan…" : subtes ? "Simpan perubahan" : "Tambah subtes"}

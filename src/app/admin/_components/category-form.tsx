@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "./pilihan";
 import { saveCategory } from "@/lib/admin";
 
 import { FormError, StatusBadge } from "./shell";
@@ -66,13 +66,12 @@ export function CategoryForm({ kategori }: { kategori?: Kategori }) {
       <div className="flex flex-wrap items-end gap-3">
         <div className="grid w-40 gap-2">
           <Label htmlFor={`status-${uid}`}>Status</Label>
-          <SelectNative id={`status-${uid}`} name="status" defaultValue={kategori?.status ?? "draft"}>
-            {STATUS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </SelectNative>
+          <Pilihan
+            id={`status-${uid}`}
+            name="status"
+            defaultValue={kategori?.status ?? "draft"}
+            opsi={STATUS.map((s) => ({ value: s, label: s }))}
+          />
         </div>
         <Button type="submit" disabled={pending}>
           {pending ? "Menyimpan…" : kategori ? "Simpan perubahan" : "Tambah kategori"}

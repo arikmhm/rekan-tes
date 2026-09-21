@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "../../_components/pilihan";
 import { Textarea } from "@/components/ui/textarea";
 import { createQuestions } from "@/lib/admin";
 import {
@@ -176,14 +176,12 @@ export function PembuatSoal({ kategori }: { kategori: Kategori[] }) {
             <div className="flex flex-wrap items-end gap-3">
               <div className="grid w-36 gap-2">
                 <Label htmlFor="status-massal">Simpan sebagai</Label>
-                <SelectNative
+                <Pilihan
                   id="status-massal"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="draft">draft</option>
-                  <option value="published">published</option>
-                </SelectNative>
+                  onUbah={setStatus}
+                  opsi={["draft", "published"].map((s) => ({ value: s, label: s }))}
+                />
               </div>
               <Button onClick={simpan} disabled={!siap || pending}>
                 {pending ? "Menyimpan…" : `Simpan ${daftar.length} soal`}
@@ -331,17 +329,12 @@ function SumberManual({
       <CardContent className="grid gap-3">
         <div className="grid gap-2">
           <Label htmlFor="kategori-awal">Kategori awal</Label>
-          <SelectNative
+          <Pilihan
             id="kategori-awal"
             value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
-            {kategori.map((k) => (
-              <option key={k.id} value={k.id}>
-                {k.code} — {k.name}
-              </option>
-            ))}
-          </SelectNative>
+            onUbah={setCategoryId}
+            opsi={kategori.map((k) => ({ value: k.id, label: `${k.code} — ${k.name}` }))}
+          />
         </div>
         <div>
           <Button variant="outline" onClick={() => onTulis(categoryId)}>
@@ -391,31 +384,21 @@ function KartuDraf({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor={`kat-${draf.kunci}`}>Kategori</Label>
-            <SelectNative
+            <Pilihan
               id={`kat-${draf.kunci}`}
               value={draf.categoryId}
-              onChange={(e) => onUbah({ ...draf, categoryId: e.target.value })}
-            >
-              {kategori.map((k) => (
-                <option key={k.id} value={k.id}>
-                  {k.code} — {k.name}
-                </option>
-              ))}
-            </SelectNative>
+              onUbah={(categoryId) => onUbah({ ...draf, categoryId })}
+              opsi={kategori.map((k) => ({ value: k.id, label: `${k.code} — ${k.name}` }))}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor={`sulit-${draf.kunci}`}>Tingkat kesulitan</Label>
-            <SelectNative
+            <Pilihan
               id={`sulit-${draf.kunci}`}
               value={draf.difficulty}
-              onChange={(e) => onUbah({ ...draf, difficulty: e.target.value })}
-            >
-              {DIFFICULTY.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </SelectNative>
+              onUbah={(difficulty) => onUbah({ ...draf, difficulty })}
+              opsi={DIFFICULTY.map((d) => ({ value: d, label: d }))}
+            />
           </div>
         </div>
 

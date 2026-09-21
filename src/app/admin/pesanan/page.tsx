@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "../_components/pilihan";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listOrdersForAdmin } from "@/lib/admin-order";
 import { formatPrice } from "@/lib/format";
@@ -45,14 +45,15 @@ export default async function PesananPage({
             </div>
             <div className="grid w-40 gap-2">
               <Label htmlFor="status">Status</Label>
-              <SelectNative id="status" name="status" defaultValue={filter.status ?? ""}>
-                <option value="">Semua</option>
-                {["pending", "paid", "expired", "cancelled", "refunded"].map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </SelectNative>
+              <Pilihan
+                id="status"
+                name="status"
+                defaultValue={filter.status ?? ""}
+                opsi={["", "pending", "paid", "expired", "cancelled", "refunded"].map((s) => ({
+                  value: s,
+                  label: s || "Semua",
+                }))}
+              />
             </div>
             <div className="flex gap-2">
               <Button type="submit" variant="outline">

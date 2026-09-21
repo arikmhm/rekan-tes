@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectNative } from "@/components/ui/select-native";
+import { Pilihan } from "./pilihan";
 import { Textarea } from "@/components/ui/textarea";
 import { duplicateQuestion, saveQuestion } from "@/lib/admin";
 import { OPTION_LABELS, OPTION_SLOTS } from "@/lib/question-input";
@@ -57,45 +57,32 @@ export function QuestionForm({
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="grid gap-2">
                 <Label htmlFor="categoryId">Kategori</Label>
-                <SelectNative
+                <Pilihan
                   id="categoryId"
                   name="categoryId"
                   required
+                  placeholder="Pilih kategori"
                   defaultValue={soal?.categoryId ?? ""}
-                >
-                  <option value="" disabled>
-                    Pilih kategori
-                  </option>
-                  {kategori.map((k) => (
-                    <option key={k.id} value={k.id}>
-                      {k.code} — {k.name}
-                    </option>
-                  ))}
-                </SelectNative>
+                  opsi={kategori.map((k) => ({ value: k.id, label: `${k.code} — ${k.name}` }))}
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="difficulty">Tingkat kesulitan</Label>
-                <SelectNative
+                <Pilihan
                   id="difficulty"
                   name="difficulty"
                   defaultValue={soal?.difficulty ?? "medium"}
-                >
-                  {DIFFICULTY.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </SelectNative>
+                  opsi={DIFFICULTY.map((d) => ({ value: d, label: d }))}
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="status">Status</Label>
-                <SelectNative id="status" name="status" defaultValue={soal?.status ?? "draft"}>
-                  {STATUS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </SelectNative>
+                <Pilihan
+                  id="status"
+                  name="status"
+                  defaultValue={soal?.status ?? "draft"}
+                  opsi={STATUS.map((s) => ({ value: s, label: s }))}
+                />
               </div>
             </div>
 

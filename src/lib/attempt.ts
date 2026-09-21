@@ -416,49 +416,67 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
 }
 
 /**
- * Menyimpan satu jawaban peserta. Assignment dan opsi divalidasi terhadap soal
- * subtes yang sedang berjalan — datanya berasal dari `getAttempt`, jadi id yang
- * dikarang klien tidak akan ditemukan. Subtes yang sudah ditutup, termasuk yang
- * baru saja ditutup karena waktunya habis, otomatis tidak lagi `in_progress`
- * sehingga penolakan setelah deadline tidak butuh pemeriksaan waktu kedua.
+ * Menyimpan sekelompok jawaban sekaligus. Klien menahan pilihan peserta di
+ * memori dan menyetornya berkala (RT-013), jadi satu subtes cukup beberapa
+ * request — bukan satu request penuh per klik seperti sebelumnya.
  *
- * ponytail: satu POST penuh per jawaban, tanpa status simpan di klien. Itu
- * RT-013 (autosave); bentuk `onConflictDoUpdate` di bawah sudah aman diulang.
+ * Assignment dan opsi divalidasi terhadap soal subtes yang sedang berjalan —
+ * datanya berasal dari `getAttempt`, jadi id yang dikarang klien tidak akan
+ * ditemukan. Subtes yang sudah ditutup, termasuk yang baru saja ditutup karena
+ * waktunya habis, otomatis tidak lagi `in_progress` sehingga penolakan setelah
+ * deadline tidak butuh pemeriksaan waktu kedua.
+ *
+ * Seluruh kelompok ditolak bila ada satu saja entri yang tidak sah: klien
+ * menyimpan kembali ke antrean dan memberi tahu peserta, alih-alih diam-diam
+ * menelan sebagian jawaban. Upsert-nya idempotent, jadi kiriman ulang aman.
  */
-export async function saveAnswer(_prev: string | null, form: FormData) {
-  const attempt = await getAttempt(String(form.get("attemptId") ?? ""));
+export async function saveAnswers(
+  attemptId: string,
+  entries: { assignmentId: string; optionId: string }[],
+) {
+  const attempt = await getAttempt(attemptId);
   if (!attempt) return "Sesi tidak ditemukan.";
 
   const aktif = activeSubtest(attempt.subtests);
-  if (!aktif?.id || aktif.status !== "in_progress") {
+  const aktifId = aktif?.id;
+  if (!aktifId || aktif.status !== "in_progress") {
     return "Subtes ini sudah ditutup, jawaban tidak lagi dapat diubah.";
   }
 
-  const assignmentId = String(form.get("assignmentId") ?? "");
-  const optionId = String(form.get("optionId") ?? "");
-  const soal = attempt.questions.find((q) => q.assignmentId === assignmentId);
+  const now = new Date();
+  const baris = entries.flatMap(({ assignmentId, optionId }) => {
+    const soal = attempt.questions.find((q) => q.assignmentId === assignmentId);
+    if (!soal || !soal.options.some((o) => o.id === optionId)) return [];
 
-  // Opsi harus milik soal yang sedang dijawab, bukan sekadar opsi yang ada.
-  if (!soal || !soal.options.some((o) => o.id === optionId)) {
+    return [
+      {
+        attemptSubtestId: aktifId,
+        testSubtestQuestionId: assignmentId,
+        selectedOptionId: optionId,
+        answeredAt: now,
+      },
+    ];
+  });
+
+  if (baris.length !== entries.length) {
     return "Jawaban tidak dapat disimpan; subtes mungkin sudah berpindah. Muat ulang halaman.";
   }
-
-  const now = new Date();
+  if (baris.length === 0) return null;
 
   await db
     .insert(schema.attemptAnswers)
-    .values({
-      attemptSubtestId: aktif.id,
-      testSubtestQuestionId: assignmentId,
-      selectedOptionId: optionId,
-      answeredAt: now,
-    })
+    .values(baris)
     .onConflictDoUpdate({
       target: [schema.attemptAnswers.attemptSubtestId, schema.attemptAnswers.testSubtestQuestionId],
-      set: { selectedOptionId: optionId, answeredAt: now, updatedAt: now },
+      // `excluded` dipakai karena satu pernyataan membawa banyak baris: tiap
+      // baris harus memakai opsi miliknya sendiri, bukan satu nilai tetap.
+      set: {
+        selectedOptionId: sql`excluded.selected_option_id`,
+        answeredAt: now,
+        updatedAt: now,
+      },
     });
 
-  revalidatePath(`/peserta/simulasi/${attempt.id}`);
   return null;
 }
 

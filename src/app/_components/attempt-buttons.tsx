@@ -38,6 +38,7 @@ export function SubmitSubtestButton({
   terjawab,
   total,
   subtesTerakhir,
+  onSebelumKirim,
 }: {
   attemptId: string;
   /** Subtes yang sedang dilihat; server menolak bila sudah berpindah. */
@@ -45,9 +46,21 @@ export function SubmitSubtestButton({
   terjawab: number;
   total: number;
   subtesTerakhir: boolean;
+  /**
+   * Dijalankan sampai selesai sebelum subtes ditutup — layar kerja memakainya
+   * untuk menyetor jawaban yang masih mengantre. Tanpa ini, jawaban terakhir
+   * bisa tertinggal di peramban saat subtesnya sudah dinilai.
+   */
+  onSebelumKirim?: () => Promise<void>;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const [pesan, action, pending] = useActionState(submitSubtest, null);
+  const [pesan, action, pending] = useActionState(
+    async (prev: string | null, form: FormData) => {
+      await onSebelumKirim?.();
+      return submitSubtest(prev, form);
+    },
+    null,
+  );
   const kosong = total - terjawab;
 
   return (

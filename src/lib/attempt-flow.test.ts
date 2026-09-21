@@ -3,6 +3,7 @@ import { expect, test } from "vitest";
 import {
   activeSubtest,
   attemptAccessProblem,
+  jawabanPulih,
   nextSubtest,
   ringkasSubtes,
   subtestDeadline,
@@ -118,4 +119,21 @@ test("soal yang dijawab tetapi belum dinilai dihitung salah, bukan benar", () =>
 
 test("subtes tanpa soal tidak membagi nol", () => {
   expect(ringkasSubtes([])).toEqual({ benar: 0, salah: 0, kosong: 0, skor: 0, maksimal: 0 });
+});
+
+const soalPulih = [
+  { assignmentId: "a1", selectedOptionId: null, options: [{ id: "o1" }, { id: "o2" }] },
+  { assignmentId: "a2", selectedOptionId: "o3", options: [{ id: "o3" }, { id: "o4" }] },
+];
+
+test("jawaban cadangan yang belum sampai ke server dipulihkan", () => {
+  expect(jawabanPulih({ a1: "o2" }, soalPulih)).toEqual([["a1", "o2"]]);
+});
+
+test("jawaban yang sudah sama dengan catatan server tidak dipulihkan", () => {
+  expect(jawabanPulih({ a2: "o3" }, soalPulih)).toEqual([]);
+});
+
+test("opsi milik soal lain dan assignment sesi lama ditolak", () => {
+  expect(jawabanPulih({ a1: "o4", a9: "o1" }, soalPulih)).toEqual([]);
 });

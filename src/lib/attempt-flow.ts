@@ -133,3 +133,30 @@ export function ringkasSubtes(soal: HasilSoal[]) {
     maksimal: soal.reduce((n, s) => n + s.weight, 0),
   };
 }
+
+/**
+ * Jawaban cadangan peramban yang layak dipulihkan saat layar kerja dibuka:
+ * assignment-nya memang ada di subtes ini, opsinya benar-benar milik soal itu,
+ * dan nilainya berbeda dari yang sudah tercatat server. Tanpa saringan ini,
+ * sisa `localStorage` dari sesi lama — atau isinya yang diutak-atik — ikut
+ * masuk ke antrean simpan dan ditolak server satu per satu.
+ *
+ * Murni supaya dapat diuji tanpa peramban; server tetap memvalidasi ulang.
+ */
+export function jawabanPulih(
+  tersimpan: Record<string, string>,
+  soal: {
+    assignmentId: string;
+    selectedOptionId: string | null;
+    options: { id: string }[];
+  }[],
+): [string, string][] {
+  return Object.entries(tersimpan).filter(([assignmentId, optionId]) =>
+    soal.some(
+      (s) =>
+        s.assignmentId === assignmentId &&
+        s.selectedOptionId !== optionId &&
+        s.options.some((o) => o.id === optionId),
+    ),
+  );
+}

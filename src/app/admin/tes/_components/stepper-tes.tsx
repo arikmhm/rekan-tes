@@ -1,8 +1,9 @@
 "use client";
 
-import { CheckIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckIcon } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Stepper,
   StepperContent,
@@ -17,8 +18,6 @@ import {
 
 export type LangkahTes = {
   judul: string;
-  /** Sudah beres, ditandai centang walau bukan langkah sekarang. */
-  selesai: boolean;
   /** Belum bisa dibuka; dipakai halaman produk baru yang belum punya id. */
   nonaktif?: boolean;
   isi: React.ReactNode;
@@ -48,13 +47,22 @@ export function StepperTes({ awal, langkah }: { awal: number; langkah: LangkahTe
             <StepperItem
               key={l.judul}
               step={i + 1}
-              completed={l.selesai}
+              // Centang murni soal posisi: langkah di belakang yang sudah
+              // dilewati. Kelengkapan datanya tidak dipakai di sini — menandai
+              // langkah di depan sebagai selesai membuat penanda posisi hilang,
+              // dan syarat terbit toh sudah dirinci di langkah terakhir.
               disabled={l.nonaktif}
               className="relative flex-1 items-start"
             >
               <StepperTrigger className="flex flex-col gap-2.5">
-                <StepperIndicator>{i + 1}</StepperIndicator>
-                <StepperTitle>{l.judul}</StepperTitle>
+                {/* Selesai dan sedang dibuka memakai warna yang sama di komponen
+                    aslinya, jadi langkah aktif diberi cincin dan judul tebal. */}
+                <StepperIndicator className="data-[state=active]:ring-primary/30 data-[state=active]:ring-4">
+                  {i + 1}
+                </StepperIndicator>
+                <StepperTitle className="data-[state=active]:font-semibold data-[state=inactive]:text-muted-foreground">
+                  {l.judul}
+                </StepperTitle>
               </StepperTrigger>
               {i < langkah.length - 1 && (
                 <StepperSeparator className="group-data-[state=completed]/step:bg-primary absolute inset-x-0 top-3 left-[calc(50%+0.875rem)] m-0 group-data-[orientation=horizontal]/stepper-nav:w-[calc(100%-2rem+0.225rem)] group-data-[orientation=horizontal]/stepper-nav:flex-none" />
@@ -75,6 +83,28 @@ export function StepperTes({ awal, langkah }: { awal: number; langkah: LangkahTe
             className="grid grid-cols-[minmax(0,1fr)] gap-4"
           >
             {l.isi}
+
+            {/* Navigasi antarlangkah. Tidak menyimpan apa pun: tiap langkah
+                punya tombol simpannya sendiri, ini hanya berpindah halaman. */}
+            <div className="flex gap-3">
+              {i > 0 && (
+                <Button type="button" variant="outline" onClick={() => setAktif(i)}>
+                  <ArrowLeft className="size-4" />
+                  Kembali
+                </Button>
+              )}
+              {i < langkah.length - 1 && (
+                <Button
+                  type="button"
+                  className="ml-auto"
+                  disabled={langkah[i + 1].nonaktif}
+                  onClick={() => setAktif(i + 2)}
+                >
+                  Lanjut
+                  <ArrowRight className="size-4" />
+                </Button>
+              )}
+            </div>
           </StepperContent>
         ))}
       </StepperPanel>

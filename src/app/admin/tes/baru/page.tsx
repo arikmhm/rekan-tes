@@ -34,7 +34,6 @@ export default function TesBaruPage() {
         langkah={[
           {
             judul: "Informasi",
-            selesai: false,
             isi: (
               <Card>
                 <CardHeader>
@@ -49,9 +48,9 @@ export default function TesBaruPage() {
               </Card>
             ),
           },
-          { judul: "Subtes", selesai: false, nonaktif: true, isi: menyusul("susun subtesnya") },
-          { judul: "Soal", selesai: false, nonaktif: true, isi: menyusul("tugaskan soalnya") },
-          { judul: "Terbit", selesai: false, nonaktif: true, isi: menyusul("terbitkan produknya") },
+          { judul: "Subtes", nonaktif: true, isi: menyusul("susun subtesnya") },
+          { judul: "Soal", nonaktif: true, isi: menyusul("tugaskan soalnya") },
+          { judul: "Terbit", nonaktif: true, isi: menyusul("terbitkan produknya") },
         ]}
       />
     </AdminShell>

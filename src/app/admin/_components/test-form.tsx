@@ -73,16 +73,25 @@ export function TestForm({ tes }: { tes?: Tes }) {
             defaultValue={tes?.priceAmount ?? 0}
           />
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor={`tes-status-${uid}`}>Status</Label>
-          <SelectNative id={`tes-status-${uid}`} name="status" defaultValue={tes?.status ?? "draft"}>
-            {STATUS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </SelectNative>
-        </div>
+        {/* Produk baru selalu lahir sebagai draft — server menolak status lain
+            sebelum subtes dan soalnya lengkap — jadi pilihannya baru muncul
+            saat menyunting. Penerbitan sendiri dilakukan di langkah terakhir. */}
+        {tes && (
+          <div className="grid gap-2">
+            <Label htmlFor={`tes-status-${uid}`}>Status</Label>
+            <SelectNative
+              id={`tes-status-${uid}`}
+              name="status"
+              defaultValue={tes.status}
+            >
+              {STATUS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </SelectNative>
+          </div>
+        )}
       </div>
 
       <FormError message={error} />

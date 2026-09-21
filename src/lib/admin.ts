@@ -445,7 +445,8 @@ export async function saveTest(_prev: string | null, form: FormData) {
     name: form.get("name"),
     description: form.get("description"),
     priceAmount: form.get("priceAmount"),
-    status: form.get("status"),
+    // Formulir produk baru tidak mengirim status: yang baru dibuat selalu draft.
+    status: form.get("status") ?? "draft",
   });
 
   if (!parsed.success) return pesanZod(parsed.error);

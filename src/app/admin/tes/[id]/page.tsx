@@ -72,7 +72,6 @@ export default async function TesDetailPage({ params }: { params: Promise<{ id: 
         langkah={[
           {
             judul: "Informasi",
-            selesai: true,
             isi: (
               <Card>
                 <CardHeader>
@@ -89,7 +88,6 @@ export default async function TesDetailPage({ params }: { params: Promise<{ id: 
           },
           {
             judul: "Subtes",
-            selesai: adaSubtes,
             isi: (
               <>
                 <p className="text-muted-foreground text-sm">
@@ -199,7 +197,6 @@ export default async function TesDetailPage({ params }: { params: Promise<{ id: 
           },
           {
             judul: "Soal",
-            selesai: soalLengkap,
             isi: !adaSubtes ? (
               <EmptyState>
                 Soal ditugaskan per subtes, jadi tambahkan subtesnya lebih dulu di langkah 2.
@@ -279,7 +276,6 @@ export default async function TesDetailPage({ params }: { params: Promise<{ id: 
           },
           {
             judul: "Terbit",
-            selesai: terbit,
             isi: (
               <Card>
                 <CardHeader>
@@ -307,28 +303,20 @@ export default async function TesDetailPage({ params }: { params: Promise<{ id: 
                     </Ringkas>
                   </dl>
 
-                  {terbit ? (
-                    <>
-                      <p className="text-sm">
-                        Produk ini tampil di{" "}
-                        <Link
-                          href={`/produk/${tes.slug}`}
-                          className="text-primary font-medium hover:underline"
-                        >
-                          /produk/{tes.slug}
-                        </Link>
-                        .
-                      </p>
-                      <FormulirTerbit
-                        tes={tes}
-                        tujuan="draft"
-                        label="Tarik dari etalase"
-                        variant="outline"
-                      />
-                    </>
-                  ) : (
-                    <FormulirTerbit tes={tes} tujuan="published" label="Terbitkan produk" />
+                  {terbit && (
+                    <p className="text-sm">
+                      Produk ini tampil di{" "}
+                      <Link
+                        href={`/produk/${tes.slug}`}
+                        className="text-primary font-medium hover:underline"
+                      >
+                        /produk/{tes.slug}
+                      </Link>
+                      .
+                    </p>
                   )}
+
+                  <FormulirTerbit tes={tes} />
                 </CardContent>
               </Card>
             ),

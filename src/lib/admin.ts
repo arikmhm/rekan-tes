@@ -1041,3 +1041,91 @@ export async function adminStats() {
 
   return { ...ringkasan, kurang };
 }
+
+// ---------------------------------------------------------------------------
+// Spanduk
+// ---------------------------------------------------------------------------
+
+const bannerSchema = z.object({
+  id: z.string().optional(),
+  imageUrl: z
+    .string()
+    .trim()
+    .url("harus berupa URL lengkap, misalnya https://cdn.contoh.com/spanduk-1.jpg"),
+  alt: z.string().trim().min(3, "teks alternatif minimal 3 karakter"),
+});
+
+export async function saveBanner(_prev: string | null, form: FormData) {
+  await requireAdminMutation();
+
+  const parsed = bannerSchema.safeParse({
+    id: form.get("id") || undefined,
+    imageUrl: form.get("imageUrl"),
+    alt: form.get("alt"),
+  });
+
+  if (!parsed.success) return pesanZod(parsed.error);
+
+  const { id, ...nilai } = parsed.data;
+
+  if (id) {
+    await db
+      .update(schema.banners)
+      .set({ ...nilai, updatedAt: new Date() })
+      .where(eq(schema.banners.id, id));
+  } else {
+    // Spanduk baru masuk paling belakang; urutannya diatur setelah itu.
+    const [{ terbesar }] = await db
+      .select({ terbesar: sql<number>`coalesce(max(${schema.banners.position}), 0)` })
+      .from(schema.banners);
+
+    await db.insert(schema.banners).values({ ...nilai, position: terbesar + 1 });
+  }
+
+  revalidatePath("/admin/spanduk");
+  revalidatePath("/produk");
+  return null;
+}
+
+/** Menukar urutan dengan spanduk tetangga; urutan ini yang dilihat pengunjung. */
+export async function moveBanner(form: FormData) {
+  await requireAdminMutation();
+
+  const id = String(form.get("id") ?? "");
+  const naik = form.get("arah") === "naik";
+
+  const [ini] = await db.select().from(schema.banners).where(eq(schema.banners.id, id));
+  if (!ini) return;
+
+  const [tetangga] = await db
+    .select()
+    .from(schema.banners)
+    .where(naik ? lt(schema.banners.position, ini.position) : gt(schema.banners.position, ini.position))
+    .orderBy(naik ? desc(schema.banners.position) : asc(schema.banners.position))
+    .limit(1);
+  if (!tetangga) return;
+
+  // Posisi spanduk tidak unik, jadi keduanya cukup ditukar langsung.
+  await db.transaction(async (tx) => {
+    const set = (baris: string, position: number) =>
+      tx
+        .update(schema.banners)
+        .set({ position, updatedAt: new Date() })
+        .where(eq(schema.banners.id, baris));
+
+    await set(ini.id, tetangga.position);
+    await set(tetangga.id, ini.position);
+  });
+
+  revalidatePath("/admin/spanduk");
+  revalidatePath("/produk");
+}
+
+export async function removeBanner(form: FormData) {
+  await requireAdminMutation();
+
+  await db.delete(schema.banners).where(eq(schema.banners.id, String(form.get("id") ?? "")));
+
+  revalidatePath("/admin/spanduk");
+  revalidatePath("/produk");
+}

@@ -24,6 +24,9 @@ const MUTATIONS = [
   "moveTestSubtest",
   "addAssignment",
   "removeAssignment",
+  "saveBanner",
+  "moveBanner",
+  "removeBanner",
 ];
 const READS = [
   "listCategories",

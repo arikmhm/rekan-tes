@@ -3,6 +3,7 @@
 import {
   BookOpen,
   ExternalLink,
+  GalleryHorizontal,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -51,7 +52,10 @@ const grup = [
   },
   {
     label: "Produk",
-    items: [{ href: "/admin/tes", label: "Produk tes", icon: Package }],
+    items: [
+      { href: "/admin/tes", label: "Produk tes", icon: Package },
+      { href: "/admin/spanduk", label: "Spanduk", icon: GalleryHorizontal },
+    ],
   },
   {
     label: "Operasional",

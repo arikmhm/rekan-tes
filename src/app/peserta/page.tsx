@@ -3,8 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { requireUser } from "@/lib/authz";
+import { listBanners } from "@/lib/produk";
 
 import { EtalaseProduk } from "../_components/etalase-produk";
+import { Spanduk } from "../_components/spanduk";
 
 export const metadata: Metadata = { title: "Produk" };
 
@@ -42,11 +44,19 @@ export default async function PesertaPage({
         </Link>
       )}
 
-      <EtalaseProduk
-        jenis={(await searchParams).jenis}
-        dasar="/peserta"
-        detail="/peserta/produk"
-      />
+      {/* Spanduk yang sama dengan halaman produk publik, diatur dari panel
+          admin yang sama pula. Sorotan bawaan etalase dimatikan karena itu akan
+          jadi korsel kedua yang menempel tepat di bawah korsel pertama. */}
+      <Spanduk slides={await listBanners()} />
+
+      <div className="mt-8">
+        <EtalaseProduk
+          jenis={(await searchParams).jenis}
+          dasar="/peserta"
+          detail="/peserta/produk"
+          sorotan={false}
+        />
+      </div>
     </div>
   );
 }

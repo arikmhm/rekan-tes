@@ -53,6 +53,7 @@ test("seluruh tabel MVP ada di migrasi", () => {
     "test_attempts",
     "attempt_subtests",
     "attempt_answers",
+    "banners",
   ];
   const auth = ["user", "session", "account", "verification"];
 

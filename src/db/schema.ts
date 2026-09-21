@@ -66,6 +66,28 @@ const updatedAt = () => timestamp("updated_at", { withTimezone: true }).notNull(
 // Konten
 // ---------------------------------------------------------------------------
 
+/**
+ * Spanduk korsel di kepala halaman produk. Berkas gambarnya tinggal di
+ * penyimpanan objek (Cloudflare R2) dan tabel ini hanya memegang alamatnya —
+ * gambar tidak pernah masuk basis data maupun repositori.
+ *
+ * Tidak ada kolom status: spanduk yang tidak ingin tampil dihapus saja, dan
+ * satu-satunya urutan yang berlaku adalah `position`.
+ */
+export const banners = pgTable(
+  "banners",
+  {
+    id: id(),
+    imageUrl: text("image_url").notNull(),
+    // Wajib: korsel tanpa teks alternatif tidak terbaca pembaca layar.
+    alt: text("alt").notNull(),
+    position: integer("position").notNull().default(0),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("banners_position_idx").on(t.position)],
+);
+
 export const questionCategories = pgTable("question_categories", {
   id: id(),
   code: text("code").notNull().unique(),

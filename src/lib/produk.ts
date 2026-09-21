@@ -135,3 +135,18 @@ export async function listProduk(): Promise<Produk[]> {
     ],
   }));
 }
+
+/**
+ * Spanduk korsel halaman produk, urut tampil. Tidak ada status draf: yang
+ * tercatat berarti tayang, jadi pembacanya tidak perlu menyaring apa pun.
+ */
+export async function listBanners() {
+  return db
+    .select({
+      id: schema.banners.id,
+      imageUrl: schema.banners.imageUrl,
+      alt: schema.banners.alt,
+    })
+    .from(schema.banners)
+    .orderBy(asc(schema.banners.position), asc(schema.banners.createdAt));
+}

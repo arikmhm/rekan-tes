@@ -2,9 +2,11 @@ import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { listBanners } from "@/lib/produk";
+
 import { EtalaseProduk } from "../_components/etalase-produk";
 import { SiteShell } from "../_components/site-shell";
-import { Spanduk } from "./_components/spanduk";
+import { Spanduk } from "../_components/spanduk";
 
 export const metadata: Metadata = {
   title: "Produk",
@@ -32,7 +34,7 @@ export default async function ProdukPage({
               diperlukan — dan sorotan bawaan etalase dimatikan supaya tidak
               jadi korsel kedua yang menempel tepat di bawah korsel pertama. */}
           <h1 className="sr-only">Produk</h1>
-          <Spanduk />
+          <Spanduk slides={await listBanners()} />
 
           <EtalaseProduk
             jenis={(await searchParams).jenis}

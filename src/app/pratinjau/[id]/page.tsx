@@ -38,7 +38,7 @@ export default async function PratinjauPage({ params }: { params: Promise<{ id: 
 
   if (paket.soal.length === 0) {
     return (
-      <div className="bg-cream flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
         <p className="text-brand text-lg font-medium">{tes.name} belum punya soal.</p>
         <p className="text-brand/60 max-w-md text-sm">
           Tambahkan subtes dan tugaskan soalnya dulu, baru produk ini bisa dicoba.
@@ -51,7 +51,7 @@ export default async function PratinjauPage({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className="bg-cream flex min-h-screen flex-col">
+    <div className="bg-background flex min-h-screen flex-col">
       <SesiSimulasi
         paket={paket}
         label="Pratinjau admin"

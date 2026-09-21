@@ -42,7 +42,7 @@ export default async function SesiPage({
   // tetap footer situs, didorong ke dasar halaman oleh sesi yang mengisi sisa
   // tinggi layar.
   return (
-    <div className="flex min-h-screen flex-col bg-cream">
+    <div className="flex min-h-screen flex-col bg-background">
       <SesiSimulasi paket={paket} />
 
       <SiteFooter />

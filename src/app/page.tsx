@@ -105,7 +105,7 @@ export default async function Home() {
         {/* Rekaman sesi pengerjaan sebagai gambar produk: berjalan sendiri,
             mengulang, tanpa suara, dan tidak menerima klik sama sekali — ini
             gambar yang bergerak, bukan pemutar video yang perlu dilayani. */}
-        {/* <div className="mx-auto w-full max-w-6xl pb-16 px-5 sm:px-0 md:px-0 sm:pb-20">
+        <div className="mx-auto w-full max-w-6xl pb-16 px-5 sm:px-0 md:px-0 sm:pb-20">
           <video
             src="/hero.mp4"
             autoPlay
@@ -116,8 +116,8 @@ export default async function Home() {
             tabIndex={-1}
             className={`pointer-events-none w-full rounded-lg border ${hairline} bg-cream`}
           />
-        </div> */}
-        <section id="mulai" className={` bg-white px-5  sm:px-8`}>
+        </div>
+        {/* <section id="mulai" className={` bg-white px-5  sm:px-8`}>
           <div className="mx-auto max-w-6xl bg-brand-orange/80 px-5 pt-16 sm:pt-24 sm:px-8 rounded-t-2xl sm:rounded-t-2xl">
             <h2 className="mx-auto max-w-xl text-center text-3xl font-medium tracking-[-0.01em] text-white sm:text-4xl">
               Bingung Harus Mulai dari Mana?
@@ -126,13 +126,13 @@ export default async function Home() {
               <PhoneChat />
             </div>
           </div>
-        </section>
+        </section> */}
         {/* Simulasi percobaannya sendiri tinggal di /simulasi. Menanamkannya di
             sini berarti setiap pengunjung beranda ikut mengunduh mesin kuisnya,
             padahal cuma sebagian yang benar-benar mencoba. */}
         {/* Warna latarnya sendiri: seksi ini memamerkan produknya, jadi ia
             perlu terbaca sebagai satu blok utuh di antara seksi putih. */}
-        <section id="coba" className="bg-mint/50 px-5 py-16 sm:px-8 sm:py-24">
+        <section id="coba" className="bg-gray-50 px-5 py-16 sm:px-8 sm:py-24">
           <div className="mx-auto max-w-6xl">
             <span className="text-xs font-medium tracking-wide text-brand-orange uppercase">
               Yang kamu dapat

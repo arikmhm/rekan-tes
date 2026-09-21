@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient, keluar } from "@/lib/auth-client";
 
 // Disalin dari site-shell alih-alih diimpor: berkas itu ikut menarik modul
 // server, sedangkan komponen ini berjalan di peramban.
@@ -21,7 +20,6 @@ const buttonClass =
  */
 export function AccountNav() {
   const { data: session, isPending } = authClient.useSession();
-  const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
 
   // Menjaga tinggi baris tetap sama sebelum session diketahui.
@@ -61,9 +59,7 @@ export function AccountNav() {
         className={`${buttonClass} disabled:opacity-60`}
         onClick={async () => {
           setSigningOut(true);
-          await authClient.signOut();
-          setSigningOut(false);
-          router.refresh();
+          await keluar();
         }}
       >
         {signingOut ? "Keluar…" : "Keluar"}

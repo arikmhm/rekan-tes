@@ -11,7 +11,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import {
@@ -42,7 +42,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth-client";
+import { keluar as keluarAkun } from "@/lib/auth-client";
 
 /**
  * Jenis produk di sidebar. Nilainya sama dengan `JenisProduk` di lib/produk,
@@ -68,7 +68,6 @@ const belanja = [
 export function AppSidebar({ nama }: { nama: string }) {
   const pathname = usePathname();
   const jenisAktif = useSearchParams().get("jenis");
-  const router = useRouter();
   const [keluar, setKeluar] = useState(false);
   const diPustaka = pathname === "/peserta/pustaka";
 
@@ -209,9 +208,7 @@ export function AppSidebar({ nama }: { nama: string }) {
                   disabled={keluar}
                   onClick={async () => {
                     setKeluar(true);
-                    await authClient.signOut();
-                    router.push("/");
-                    router.refresh();
+                    await keluarAkun();
                   }}
                 >
                   <LogOut />

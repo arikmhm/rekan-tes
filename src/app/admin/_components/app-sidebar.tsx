@@ -12,7 +12,7 @@ import {
   Tags,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import {
@@ -35,7 +35,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { authClient } from "@/lib/auth-client";
+import { keluar as keluarAkun } from "@/lib/auth-client";
 
 const grup = [
   {
@@ -65,7 +65,6 @@ const grup = [
 
 export function AppSidebar({ nama }: { nama: string }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [keluar, setKeluar] = useState(false);
 
   return (
@@ -145,9 +144,7 @@ export function AppSidebar({ nama }: { nama: string }) {
                   disabled={keluar}
                   onClick={async () => {
                     setKeluar(true);
-                    await authClient.signOut();
-                    router.push("/");
-                    router.refresh();
+                    await keluarAkun();
                   }}
                 >
                   <LogOut />

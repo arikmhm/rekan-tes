@@ -208,6 +208,7 @@ export function AppSidebar({ nama }: { nama: string }) {
                 <form action={keluar}>
                   <DropdownMenuItem
                     closeOnClick={false}
+                    nativeButton
                     className="w-full"
                     render={<button type="submit" />}
                   >

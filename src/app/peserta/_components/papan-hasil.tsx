@@ -14,7 +14,13 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
-import { Donat, Kartu, menitDetik, Sebaran } from "../../_components/hasil-ui";
+import {
+  Donat,
+  Kartu,
+  menitDetik,
+  Sebaran,
+  WaktuSubtes,
+} from "../../_components/hasil-ui";
 
 const hairline = "border-[#105C78]/20";
 
@@ -34,6 +40,8 @@ export type SoalHasil = {
   weight: number;
   dijawab: boolean;
   isCorrect: boolean | null;
+  /** Lama soal ini dibuka peserta, dalam detik. */
+  detik: number;
   selectedOptionId: string | null;
   options: Opsi[];
   explanation: string;
@@ -48,8 +56,24 @@ export type SubtesHasil = {
   kosong: number;
   skor: number;
   maksimal: number;
+  /** Waktu terpakai subtes ini, atau null bila jamnya tidak tercatat. */
+  detik: number | null;
+  /** Jatah waktu subtes ini, dalam detik. */
+  jatah: number;
   soal: SoalHasil[];
 };
+
+/**
+ * Jatah waktu wajar satu soal: durasi subtesnya dibagi rata jumlah soalnya.
+ * Per subtes, bukan per sesi, karena tiap subtes punya jatah dan jumlah soal
+ * yang berbeda — rata-rata sesi akan menghukum subtes yang soalnya padat.
+ */
+function idealSoal(subtes: SubtesHasil[], soal: SoalHasil) {
+  const milik = subtes.find((x) => x.soal.some((q) => q.assignmentId === soal.assignmentId));
+  if (!milik || milik.soal.length === 0) return 0;
+
+  return Math.round(milik.jatah / milik.soal.length);
+}
 
 /** Warna satu kotak di peta jawaban. */
 function rupaSoal(s: SoalHasil) {
@@ -98,9 +122,6 @@ export function PapanHasil({
   const semua = subtes.flatMap((s) => s.soal);
   const jumlah = semua.length;
   const akurasi = jumlah === 0 ? 0 : Math.round((total.benar / jumlah) * 100);
-  const idealPerSoal = jumlah === 0 ? 0 : Math.round(durasi / jumlah);
-  const rataPerSoal =
-    terpakai === null || jumlah === 0 ? null : Math.round(terpakai / jumlah);
 
   const perSubtes = subtes.map((s) => ({
     ...s,
@@ -176,54 +197,21 @@ export function PapanHasil({
         >
           {terpakai === null ? (
             <p className="mt-6 rounded-xl bg-cream px-4 py-3 text-xs leading-5 font-normal text-brand/70">
-              Waktu pengerjaan sesi ini tidak tercatat lengkap, jadi tempo per
-              soalnya tidak dapat dihitung.
+              Waktu pengerjaan sesi ini tidak tercatat lengkap.
             </p>
           ) : (
-            <>
-              <p className="mt-6 text-center font-mono text-4xl font-medium tabular-nums text-brand">
-                {menitDetik(terpakai)}
-              </p>
-              <p className="mt-2 text-center text-xs font-normal text-brand/60">
-                Rata-rata {rataPerSoal} detik per soal · ideal {idealPerSoal}{" "}
-                detik
-              </p>
-              <p className="mt-6 rounded-xl bg-cream px-4 py-3 text-xs leading-5 font-normal text-brand/70">
-                <span className="block font-medium text-brand">
-                  {rataPerSoal! < idealPerSoal / 2
-                    ? "Terburu-buru"
-                    : rataPerSoal! > idealPerSoal
-                      ? "Melebihi tempo"
-                      : "Tempo terjaga"}
-                </span>
-                {rataPerSoal! < idealPerSoal / 2
-                  ? "Jauh lebih cepat dari jatah waktunya. Periksa ulang sebelum berpindah soal."
-                  : rataPerSoal! > idealPerSoal
-                    ? "Melewati jatah per soal. Lewati dulu yang berat, kembali kalau masih ada waktu."
-                    : "Kecepatanmu pas dengan jatah waktu tiap soal. Pertahankan."}
-              </p>
-            </>
+            <p className="mt-6 text-center font-mono text-4xl font-medium tabular-nums text-brand">
+              {menitDetik(terpakai)}
+            </p>
           )}
 
-          <dl className={`mt-4 divide-y ${hairline} border-t ${hairline}`}>
-            {subtes.map((x) => (
-              <div
-                key={x.testSubtestId}
-                className="flex items-center gap-3 py-2.5 text-sm"
-              >
-                <dt className="min-w-0 flex-1 truncate font-normal text-brand/60">
-                  {x.nama}
-                </dt>
-                <dd className="font-medium text-brand">
-                  {x.skor}
-                  <span className="font-normal text-brand/50">
-                    {" "}
-                    / {x.maksimal}
-                  </span>
-                </dd>
-              </div>
-            ))}
-          </dl>
+          <WaktuSubtes
+            data={subtes.map((s) => ({
+              nama: s.nama,
+              detik: s.detik,
+              jatah: s.jatah,
+            }))}
+          />
         </Kartu>
 
         <Kartu judul="Analisis subtes" Ikon={TrendingUp} tanda="Saran">
@@ -231,6 +219,8 @@ export function PapanHasil({
             data={perSubtes.map((x) => ({
               subtes: x.singkat,
               nilai: x.persen,
+              benar: x.benar,
+              total: x.benar + x.salah + x.kosong,
             }))}
           />
           {terlemah && (
@@ -250,7 +240,7 @@ export function PapanHasil({
         <Kartu judul="Peta jawaban" Ikon={Grid2x2Check} kelas="lg:self-start">
           <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
             Klik nomor soal untuk membuka pembahasannya. Warna menunjukkan
-            ketepatan jawabanmu.
+            ketepatan jawabanmu, angka di bawahnya lama pengerjaan.
           </p>
 
           {subtes.map((x) => (
@@ -268,14 +258,19 @@ export function PapanHasil({
                       aria-current={
                         q.nomor - 1 === dilihat ? "true" : undefined
                       }
-                      aria-label={`Soal ${q.nomor}, ${rupa.label}`}
-                      className={`cursor-pointer rounded-lg border py-2 text-center text-sm font-medium transition-colors ${rupa.kelas} ${
+                      aria-label={`Soal ${q.nomor}, ${rupa.label}, ${q.detik} detik`}
+                      className={`cursor-pointer rounded-lg border py-1.5 text-center transition-colors ${rupa.kelas} ${
                         q.nomor - 1 === dilihat
                           ? "ring-2 ring-brand-orange ring-offset-1"
                           : ""
                       }`}
                     >
-                      {q.nomor}
+                      <span className="block text-sm font-medium">
+                        {q.nomor}
+                      </span>
+                      <span className="block font-mono text-[10px] opacity-70">
+                        {q.detik}s
+                      </span>
                     </button>
                   );
                 })}
@@ -305,7 +300,7 @@ export function PapanHasil({
           <Kartu
             judul={`Pembahasan soal ${s.nomor}`}
             Ikon={ClipboardList}
-            tanda={`bobot ${s.weight}`}
+            tanda={`${s.detik} detik · ideal ${idealSoal(subtes, s)} detik · bobot ${s.weight}`}
             kelas="lg:col-span-2"
           >
             <p className="mt-4 text-xs font-medium text-brand/60">

@@ -127,6 +127,7 @@ export default async function SesiPage({
             prompt: q.prompt,
             options: q.options,
             selectedOptionId: q.selectedOptionId,
+            secondsSpent: q.secondsSpent,
           }))}
           remainingSeconds={attempt.remainingSeconds}
           deadlineLabel={attempt.deadline ? jam.format(attempt.deadline) : null}

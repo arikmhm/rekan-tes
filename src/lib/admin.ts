@@ -1,6 +1,20 @@
 "use server";
 
-import { and, asc, count, desc, eq, gt, ilike, inArray, like, lt, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  ilike,
+  inArray,
+  isNotNull,
+  like,
+  lt,
+  or,
+  sql,
+} from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -325,10 +339,18 @@ async function sudahDikerjakan(questionId: string) {
     .from(schema.testSubtestQuestions)
     .where(eq(schema.testSubtestQuestions.questionId, questionId));
 
+  // Baris jawaban kini juga dibuat untuk soal yang hanya dibuka — itu yang
+  // mencatat lama pengerjaan. Penguncian tetap mengikuti arti aslinya: yang
+  // benar-benar dijawab, bukan yang sekadar terlihat.
   const [row] = await db
     .select({ ada: schema.attemptAnswers.id })
     .from(schema.attemptAnswers)
-    .where(inArray(schema.attemptAnswers.testSubtestQuestionId, assignments))
+    .where(
+      and(
+        inArray(schema.attemptAnswers.testSubtestQuestionId, assignments),
+        isNotNull(schema.attemptAnswers.selectedOptionId),
+      ),
+    )
     .limit(1);
 
   return Boolean(row);

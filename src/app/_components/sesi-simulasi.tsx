@@ -20,7 +20,13 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Paket, Soal } from "../simulasi/data";
 
-import { Donat, Kartu, menitDetik, Sebaran } from "./hasil-ui";
+import {
+  Donat,
+  Kartu,
+  menitDetik,
+  Sebaran,
+  WaktuSubtes,
+} from "./hasil-ui";
 
 const hairline = "border-[#105C78]/20";
 
@@ -469,9 +475,8 @@ function Hasil({
   const salah = soal.length - benar - kosong;
   const akurasi = Math.round((benar / soal.length) * 100);
   const idealPerSoal = Math.round(durasi / soal.length);
-  const rataPerSoal = Math.round(terpakai / soal.length);
 
-  const perSubtes = ringkasSubtes(soal, jawaban);
+  const perSubtes = ringkasSubtes(soal, jawaban, waktuSoal);
   // Subtes dengan persentase terendah jadi bahan rekomendasi. Kalau seri, yang
   // pertama muncul di urutan soal yang dipilih — bukan hasil acak.
   const terlemah = perSubtes.reduce((a, b) => (b.persen < a.persen ? b : a));
@@ -539,23 +544,12 @@ function Hasil({
           <p className="mt-6 text-center font-mono text-4xl font-medium tabular-nums text-brand">
             {menitDetik(terpakai)}
           </p>
-          <p className="mt-2 text-center text-xs font-normal text-brand/60">
-            Rata-rata {rataPerSoal} detik per soal · ideal {idealPerSoal} detik
-          </p>
-          <p className="mt-6 rounded-xl bg-cream px-4 py-3 text-xs leading-5 font-normal text-brand/70">
-            <span className="block font-medium text-brand">
-              {rataPerSoal < idealPerSoal / 2
-                ? "Terburu-buru"
-                : rataPerSoal > idealPerSoal
-                  ? "Melebihi tempo"
-                  : "Tempo terjaga"}
-            </span>
-            {rataPerSoal < idealPerSoal / 2
-              ? "Jauh lebih cepat dari jatah waktunya. Periksa ulang sebelum berpindah soal."
-              : rataPerSoal > idealPerSoal
-                ? "Melewati jatah per soal. Lewati dulu yang berat, kembali kalau masih ada waktu."
-                : "Kecepatanmu pas dengan jatah waktu tiap soal. Pertahankan."}
-          </p>
+
+          {/* Simulasi percobaan memakai satu jatah untuk seluruh sesi, jadi
+              subtesnya tidak punya jatah sendiri untuk dibandingkan. */}
+          <WaktuSubtes
+            data={perSubtes.map((x) => ({ nama: x.nama, detik: x.detik }))}
+          />
         </Kartu>
 
         <Kartu judul="Analisis subtes" Ikon={TrendingUp} tanda="Saran">
@@ -563,6 +557,8 @@ function Hasil({
             data={perSubtes.map((x) => ({
               subtes: x.singkat,
               nilai: x.persen,
+              benar: x.benar,
+              total: x.total,
             }))}
           />
           <p className="mt-4 rounded-xl bg-cream px-4 py-3 text-xs leading-5 font-normal text-brand/70">
@@ -755,11 +751,18 @@ const KETERANGAN: [string, string][] = [
   ["border-brand-orange/40 bg-brand-orange/15", "Salah & lambat"],
 ];
 
-/** Benar dan total tiap subtes, dipakai radar sekaligus kalimat rekomendasi. */
-function ringkasSubtes(soal: Soal[], jawaban: (number | null)[]) {
+/**
+ * Benar, total, dan waktu terpakai tiap subtes — dipakai cincin sebaran, daftar
+ * waktu, sekaligus kalimat rekomendasi.
+ */
+function ringkasSubtes(
+  soal: Soal[],
+  jawaban: (number | null)[],
+  waktuSoal: number[],
+) {
   const per = new Map<
     string,
-    { nama: string; singkat: string; benar: number; total: number }
+    { nama: string; singkat: string; benar: number; total: number; detik: number }
   >();
 
   soal.forEach((s, i) => {
@@ -768,8 +771,10 @@ function ringkasSubtes(soal: Soal[], jawaban: (number | null)[]) {
       singkat: s.singkat,
       benar: 0,
       total: 0,
+      detik: 0,
     };
     catatan.total += 1;
+    catatan.detik += waktuSoal[i] ?? 0;
     if (jawaban[i] === s.kunci) catatan.benar += 1;
     per.set(s.singkat, catatan);
   });

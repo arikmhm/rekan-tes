@@ -22,6 +22,8 @@ type Soal = {
   prompt: string;
   options: Opsi[];
   selectedOptionId: string | null;
+  /** Waktu yang sudah tercatat di server; hitungan dilanjutkan dari sini. */
+  secondsSpent: number;
 };
 
 type Status = "diam" | "antre" | "menyimpan" | "tersimpan" | "gagal";
@@ -32,7 +34,8 @@ type Status = "diam" | "antre" | "menyimpan" | "tersimpan" | "gagal";
  * Seluruh soal subtes sudah ikut terkirim dari server, jadi berpindah nomor
  * tidak menyentuh jaringan sama sekali — itu yang membuat sesi terasa ringan.
  * Jawaban ditahan di memori, disetor berkelompok tiap {@link JEDA_SIMPAN}, dan
- * dicadangkan ke `localStorage` untuk menutup celah antar setoran.
+ * dicadangkan ke `localStorage` untuk menutup celah antar setoran. Lama tiap
+ * soal dibuka ikut dicatat dan menumpang setoran yang sama.
  *
  * Waktu tetap milik server: `remainingSeconds` dihitung dari `started_at`
  * server, dan server pula yang menolak jawaban setelah subtesnya ditutup.
@@ -63,6 +66,17 @@ export function SesiKerja({
     soal.flatMap((s) => (s.selectedOptionId ? [[s.assignmentId, s.selectedOptionId]] : [])),
   );
   const [jawaban, setJawaban] = useState<Record<string, string>>(awal);
+
+  // Waktu terkumpul tiap soal, dilanjutkan dari catatan server. Soal yang
+  // sedang dibuka belum masuk hitungan sampai peserta berpindah darinya.
+  const detik = useRef<Record<string, number>>(
+    Object.fromEntries(soal.map((s) => [s.assignmentId, s.secondsSpent])),
+  );
+  // Diisi saat komponen terpasang, bukan saat render: `Date.now()` di badan
+  // render membuat hasilnya bergantung pada kapan React kebetulan me-render.
+  const sejak = useRef(0);
+  const waktuKotor = useRef(new Set<string>());
+  const nomorRef = useRef(1);
   // Cermin sinkron dari state: penyetor perlu nilai terbaru saat itu juga,
   // sementara state baru terbaca pada render berikutnya.
   const jawabanRef = useRef(jawaban);
@@ -73,16 +87,53 @@ export function SesiKerja({
   const [status, setStatus] = useState<Status>("diam");
   const [galat, setGalat] = useState<string | null>(null);
 
-  const kirim = useCallback(async () => {
-    if (antre.current.size === 0 || sedangKirim.current) return;
+  /**
+   * Menutup hitungan waktu soal yang sedang dibuka dan memindahkannya ke
+   * antrean waktu. Dipanggil tiap perpindahan nomor dan sebelum tiap setoran.
+   */
+  const catatWaktu = useCallback(() => {
+    const sekarang = Date.now();
+    const dibuka = soal[nomorRef.current - 1];
 
-    const kelompok = [...antre.current].map((assignmentId) => ({
+    if (dibuka && sejak.current > 0) {
+      const berlalu = Math.round((sekarang - sejak.current) / 1000);
+      if (berlalu > 0) {
+        detik.current[dibuka.assignmentId] =
+          (detik.current[dibuka.assignmentId] ?? 0) + berlalu;
+        waktuKotor.current.add(dibuka.assignmentId);
+      }
+    }
+
+    sejak.current = sekarang;
+  }, [soal]);
+
+  /**
+   * `paksa` menyetor walau yang tertunda hanya waktu. Setoran berkala tetap
+   * menunggu ada jawaban baru supaya sesi yang diam tidak menghasilkan request
+   * tiap sepuluh detik; waktunya menumpang setoran jawaban berikutnya, atau
+   * setoran paksa saat subtes ditutup.
+   */
+  const kirim = useCallback(async (paksa = false) => {
+    catatWaktu();
+
+    const perlu = paksa
+      ? new Set([...antre.current, ...waktuKotor.current])
+      : new Set(antre.current);
+    if (perlu.size === 0 || sedangKirim.current) return;
+
+    // Waktu yang sudah terkumpul selalu ikut menumpang, jadi setoran jawaban
+    // apa pun sekaligus memperbarui waktunya.
+    for (const a of waktuKotor.current) perlu.add(a);
+
+    const kelompok = [...perlu].map((assignmentId) => ({
       assignmentId,
-      optionId: jawabanRef.current[assignmentId],
+      optionId: jawabanRef.current[assignmentId] ?? null,
+      detik: detik.current[assignmentId] ?? 0,
     }));
     // Dikosongkan sebelum menunggu supaya jawaban yang dipilih selagi request
     // berjalan ikut antrean berikutnya, bukan hilang tertimpa.
     antre.current.clear();
+    waktuKotor.current.clear();
     sedangKirim.current = true;
     setStatus("menyimpan");
 
@@ -97,7 +148,10 @@ export function SesiKerja({
     }
 
     if (pesan) {
-      for (const k of kelompok) antre.current.add(k.assignmentId);
+      for (const k of kelompok) {
+        if (k.optionId !== null) antre.current.add(k.assignmentId);
+        waktuKotor.current.add(k.assignmentId);
+      }
       setGalat(pesan);
       setStatus("gagal");
       return;
@@ -107,7 +161,7 @@ export function SesiKerja({
     setStatus(antre.current.size === 0 ? "tersimpan" : "antre");
     // Cadangan lokal hanya menutup jawaban yang belum sampai di server.
     if (antre.current.size === 0) localStorage.removeItem(kunci);
-  }, [attemptId, kunci]);
+  }, [attemptId, kunci, catatWaktu]);
 
   function pilih(assignmentId: string, optionId: string) {
     jawabanRef.current = { ...jawabanRef.current, [assignmentId]: optionId };
@@ -137,6 +191,10 @@ export function SesiKerja({
   }, [kunci, soal, kirim]);
 
   useEffect(() => {
+    sejak.current = Date.now();
+  }, []);
+
+  useEffect(() => {
     const jam = setInterval(() => void kirim(), JEDA_SIMPAN);
     return () => clearInterval(jam);
   }, [kirim]);
@@ -148,7 +206,7 @@ export function SesiKerja({
     if (remainingSeconds === null) return;
 
     const jeda = setTimeout(
-      () => void kirim(),
+      () => void kirim(true),
       Math.max(0, remainingSeconds * 1000 - 2_000),
     );
     return () => clearTimeout(jeda);
@@ -158,12 +216,18 @@ export function SesiKerja({
   // sistem, jadi antrean disetor saat itu juga — tidak menunggu jedanya habis.
   useEffect(() => {
     const saatSembunyi = () => {
-      if (document.visibilityState === "hidden") void kirim();
+      if (document.visibilityState === "hidden") void kirim(true);
     };
 
     document.addEventListener("visibilitychange", saatSembunyi);
     return () => document.removeEventListener("visibilitychange", saatSembunyi);
   }, [kirim]);
+
+  function pindah(ke: number) {
+    catatWaktu();
+    nomorRef.current = ke;
+    setNomor(ke);
+  }
 
   const s = soal[nomor - 1];
   const terjawab = soal.filter((q) => jawaban[q.assignmentId]).length;
@@ -266,7 +330,7 @@ export function SesiKerja({
               {nomor > 1 ? (
                 <button
                   type="button"
-                  onClick={() => setNomor(nomor - 1)}
+                  onClick={() => pindah(nomor - 1)}
                   className={`inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border ${hairline} px-4 text-sm font-normal text-brand transition-colors hover:bg-brand hover:text-white`}
                 >
                   <ArrowLeft className="size-4" aria-hidden />
@@ -278,7 +342,7 @@ export function SesiKerja({
               {nomor < soal.length && (
                 <button
                   type="button"
-                  onClick={() => setNomor(nomor + 1)}
+                  onClick={() => pindah(nomor + 1)}
                   className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
                 >
                   Berikutnya
@@ -295,11 +359,11 @@ export function SesiKerja({
             terjawab={terjawab}
             status={status}
             galat={galat}
-            onPindah={setNomor}
+            onPindah={pindah}
             attemptId={attemptId}
             subtesId={subtesId}
             subtesTerakhir={posisi === jumlahSubtes}
-            onSebelumKumpul={kirim}
+            onSebelumKumpul={() => kirim(true)}
           />
         </div>
       )}

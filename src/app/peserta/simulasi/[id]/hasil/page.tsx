@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { getResult } from "@/lib/attempt";
+import { labelSubtes } from "@/lib/format";
 
 import {
   PapanHasil,
@@ -19,24 +20,6 @@ const tanggal = new Intl.DateTimeFormat("id-ID", {
   dateStyle: "long",
   timeStyle: "short",
 });
-
-/**
- * Label pendek untuk sumbu radar. Nama subtes panjang membuat sumbunya
- * bertumpuk, jadi nama beberapa kata disingkat jadi inisialnya — "Tes Wawasan
- * Kebangsaan" menjadi "TWK".
- *
- * ponytail: murni tebakan dari bentuk namanya. Kalau nanti subtes perlu label
- * pendek yang benar-benar terkendali, tambahkan kolomnya di tabel subtes.
- */
-function singkatkan(nama: string) {
-  const kata = nama.split(/\s+/).filter(Boolean);
-  if (kata.length < 2) return nama.slice(0, 12);
-  return kata
-    .map((k) => k[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 5);
-}
 
 export default async function HasilPage({
   params,
@@ -59,16 +42,33 @@ export default async function HasilPage({
 
   // Nomor soal dibuat berurut untuk seluruh sesi, bukan per subtes, supaya peta
   // jawaban dan panel pembahasan menunjuk soal yang sama.
+  // Waktu terpakai tiap subtes dihitung dari jam server. Subtes yang tertutup
+  // karena waktunya habis dihitung sepenuh jatahnya, dan yang belum pernah
+  // dibuka tidak punya angka sama sekali.
+  const tercatat = subtes.map((s) =>
+    s.startedAt && s.submittedAt
+      ? Math.round((s.submittedAt.getTime() - s.startedAt.getTime()) / 1000)
+      : s.startedAt
+        ? s.durationSeconds
+        : null,
+  );
+
   let urut = 0;
-  const papan: SubtesHasil[] = subtes.map((s) => ({
+  // Label sumbu disiapkan sekaligus supaya dua subtes tidak berakhir dengan
+  // singkatan yang sama — "Kesamaan Dasar" dan "Ketelitian Dasar" keduanya "KD".
+  const singkat = labelSubtes(subtes.map((s) => s.name));
+
+  const papan: SubtesHasil[] = subtes.map((s, i) => ({
     testSubtestId: s.testSubtestId,
     nama: s.name,
-    singkat: singkatkan(s.name),
+    singkat: singkat[i],
     benar: s.benar,
     salah: s.salah,
     kosong: s.kosong,
     skor: s.skor,
     maksimal: s.maksimal,
+    detik: tercatat[i],
+    jatah: s.durationSeconds,
     soal: s.soal.map((q): SoalHasil => ({
       assignmentId: q.assignmentId,
       nomor: ++urut,
@@ -77,6 +77,7 @@ export default async function HasilPage({
       weight: q.weight,
       dijawab: q.dijawab,
       isCorrect: q.isCorrect,
+      detik: q.detik,
       selectedOptionId: q.selectedOptionId,
       options: q.options.map((o) => ({
         id: o.id,
@@ -90,16 +91,8 @@ export default async function HasilPage({
 
   const durasi = subtes.reduce((n, s) => n + s.durationSeconds, 0);
 
-  // Waktu terpakai dijumlahkan per subtes, bukan diambil dari rentang mulai
-  // sampai kumpul: di antara dua subtes ada jeda yang bukan waktu mengerjakan.
-  // Subtes yang tertutup karena waktunya habis dihitung sepenuh jatahnya.
-  const tercatat = subtes.map((s) =>
-    s.startedAt && s.submittedAt
-      ? Math.round((s.submittedAt.getTime() - s.startedAt.getTime()) / 1000)
-      : s.startedAt
-        ? s.durationSeconds
-        : null,
-  );
+  // Dijumlahkan per subtes, bukan diambil dari rentang mulai sampai kumpul: di
+  // antara dua subtes ada jeda yang bukan waktu mengerjakan.
   const terpakai = tercatat.includes(null)
     ? null
     : tercatat.reduce((n: number, d) => n + (d ?? 0), 0);

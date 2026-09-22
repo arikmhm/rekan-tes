@@ -342,6 +342,10 @@ export const attemptAnswers = pgTable(
     // Null berarti soal dilewati.
     selectedOptionId: text("selected_option_id").references(() => questionOptions.id),
     isCorrect: boolean("is_correct"),
+    // Lama soal ini dibuka peserta, dijumlahkan di klien lalu disetor bersama
+    // jawabannya. Soal yang dibuka tetapi tidak dijawab tetap punya barisnya,
+    // dengan `selected_option_id` null — itulah arti "dilewati" di atas.
+    secondsSpent: integer("seconds_spent").notNull().default(0),
     answeredAt: timestamp("answered_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),

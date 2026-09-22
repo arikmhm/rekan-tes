@@ -1,14 +1,6 @@
 "use client";
 
 import type { Award } from "lucide-react";
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
-
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart";
 
 const hairline = "border-[#105C78]/20";
 
@@ -61,17 +53,21 @@ export function Donat({
   persen,
   angka,
   dari,
+  kecil = false,
 }: {
   persen: number;
   angka: number;
   dari: number;
+  /** Cincin ringkas untuk sebaran subtes: hanya persennya yang muat di dalam. */
+  kecil?: boolean;
 }) {
   const r = 52;
   const keliling = 2 * Math.PI * r;
+  const ukuran = kecil ? "size-24" : "size-36";
 
   return (
-    <div className="relative grid size-36 place-items-center">
-      <svg viewBox="0 0 120 120" className="absolute size-36 -rotate-90">
+    <div className={`relative grid ${ukuran} place-items-center`}>
+      <svg viewBox="0 0 120 120" className={`absolute ${ukuran} -rotate-90`}>
         <circle
           cx="60"
           cy="60"
@@ -92,65 +88,109 @@ export function Donat({
         />
       </svg>
       <div className="text-center">
-        <p className="text-3xl font-medium text-brand">{persen}%</p>
-        <p className="mt-0.5 text-xs font-normal text-brand/60">
-          {angka} dari {dari}
+        <p
+          className={`font-medium text-brand ${kecil ? "text-lg" : "text-3xl"}`}
+        >
+          {persen}%
         </p>
+        {!kecil && (
+          <p className="mt-0.5 text-xs font-normal text-brand/60">
+            {angka} dari {dari}
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
-const konfigSebaran = {
-  nilai: { label: "Skor", color: "var(--color-brand-orange)" },
-} satisfies ChartConfig;
-
 /**
- * Sebaran nilai per subtes dalam bentuk radar: bagian mana yang sudah aman,
- * bagian mana yang perlu dikejar. Datanya disiapkan pemanggil karena sumbernya
- * berbeda — percobaan menghitung dari jawaban di memori, sesi berbayar dari
- * skor yang dibekukan saat subtes ditutup.
+ * Sebaran nilai per subtes: satu cincin untuk tiap subtes, sama seperti cincin
+ * akurasi di kartu utama — hanya saja di sini angkanya dipecah per subtes.
+ *
+ * Dulu radar. Radar butuh minimal tiga sumbu untuk membentuk bidang, jadi tes
+ * dua subtes hanya menghasilkan satu garis lurus, dan label sumbunya terlalu
+ * sempit untuk nama subtes yang mirip. Cincin terbaca sama jelasnya pada dua
+ * subtes maupun enam.
  */
 export function Sebaran({
   data,
   keterangan = "Persentase jawaban benar di tiap subtes.",
 }: {
-  data: { subtes: string; nilai: number }[];
+  data: { subtes: string; nilai: number; benar: number; total: number }[];
   keterangan?: string;
 }) {
   return (
     <>
-      <ChartContainer
-        config={konfigSebaran}
-        className="mx-auto mt-4 aspect-square w-full max-w-72"
-      >
-        <RadarChart data={data} outerRadius="68%">
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel={false} />}
-          />
-          <PolarGrid stroke="var(--color-brand)" strokeOpacity={0.2} />
-          <PolarAngleAxis
-            dataKey="subtes"
-            tick={{ fill: "var(--color-brand)", fontSize: 11 }}
-          />
-          <Radar
-            dataKey="nilai"
-            // Animasi masuk recharts tidak pernah berjalan di dalam lapisan
-            // layar penuh ini dan meninggalkan poligon yang menciut di titik
-            // pusat — grafiknya jadi kosong. Digambar langsung di posisi akhir.
-            isAnimationActive={false}
-            fill="var(--color-nilai)"
-            fillOpacity={0.45}
-            stroke="var(--color-nilai)"
-            strokeWidth={2}
-          />
-        </RadarChart>
-      </ChartContainer>
-      <p className="text-center text-xs font-normal text-brand/60">
+      <ul className="mt-4 space-y-3">
+        {data.map((d) => (
+          <li key={d.subtes} className="flex items-center gap-4">
+            <Donat kecil persen={d.nilai} angka={d.benar} dari={d.total} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium text-brand" title={d.subtes}>
+                {d.subtes}
+              </p>
+              <p className="mt-0.5 text-xs font-normal text-brand/60">
+                {d.benar} benar dari {d.total} soal
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-5 text-center text-xs font-normal text-brand/60">
         {keterangan}
       </p>
     </>
+  );
+}
+
+/**
+ * Pemakaian waktu tiap subtes. Kartu waktu hanya bicara soal waktu — benar dan
+ * salahnya sudah punya kartunya sendiri — jadi yang dibandingkan di sini adalah
+ * waktu terpakai terhadap jatahnya, bukan terhadap jumlah soal.
+ *
+ * `jatah` boleh kosong: simulasi percobaan memakai satu jatah untuk seluruh
+ * sesi, jadi batangnya dibandingkan terhadap subtes yang paling lama.
+ */
+export function WaktuSubtes({
+  data,
+}: {
+  data: { nama: string; detik: number | null; jatah?: number }[];
+}) {
+  const puncak = Math.max(1, ...data.map((d) => d.jatah ?? d.detik ?? 0));
+
+  return (
+    <ul className="mt-5 space-y-3">
+      {data.map((d) => {
+        const dasar = d.jatah ?? puncak;
+        const lebar =
+          d.detik === null ? 0 : Math.min(100, Math.round((d.detik / dasar) * 100));
+
+        return (
+          <li key={d.nama}>
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="min-w-0 truncate text-xs font-normal text-brand/70">
+                {d.nama}
+              </p>
+              <p className="shrink-0 font-mono text-xs font-medium tabular-nums text-brand">
+                {d.detik === null ? "—" : menitDetik(d.detik)}
+                {d.jatah !== undefined && (
+                  <span className="font-normal text-brand/50">
+                    {" / "}
+                    {menitDetik(d.jatah)}
+                  </span>
+                )}
+              </p>
+            </div>
+            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-brand/10">
+              <div
+                className="h-full rounded-full bg-brand-orange"
+                style={{ width: `${lebar}%` }}
+              />
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

@@ -50,6 +50,13 @@
       "when": 1790018665826,
       "tag": "0006_damp_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790050258233,
+      "tag": "0007_wild_the_enforcers",
+      "breakpoints": true
     }
   ]
 }

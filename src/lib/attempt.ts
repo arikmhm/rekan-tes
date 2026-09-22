@@ -281,6 +281,7 @@ async function loadQuestions(aktif: { id: string; testSubtestId: string; questio
     .select({
       testSubtestQuestionId: schema.attemptAnswers.testSubtestQuestionId,
       selectedOptionId: schema.attemptAnswers.selectedOptionId,
+      secondsSpent: schema.attemptAnswers.secondsSpent,
     })
     .from(schema.attemptAnswers)
     .where(eq(schema.attemptAnswers.attemptSubtestId, aktif.id));
@@ -291,6 +292,10 @@ async function loadQuestions(aktif: { id: string; testSubtestId: string; questio
     options: opsi.filter((o) => o.questionId === s.questionId),
     selectedOptionId:
       jawaban.find((j) => j.testSubtestQuestionId === s.assignmentId)?.selectedOptionId ?? null,
+    // Hitungan waktu dilanjutkan dari yang sudah tersimpan, bukan diulang dari
+    // nol — sesi yang dimuat ulang tidak menghapus waktu yang sudah berjalan.
+    secondsSpent:
+      jawaban.find((j) => j.testSubtestQuestionId === s.assignmentId)?.secondsSpent ?? 0,
   }));
 }
 
@@ -416,9 +421,13 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
 }
 
 /**
- * Menyimpan sekelompok jawaban sekaligus. Klien menahan pilihan peserta di
- * memori dan menyetornya berkala (RT-013), jadi satu subtes cukup beberapa
- * request — bukan satu request penuh per klik seperti sebelumnya.
+ * Menyimpan sekelompok jawaban sekaligus, beserta lama tiap soal dibuka. Klien
+ * menahan pilihan peserta di memori dan menyetornya berkala (RT-013), jadi satu
+ * subtes cukup beberapa request — bukan satu request penuh per klik.
+ *
+ * `optionId` boleh null: soal yang dibuka tetapi belum dijawab tetap punya
+ * barisnya sendiri supaya waktunya tercatat. Baris seperti itu tidak pernah
+ * dinilai — `scoreSubtest` hanya menyentuh baris yang punya opsi terpilih.
  *
  * Assignment dan opsi divalidasi terhadap soal subtes yang sedang berjalan —
  * datanya berasal dari `getAttempt`, jadi id yang dikarang klien tidak akan
@@ -432,7 +441,7 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
  */
 export async function saveAnswers(
   attemptId: string,
-  entries: { assignmentId: string; optionId: string }[],
+  entries: { assignmentId: string; optionId: string | null; detik: number }[],
 ) {
   const attempt = await getAttempt(attemptId);
   if (!attempt) return "Sesi tidak ditemukan.";
@@ -444,16 +453,18 @@ export async function saveAnswers(
   }
 
   const now = new Date();
-  const baris = entries.flatMap(({ assignmentId, optionId }) => {
+  const baris = entries.flatMap(({ assignmentId, optionId, detik }) => {
     const soal = attempt.questions.find((q) => q.assignmentId === assignmentId);
-    if (!soal || !soal.options.some((o) => o.id === optionId)) return [];
+    if (!soal) return [];
+    if (optionId !== null && !soal.options.some((o) => o.id === optionId)) return [];
 
     return [
       {
         attemptSubtestId: aktifId,
         testSubtestQuestionId: assignmentId,
         selectedOptionId: optionId,
-        answeredAt: now,
+        secondsSpent: Number.isFinite(detik) ? Math.max(0, Math.round(detik)) : 0,
+        answeredAt: optionId === null ? null : now,
       },
     ];
   });
@@ -469,10 +480,12 @@ export async function saveAnswers(
     .onConflictDoUpdate({
       target: [schema.attemptAnswers.attemptSubtestId, schema.attemptAnswers.testSubtestQuestionId],
       // `excluded` dipakai karena satu pernyataan membawa banyak baris: tiap
-      // baris harus memakai opsi miliknya sendiri, bukan satu nilai tetap.
+      // baris harus memakai nilainya sendiri, bukan satu nilai tetap. `coalesce`
+      // menjaga jawaban yang sudah ada dari baris yang hanya membawa waktu.
       set: {
-        selectedOptionId: sql`excluded.selected_option_id`,
-        answeredAt: now,
+        selectedOptionId: sql`coalesce(excluded.selected_option_id, ${schema.attemptAnswers.selectedOptionId})`,
+        secondsSpent: sql`greatest(excluded.seconds_spent, ${schema.attemptAnswers.secondsSpent})`,
+        answeredAt: sql`coalesce(excluded.answered_at, ${schema.attemptAnswers.answeredAt})`,
         updatedAt: now,
       },
     });
@@ -535,6 +548,7 @@ export async function getResult(attemptId: string) {
           testSubtestQuestionId: schema.attemptAnswers.testSubtestQuestionId,
           selectedOptionId: schema.attemptAnswers.selectedOptionId,
           isCorrect: schema.attemptAnswers.isCorrect,
+          secondsSpent: schema.attemptAnswers.secondsSpent,
         })
         .from(schema.attemptAnswers)
         .where(inArray(schema.attemptAnswers.attemptSubtestId, attemptSubtestIds))
@@ -555,7 +569,10 @@ export async function getResult(attemptId: string) {
         // Kebenaran dibaca dari yang dibekukan saat subtes ditutup, bukan
         // dibandingkan ulang dengan kunci yang berlaku sekarang.
         isCorrect: jawab?.isCorrect ?? null,
-        dijawab: Boolean(jawab),
+        detik: jawab?.secondsSpent ?? 0,
+        // Baris bisa ada hanya untuk mencatat waktu; yang menentukan soal ini
+        // dijawab adalah opsinya, bukan keberadaan barisnya.
+        dijawab: Boolean(jawab?.selectedOptionId),
         explanation: pembahasan.find((p) => p.id === q.questionId)?.explanation ?? "",
       };
     });

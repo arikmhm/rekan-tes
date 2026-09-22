@@ -189,41 +189,6 @@ export default async function PesananDetailPage({
           <CheckPaymentButton orderId={order.id} />
         </div>
       )}
-
-      <h2 className="mt-9 text-lg font-medium text-brand">
-        Percobaan pembayaran
-      </h2>
-      <ul className="mt-3 space-y-2">
-        {order.payments.map((p) => (
-          <li
-            key={p.id}
-            className={`flex flex-wrap items-center gap-3 rounded-xl border ${hairline} bg-white px-5 py-4 text-sm font-normal`}
-          >
-            <code className="rounded-lg bg-cream px-2 py-1 text-xs font-medium text-brand">
-              {p.externalId}
-            </code>
-            <span className="text-brand/70">
-              {LABEL_ORDER[p.status] ?? p.status}
-            </span>
-            <span className="text-xs text-brand/50">
-              {tanggal.format(p.createdAt)}
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      <p className="mt-8 text-sm leading-6 font-normal text-brand/60">
-        Halaman ini hanya menampilkan status yang tercatat di sistem kami.
-        Memindai QR tidak langsung mengubah status; perubahan menunggu
-        notifikasi resmi DOKU.{" "}
-        <Link
-          className="font-medium text-brand hover:text-brand-orange"
-          href={`/peserta/produk/${order.testSlug}`}
-        >
-          Lihat detail produk
-        </Link>
-        .
-      </p>
     </div>
   );
 }

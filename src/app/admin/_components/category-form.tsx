@@ -20,7 +20,6 @@ type Kategori = {
 
 const STATUS = ["draft", "published", "archived"];
 
-/** Formulir satu kategori: dipakai untuk membuat maupun menyunting. */
 export function CategoryForm({ kategori }: { kategori?: Kategori }) {
   const [error, action, pending] = useActionState(saveCategory, null);
   const uid = kategori?.id ?? "baru";

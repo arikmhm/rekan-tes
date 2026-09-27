@@ -43,22 +43,13 @@ import {
 } from "@/components/ui/sidebar";
 import { keluar } from "@/lib/auth-actions";
 
-/**
- * Jenis produk di sidebar. Nilainya sama dengan `JenisProduk` di lib/produk,
- * disalin karena berkas itu server-only sedangkan sidebar berjalan di peramban.
- */
+/** Salinan `JenisProduk` (lib/produk server-only); jaga tetap sama. */
 const jenisProduk = [
   { kunci: "simulasi", label: "Simulasi" },
   { kunci: "bank-soal", label: "Soal" },
   { kunci: "materi", label: "Ebook" },
 ];
 
-/**
- * Sidebar disusun mengikuti urutan perjalanan peserta: melihat produk, membayar,
- * lalu memakai yang sudah dibeli. "Belanja" berisi dua langkah pertama —
- * halaman produk sekaligus halaman depan ruang peserta — dan isi pustaka
- * berdiri sendiri karena ia milik peserta, bukan etalase.
- */
 const belanja = [
   { href: "/peserta", label: "Produk", icon: Store },
   { href: "/peserta/pesanan", label: "Pesanan", icon: Receipt },
@@ -115,8 +106,6 @@ export function AppSidebar({ nama }: { nama: string }) {
           <SidebarGroupLabel>Milik saya</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Pustaka terbuka sejak awal: jenis produk yang sudah dibeli
-                  perlu terbaca tanpa diklik dulu. */}
               <Collapsible defaultOpen>
                 <SidebarMenuItem>
                   <CollapsibleTrigger
@@ -133,9 +122,6 @@ export function AppSidebar({ nama }: { nama: string }) {
                     }
                   />
 
-                  {/* Tinggi panel dianimasikan lewat variabel yang disediakan
-                      Base UI, jadi buka-tutupnya menggeser isi sidebar dengan
-                      halus alih-alih melompat. */}
                   <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-300 ease-out data-[ending-style]:h-0 data-[starting-style]:h-0">
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
@@ -202,9 +188,8 @@ export function AppSidebar({ nama }: { nama: string }) {
                   Lihat situs
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                {/* Form, bukan onClick: keluar harus tetap bekerja walau
-                    JavaScript-nya belum siap. `closeOnClick={false}` menjaga
-                    tombolnya tetap ada di DOM sampai formulirnya terkirim. */}
+                {/* Form agar keluar jalan tanpa JavaScript. `closeOnClick={false}` menjaga
+                    tombolnya di DOM sampai formulir terkirim. */}
                 <form action={keluar}>
                   <DropdownMenuItem
                     closeOnClick={false}

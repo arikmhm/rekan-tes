@@ -6,11 +6,6 @@ import { expect, test } from "vitest";
 
 import { account, session, user, verification } from "./auth-schema";
 
-/**
- * Better Auth tidak menyediakan CLI yang sepadan dengan versi library
- * terpasang, sehingga tabel auth ditulis tangan. Test ini membandingkannya
- * dengan definisi milik library agar perbedaan terlihat saat versi dinaikkan.
- */
 const authTables = getAuthTables({
   emailAndPassword: { enabled: true },
   user: {
@@ -23,7 +18,6 @@ const authTables = getAuthTables({
 
 const kami: Record<string, PgTable> = { user, session, account, verification };
 
-/** Nama kolom snake_case yang diharapkan Better Auth untuk satu tabel. */
 function kolomDiharapkan(key: string) {
   const def = authTables[key];
   const names = Object.entries(def.fields).map(([field, d]) =>

@@ -6,10 +6,7 @@ import { PasswordForm } from "../_components/password-form";
 
 export const metadata: Metadata = { title: "Setel password baru" };
 
-/**
- * Better Auth mengarahkan ke sini dengan `?token=` bila tautan valid, atau
- * `?error=INVALID_TOKEN` bila tidak valid maupun kedaluwarsa.
- */
+/** Better Auth mengirim `?token=`, atau `?error=INVALID_TOKEN` bila tidak valid/kedaluwarsa. */
 export default async function ResetPasswordPage({
   searchParams,
 }: {

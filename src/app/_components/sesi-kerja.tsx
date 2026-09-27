@@ -11,7 +11,6 @@ import { Countdown } from "./countdown";
 
 const hairline = "border-[#105C78]/20";
 
-/** Jeda antar setoran otomatis. Cukup rapat agar yang hilang selalu sedikit. */
 const JEDA_SIMPAN = 10_000;
 
 type Opsi = { id: string; label: string; content: string };
@@ -22,23 +21,16 @@ type Soal = {
   prompt: string;
   options: Opsi[];
   selectedOptionId: string | null;
-  /** Waktu yang sudah tercatat di server; hitungan dilanjutkan dari sini. */
   secondsSpent: number;
 };
 
 type Status = "diam" | "antre" | "menyimpan" | "tersimpan" | "gagal";
 
 /**
- * Layar kerja satu subtes: bilah sesi, soal yang sedang dibuka, dan peta nomor.
- *
- * Seluruh soal subtes sudah ikut terkirim dari server, jadi berpindah nomor
- * tidak menyentuh jaringan sama sekali — itu yang membuat sesi terasa ringan.
- * Jawaban ditahan di memori, disetor berkelompok tiap {@link JEDA_SIMPAN}, dan
- * dicadangkan ke `localStorage` untuk menutup celah antar setoran. Lama tiap
- * soal dibuka ikut dicatat dan menumpang setoran yang sama.
- *
- * Waktu tetap milik server: `remainingSeconds` dihitung dari `started_at`
- * server, dan server pula yang menolak jawaban setelah subtesnya ditutup.
+ * Semua soal subtes sudah terkirim, jadi pindah nomor tanpa jaringan. Jawaban
+ * ditahan di memori, disetor berkelompok tiap {@link JEDA_SIMPAN}, dan
+ * dicadangkan ke `localStorage` untuk celah antar setoran. Waktu tetap milik
+ * server, yang juga menolak jawaban setelah subtes ditutup.
  */
 export function SesiKerja({
   attemptId,
@@ -57,7 +49,7 @@ export function SesiKerja({
   jumlahSubtes: number;
   soal: Soal[];
   remainingSeconds: number | null;
-  /** Jam deadline, sudah diformat server agar zona waktunya tidak berselisih. */
+  /** Diformat server agar zona waktunya tidak berselisih. */
   deadlineLabel: string | null;
 }) {
   const kunci = `rekan-tes:jawaban:${subtesId}`;
@@ -67,18 +59,15 @@ export function SesiKerja({
   );
   const [jawaban, setJawaban] = useState<Record<string, string>>(awal);
 
-  // Waktu terkumpul tiap soal, dilanjutkan dari catatan server. Soal yang
-  // sedang dibuka belum masuk hitungan sampai peserta berpindah darinya.
+  // Soal yang sedang dibuka baru dihitung saat peserta berpindah darinya.
   const detik = useRef<Record<string, number>>(
     Object.fromEntries(soal.map((s) => [s.assignmentId, s.secondsSpent])),
   );
-  // Diisi saat komponen terpasang, bukan saat render: `Date.now()` di badan
-  // render membuat hasilnya bergantung pada kapan React kebetulan me-render.
+  // Diisi saat mount: `Date.now()` di badan render tidak murni.
   const sejak = useRef(0);
   const waktuKotor = useRef(new Set<string>());
   const nomorRef = useRef(1);
-  // Cermin sinkron dari state: penyetor perlu nilai terbaru saat itu juga,
-  // sementara state baru terbaca pada render berikutnya.
+  // Cermin sinkron state untuk penyetor.
   const jawabanRef = useRef(jawaban);
   const antre = useRef(new Set<string>());
   const sedangKirim = useRef(false);
@@ -87,10 +76,6 @@ export function SesiKerja({
   const [status, setStatus] = useState<Status>("diam");
   const [galat, setGalat] = useState<string | null>(null);
 
-  /**
-   * Menutup hitungan waktu soal yang sedang dibuka dan memindahkannya ke
-   * antrean waktu. Dipanggil tiap perpindahan nomor dan sebelum tiap setoran.
-   */
   const catatWaktu = useCallback(() => {
     const sekarang = Date.now();
     const dibuka = soal[nomorRef.current - 1];
@@ -107,12 +92,7 @@ export function SesiKerja({
     sejak.current = sekarang;
   }, [soal]);
 
-  /**
-   * `paksa` menyetor walau yang tertunda hanya waktu. Setoran berkala tetap
-   * menunggu ada jawaban baru supaya sesi yang diam tidak menghasilkan request
-   * tiap sepuluh detik; waktunya menumpang setoran jawaban berikutnya, atau
-   * setoran paksa saat subtes ditutup.
-   */
+  /** `paksa` menyetor walau yang tertunda hanya waktu; sesi yang diam tidak mengirim request. */
   const kirim = useCallback(async (paksa = false) => {
     catatWaktu();
 
@@ -121,8 +101,6 @@ export function SesiKerja({
       : new Set(antre.current);
     if (perlu.size === 0 || sedangKirim.current) return;
 
-    // Waktu yang sudah terkumpul selalu ikut menumpang, jadi setoran jawaban
-    // apa pun sekaligus memperbarui waktunya.
     for (const a of waktuKotor.current) perlu.add(a);
 
     const kelompok = [...perlu].map((assignmentId) => ({
@@ -130,8 +108,7 @@ export function SesiKerja({
       optionId: jawabanRef.current[assignmentId] ?? null,
       detik: detik.current[assignmentId] ?? 0,
     }));
-    // Dikosongkan sebelum menunggu supaya jawaban yang dipilih selagi request
-    // berjalan ikut antrean berikutnya, bukan hilang tertimpa.
+    // Dikosongkan sebelum await: jawaban selama request masuk antrean berikutnya.
     antre.current.clear();
     waktuKotor.current.clear();
     sedangKirim.current = true;
@@ -141,7 +118,6 @@ export function SesiKerja({
     try {
       pesan = await saveAnswers(attemptId, kelompok);
     } catch {
-      // Aksi gagal terkirim sama sekali (koneksi putus, server mati).
       pesan = "Jawaban belum tersimpan karena koneksi bermasalah. Akan dicoba lagi.";
     } finally {
       sedangKirim.current = false;
@@ -171,8 +147,7 @@ export function SesiKerja({
     localStorage.setItem(kunci, JSON.stringify(jawabanRef.current));
   }
 
-  // Jawaban yang sempat tercatat di peramban tetapi belum sampai ke server —
-  // sesi yang tabnya dibuang atau HP-nya mati sebelum setoran berikutnya.
+  // Pulihkan jawaban yang belum sampai server (tab dibuang, HP mati).
   useEffect(() => {
     let tersimpan: Record<string, string>;
     try {
@@ -199,9 +174,7 @@ export function SesiKerja({
     return () => clearInterval(jam);
   }, [kirim]);
 
-  // Setoran terakhir tepat sebelum deadline. Jawaban di detik-detik akhir tetap
-  // sah, tetapi begitu server menutup subtesnya antrean tidak lagi diterima —
-  // tanpa ini, satu jeda simpan terakhir bisa hangus.
+  // Setoran terakhir sebelum deadline, sebelum server menolak antrean.
   useEffect(() => {
     if (remainingSeconds === null) return;
 
@@ -212,8 +185,7 @@ export function SesiKerja({
     return () => clearTimeout(jeda);
   }, [remainingSeconds, kirim]);
 
-  // Berpindah tab atau mengunci layar adalah saat paling rawan tab dibuang
-  // sistem, jadi antrean disetor saat itu juga — tidak menunggu jedanya habis.
+  // Tab disembunyikan = saat paling rawan dibuang sistem; setor sekarang.
   useEffect(() => {
     const saatSembunyi = () => {
       if (document.visibilityState === "hidden") void kirim(true);
@@ -234,8 +206,6 @@ export function SesiKerja({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Bilah sesi menempel di puncak layar seperti aplikasi ujian: subtes
-          yang berjalan dan sisa waktunya tidak boleh ikut tergulir. */}
       <div
         className={`sticky top-0 z-20 -mx-4 flex flex-wrap items-center justify-between gap-3 border-b ${hairline} bg-white/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6`}
       >
@@ -322,8 +292,6 @@ export function SesiKerja({
               })}
             </div>
 
-            {/* Kendali perpindahan menempel di bawah soalnya sendiri, sejalan
-                dengan arah baca: baca soal, pilih jawaban, lanjut. */}
             <div
               className={`mt-7 flex items-center justify-between border-t ${hairline} pt-5`}
             >
@@ -371,12 +339,7 @@ export function SesiKerja({
   );
 }
 
-/**
- * Peta soal di sisi kanan: nomor mana yang sudah dijawab, mana yang dilewati,
- * dan mana yang sedang dibuka. Statusnya tidak hanya dibedakan lewat warna,
- * karena warna saja tak terbaca pembaca layar maupun mata yang sulit
- * membedakannya.
- */
+/** Status nomor tidak hanya dibedakan warna, demi pembaca layar dan buta warna. */
 function Navigasi({
   soal,
   jawaban,
@@ -489,10 +452,6 @@ function Navigasi({
   );
 }
 
-/**
- * Kabar penyimpanan. Peserta tidak perlu tahu soal antrean dan jeda, tetapi
- * kegagalan harus terlihat — itu satu-satunya keadaan yang menuntut tindakan.
- */
 function StatusSimpan({
   status,
   galat,
@@ -512,7 +471,6 @@ function StatusSimpan({
   }
 
   return (
-    // Ruangnya tetap ada agar teks status tidak menggeser peta nomor.
     <p role="status" className="mt-3 min-h-5 text-xs font-normal text-brand/50">
       {status === "menyimpan"
         ? "Menyimpan…"

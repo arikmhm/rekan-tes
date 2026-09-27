@@ -4,56 +4,29 @@ const postgresUrl = (label: string) =>
   z.string().min(1, "wajib diisi").startsWith("postgres", `harus berupa ${label}`);
 
 const envSchema = z.object({
-  /** Endpoint pooled (PgBouncer). Dipakai runtime aplikasi. */
   DATABASE_URL: postgresUrl("connection string PostgreSQL"),
-  /**
-   * Endpoint direct tanpa pooling. Hanya dibutuhkan untuk migrasi Drizzle Kit;
-   * endpoint pooled dapat menggagalkan DDL. Opsional agar runtime produksi
-   * tidak perlu menyetel variabel yang tidak dipakainya.
-   */
+  /** Hanya untuk migrasi, jadi runtime produksi tidak perlu menyetelnya. */
   DATABASE_URL_UNPOOLED: postgresUrl("connection string PostgreSQL").optional(),
-  /** Secret penanda tangan session Better Auth. Minimal 32 karakter. */
   BETTER_AUTH_SECRET: z
     .string()
     .min(32, "minimal 32 karakter; buat dengan `openssl rand -base64 32`"),
-  /**
-   * Base URL aplikasi. Wajib: tautan verifikasi email dan reset password
-   * dibangun dari nilai ini, dan nilai yang salah membuat tautan tidak bisa
-   * dipakai. Tanpa ini Better Auth menebaknya dari request.
-   */
+  /** Wajib: tanpa ini Better Auth menebak dari request dan tautan email bisa rusak. */
   BETTER_AUTH_URL: z.string().url("harus berupa URL absolut, misalnya http://localhost:3000"),
-  /** API key Resend untuk email verifikasi dan reset password. */
   RESEND_API_KEY: z.string().startsWith("re_", "harus berupa API key Resend"),
-  /**
-   * Alamat pengirim. Default memakai domain uji Resend; ganti ke domain sendiri
-   * yang sudah terverifikasi sebelum rilis.
-   */
   EMAIL_FROM: z.string().default("Rekan Tes <onboarding@resend.dev>"),
-  /**
-   * Kredensial DOKU SNAP QRIS. Dibiarkan opsional agar aplikasi tetap dapat
-   * dijalankan tanpa pembayaran; `parseDokuEnv` menuntutnya pada saat checkout
-   * benar-benar dipakai, dengan pesan yang menyebut variabel yang kurang.
-   */
+  /** Opsional di sini; `parseDokuEnv` menuntutnya saat checkout. */
   DOKU_CLIENT_ID: z.string().optional(),
   DOKU_SECRET_KEY: z.string().optional(),
-  /** Private key RSA merchant, PEM. Baris baru boleh ditulis sebagai `\n`. */
   DOKU_PRIVATE_KEY: z.string().optional(),
-  /** Mall ID dan terminal dari DOKU setelah registrasi QRIS disetujui. */
   DOKU_MERCHANT_ID: z.string().optional(),
   DOKU_TERMINAL_ID: z.string().optional(),
-  /** Kode pos merchant, wajib pada permintaan generate QRIS. */
   DOKU_POSTAL_CODE: z.string().optional(),
-  /** Basis API DOKU. Kosong berarti sandbox. */
   DOKU_BASE_URL: z.string().url("harus berupa URL absolut").optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
 
-/**
- * Memvalidasi environment server dan gagal dengan pesan yang dapat
- * ditindaklanjuti. Dipisahkan dari `env.ts` agar dapat diuji tanpa melewati
- * guard `server-only`.
- */
+/** Terpisah dari `env.ts` agar teruji tanpa guard `server-only`. */
 export function parseEnv(source: Record<string, string | undefined>): Env {
   const result = envSchema.safeParse(source);
 
@@ -71,10 +44,7 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
   return result.data;
 }
 
-/**
- * Environment untuk migrasi. Menolak endpoint pooled karena PgBouncer dalam
- * mode transaction dapat menggagalkan DDL.
- */
+/** Menolak endpoint pooled: PgBouncer mode transaction dapat menggagalkan DDL. */
 export function parseMigrationEnv(source: Record<string, string | undefined>): {
   url: string;
 } {
@@ -90,10 +60,8 @@ export function parseMigrationEnv(source: Record<string, string | undefined>): {
   return { url: env.DATABASE_URL_UNPOOLED };
 }
 
-/** Sandbox dipakai selama `DOKU_BASE_URL` belum disetel. */
 export const DOKU_SANDBOX_URL = "https://api-sandbox.doku.com";
 
-/** Variabel DOKU yang seluruhnya dibutuhkan jalur QRIS. */
 const DOKU_KEYS = [
   "DOKU_CLIENT_ID",
   "DOKU_SECRET_KEY",
@@ -103,11 +71,6 @@ const DOKU_KEYS = [
   "DOKU_POSTAL_CODE",
 ] as const;
 
-/**
- * Kredensial DOKU untuk jalur pembayaran. Dipisah dari `parseEnv` dengan alasan
- * yang sama seperti `parseMigrationEnv`: variabel ini hanya wajib bagi bagian
- * aplikasi yang memakainya.
- */
 export function parseDokuEnv(source: Record<string, string | undefined>): {
   clientId: string;
   secretKey: string;

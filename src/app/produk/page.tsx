@@ -14,8 +14,6 @@ export const metadata: Metadata = {
     "Produk latihan yang tersedia beserta isi dan harganya. Bayar satuan, tanpa langganan.",
 };
 
-// Daftar produk membaca database pada setiap permintaan. Tanpa ini halaman ikut
-// ter-prerender saat build dan daftarnya membeku sampai deploy berikutnya.
 export const dynamic = "force-dynamic";
 
 export default async function ProdukPage({
@@ -25,14 +23,8 @@ export default async function ProdukPage({
 }) {
   return (
     <SiteShell>
-      {/* Mengisi sisa tinggi layar lewat <main>, jadi halaman tetap menjejak
-          penuh meski produknya baru sedikit dan pola di kakinya tidak
-          terangkat ke tengah layar. */}
       <div className="relative flex flex-1 flex-col overflow-hidden">
         <div className="relative mx-auto w-full max-w-6xl flex-1 px-5 py-10 sm:px-8 sm:py-14">
-          {/* Spanduk memegang kepala halaman, jadi judul teks tidak lagi
-              diperlukan — dan sorotan bawaan etalase dimatikan supaya tidak
-              jadi korsel kedua yang menempel tepat di bawah korsel pertama. */}
           <h1 className="sr-only">Produk</h1>
           <Spanduk slides={await listBanners()} />
 
@@ -63,8 +55,6 @@ export default async function ProdukPage({
           </div>
         </div>
 
-        {/* Pola ditaruh di kaki halaman: penutup yang terasa, bukan tekstur yang
-            harus dilewati sebelum sampai ke daftar produknya. */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.07] mask-[linear-gradient(to_top,black,transparent)]"

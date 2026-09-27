@@ -25,8 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
-      // globals.css menyetel `scroll-behavior: smooth`; atribut ini memberi tahu
-      // Next.js agar tidak memakai smooth scroll saat transisi route.
+      // Mencegah smooth scroll dari globals.css ikut saat transisi route.
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >

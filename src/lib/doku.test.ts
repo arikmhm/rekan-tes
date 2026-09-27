@@ -191,8 +191,7 @@ test("body query QRIS memuat originalReferenceNo, invoice, dan kode layanan teta
 });
 
 test("balasan query QRIS sukses (kode 00) terbaca sebagai QrisNotification", () => {
-  // Fixture dibangun dari skema resmi DOKU (properti dan pola nominal), bukan
-  // contoh dari dokumentasi karena Query QRIS tidak menyertakan contoh JSON.
+  // Dari skema resmi DOKU: Query QRIS tidak punya contoh JSON.
   const balasan = {
     responseCode: "2004700",
     responseMessage: "Success",
@@ -236,8 +235,7 @@ test("masa berlaku dari DOKU dibaca kembali sebagai waktu yang sama", () => {
 });
 
 test("komponen tanda tangan notifikasi persis seperti contoh dokumentasi DOKU", () => {
-  // Sama persis dengan contoh best-practice notifikasi DOKU: urutan baris,
-  // nama header, dan tidak ada baris baru di akhir menentukan lolos tidaknya.
+  // Contoh best-practice DOKU: urutan baris dan tanpa baris baru di akhir menentukan.
   expect(
     notificationSignatureComponent({
       clientId: "MCH-0001-10791114622547",

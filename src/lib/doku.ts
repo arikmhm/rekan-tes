@@ -1,21 +1,15 @@
 import { createHash, createHmac, createSign, timingSafeEqual } from "node:crypto";
 
 /**
- * Klien DOKU SNAP untuk QRIS (Merchant Presented Mode).
- *
- * Alurnya dua panggilan: ambil access token B2B dengan tanda tangan asimetris,
- * lalu generate QRIS dengan tanda tangan simetris. SDK resmi tidak dipasang
- * karena keduanya hanya POST JSON dengan header bertanda tangan.
- *
- * Kredensial diterima sebagai argumen, sama seperti `email.ts`, sehingga modul
- * ini tidak butuh guard `server-only` dan tanda tangannya dapat diuji langsung.
+ * Klien DOKU SNAP QRIS (MPM). Tanpa SDK: semuanya POST JSON bertanda tangan.
+ * Kredensial lewat argumen agar tanda tangan dapat diuji tanpa `server-only`.
  *
  * Acuan: https://developers.doku.com/accept-payments/direct-api/snap
  */
 
 export const TOKEN_PATH = "/authorization/v1/access-token/b2b";
 export const QRIS_GENERATE_PATH = "/snap-adapter/b2b/v1.0/qr/qr-mpm-generate";
-/** Route Handler kita sendiri. Harus sama persis dengan Notification URL yang didaftarkan di DOKU Back Office. */
+/** Harus sama persis dengan Notification URL di DOKU Back Office. */
 export const NOTIFICATION_PATH = "/api/doku/notifications";
 
 /** QRIS dijalankan host-to-host. */
@@ -27,7 +21,6 @@ const FEE_TYPE = "1";
 export type DokuCredentials = {
   /** Client ID dari DOKU Back Office; dipakai sebagai partner id juga. */
   clientId: string;
-  /** Client secret untuk tanda tangan simetris. */
   secretKey: string;
   /** Private key RSA milik merchant, PEM, untuk tanda tangan token. */
   privateKey: string;
@@ -69,7 +62,6 @@ export function invoiceNumber(now = new Date()) {
   return `RT${waktu}${acak}`;
 }
 
-/** Komponen tanda tangan token B2B. */
 export function tokenStringToSign(clientId: string, timestamp: string) {
   return `${clientId}|${timestamp}`;
 }
@@ -89,12 +81,10 @@ export function transactionStringToSign(parts: {
   return [parts.method, parts.path, parts.accessToken, digest, parts.timestamp].join(":");
 }
 
-/** Tanda tangan asimetris SHA256withRSA untuk permintaan access token. */
 export function tokenSignature(privateKey: string, stringToSign: string) {
   return createSign("RSA-SHA256").update(stringToSign, "utf8").sign(privateKey, "base64");
 }
 
-/** Tanda tangan simetris HMAC-SHA512 untuk permintaan transaksi. */
 export function transactionSignature(secretKey: string, stringToSign: string) {
   return createHmac("sha512", secretKey).update(stringToSign, "utf8").digest("base64");
 }
@@ -102,9 +92,7 @@ export function transactionSignature(secretKey: string, stringToSign: string) {
 /**
  * Access token B2B, berlaku 15 menit.
  *
- * ponytail: token diambil baru setiap checkout. Cache hanya berguna kalau
- * checkout sudah ramai, dan cache yang salah kedaluwarsa jauh lebih mahal
- * daripada satu request tambahan.
+ * ponytail: token baru setiap checkout. Cache bila checkout sudah ramai.
  */
 export async function accessToken(credentials: DokuCredentials, now = new Date()) {
   const timestamp = snapTimestamp(now);
@@ -152,14 +140,11 @@ export type QrisRequest = {
 };
 
 export type QrisResult = {
-  /** Payload QRIS yang dirender menjadi gambar QR. */
   qrContent: string;
-  /** Nomor transaksi milik DOKU. */
   referenceNo: string;
   expiresAt: Date;
 };
 
-/** Body generate QRIS. Dipisah agar dapat diperiksa tanpa memanggil DOKU. */
 export function qrisBody(credentials: DokuCredentials, request: QrisRequest, now = new Date()) {
   return {
     partnerReferenceNo: request.partnerReferenceNo,
@@ -171,11 +156,6 @@ export function qrisBody(credentials: DokuCredentials, request: QrisRequest, now
   };
 }
 
-/**
- * Header transaksi SNAP QRIS, termasuk tanda tangan simetris. Dipakai untuk
- * generate maupun query, sehingga `path` selalu eksplisit — bukan ditebak
- * dari konteks pemanggil.
- */
 export function qrisHeaders(
   credentials: DokuCredentials,
   token: string,
@@ -201,7 +181,6 @@ export function qrisHeaders(
   };
 }
 
-/** Membuat QRIS dinamis untuk satu percobaan pembayaran. */
 export async function generateQris(
   credentials: DokuCredentials,
   request: QrisRequest,
@@ -236,8 +215,7 @@ export async function generateQris(
     additionalInfo?: { validityPeriod?: string };
   };
 
-  // SNAP membalas 200 dengan responseCode yang menjelaskan hasilnya, jadi
-  // status HTTP saja tidak cukup untuk menyatakan QR benar-benar terbit.
+  // SNAP bisa membalas HTTP 200 dengan `responseCode` gagal.
   if (!data.qrContent || !data.responseCode?.startsWith("200")) {
     throw new Error(`DOKU tidak mengembalikan QRIS: ${text}`);
   }
@@ -245,8 +223,7 @@ export async function generateQris(
   return {
     qrContent: data.qrContent,
     referenceNo: data.referenceNo ?? "",
-    // DOKU mengembalikan masa berlaku yang benar-benar dipakai; nilai itu yang
-    // dipegang agar QR tidak pernah dianggap hidup lebih lama daripada aslinya.
+    // Pakai masa berlaku dari DOKU, bukan hitungan sendiri.
     expiresAt:
       parseSnapTimestamp(data.additionalInfo?.validityPeriod) ??
       new Date(now.getTime() + request.validMinutes * 60_000),
@@ -254,10 +231,8 @@ export async function generateQris(
 }
 
 // ---------------------------------------------------------------------------
-// Query QRIS — jalur backup selain webhook, untuk ditanyakan langsung saat
-// peserta membuka halaman pesanan. Hasilnya dibentuk sebagai `QrisNotification`
-// yang sama dengan notifikasi webhook, sehingga kedua jalur berbagi satu
-// logika aktivasi (`activatePayment` di `webhook.ts`).
+// Query QRIS: cadangan webhook. Hasilnya berbentuk `QrisNotification` agar
+// kedua jalur berbagi `activatePayment`.
 // ---------------------------------------------------------------------------
 
 export const QRIS_QUERY_PATH = "/snap-adapter/b2b/v1.0/qr/qr-mpm-query";
@@ -281,11 +256,7 @@ export function queryQrisBody(credentials: DokuCredentials, request: QrisQueryRe
   };
 }
 
-/**
- * Membaca balasan Query QRIS ke bentuk `QrisNotification`. `"00"` berarti
- * sukses; kode lain (pending, gagal, dibatalkan) diperlakukan sama seperti
- * notifikasi webhook berstatus non-sukses — diakui, tidak mengaktifkan apa pun.
- */
+/** `"00"` berarti sukses; kode lain diperlakukan seperti notifikasi non-sukses. */
 export function parseQrisQueryResponse(
   body: unknown,
   fallbackInvoice: string,
@@ -304,7 +275,6 @@ export function parseQrisQueryResponse(
   };
 }
 
-/** Menanyakan status satu transaksi QRIS langsung ke DOKU. */
 export async function queryQris(
   credentials: DokuCredentials,
   request: QrisQueryRequest,
@@ -340,14 +310,11 @@ export async function queryQris(
 }
 
 // ---------------------------------------------------------------------------
-// Notifikasi (HTTP Notification, skema non-SNAP)
-// ---------------------------------------------------------------------------
-//
-// QRIS yang dibuat lewat SNAP dinotifikasikan lewat skema signature non-SNAP:
-// Client-Id/Request-Id/Request-Timestamp/Request-Target/Digest digabung satu
-// baris per komponen, di-HMAC-SHA256 dengan secret key. Ini skema berbeda dari
-// tanda tangan token dan generate QRIS di atas.
+// Notifikasi: skema non-SNAP, berbeda dari tanda tangan di atas. Komponen
+// Client-Id/Request-Id/Request-Timestamp/Request-Target/Digest per baris,
+// HMAC-SHA256 dengan secret key.
 // Acuan: https://developers.doku.com/get-started-with-doku-api/notification/best-practice
+// ---------------------------------------------------------------------------
 
 /** Digest = SHA256 base64 dari body notifikasi mentah, sebelum di-parse. */
 export function notificationDigest(rawBody: string) {
@@ -370,11 +337,6 @@ export function notificationSignatureComponent(parts: {
   ].join("\n");
 }
 
-/**
- * Benar hanya bila header `Signature` cocok dengan HMAC-SHA256 milik secret
- * key kita atas komponen di atas. Perbandingan memakai `timingSafeEqual` agar
- * waktu respons tidak membocorkan seberapa dekat tebakan penyerang.
- */
 export function verifyNotificationSignature(
   secretKey: string,
   parts: { clientId: string; requestId: string; timestamp: string; target: string; rawBody: string },
@@ -403,10 +365,7 @@ export type QrisNotification = {
   amount: number;
 };
 
-/**
- * Membaca field yang kita butuhkan dari body notifikasi QRIS. Sengaja tidak
- * strict terhadap field lain: DOKU dapat menambah field baru kapan saja.
- */
+/** Tidak strict terhadap field lain: DOKU dapat menambah field kapan saja. */
 export function parseQrisNotification(body: unknown): QrisNotification | null {
   if (typeof body !== "object" || body === null) return null;
   const b = body as Record<string, unknown>;

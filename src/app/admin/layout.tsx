@@ -5,10 +5,6 @@ import { requireAdmin } from "@/lib/authz";
 import { AppSidebar } from "./_components/app-sidebar";
 import { AdminBreadcrumbs } from "./_components/breadcrumbs";
 
-/**
- * Kerangka panel admin. Guard dipasang juga di sini agar seluruh route di
- * bawahnya tertutup sejak layout, bukan hanya per halaman.
- */
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   const admin = await requireAdmin();
 

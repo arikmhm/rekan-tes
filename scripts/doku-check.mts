@@ -1,11 +1,4 @@
-/**
- * Memeriksa kredensial DOKU dengan memanggil sandbox sungguhan: ambil access
- * token, lalu terbitkan satu QRIS percobaan.
- *
- * Dijalankan dengan `pnpm doku:check`. Skrip ini memakai `src/lib/doku.ts` yang
- * sama dengan aplikasi, supaya "lolos di sini" benar-benar berarti jalur
- * pembayaran ikut lolos, bukan hanya salinan logika tanda tangan.
- */
+/** Memanggil sandbox DOKU lewat `src/lib/doku.ts` yang sama dengan aplikasi. */
 import { accessToken, externalId, generateQris, invoiceNumber } from "../src/lib/doku.ts";
 import { parseDokuEnv } from "../src/lib/env-schema.ts";
 
@@ -42,7 +35,6 @@ console.log(`✓ Access token B2B diterima (${token.length} karakter).`);
 const qris = await generateQris(kredensial, {
   partnerReferenceNo: invoiceNumber(),
   externalId: externalId(),
-  // Nominal kecil; QRIS percobaan ini tidak perlu dibayar.
   amount: 1000,
   validMinutes: 5,
 });

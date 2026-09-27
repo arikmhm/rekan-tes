@@ -7,7 +7,6 @@ import { startAttempt, submitSubtest } from "@/lib/attempt";
 
 const hairline = "border-[#105C78]/20";
 
-/** Memulai attempt; timer subtes pertama baru berjalan setelah ini ditekan. */
 export function StartAttemptButton({ attemptId }: { attemptId: string }) {
   const [pesan, action, pending] = useActionState(startAttempt, null);
 
@@ -27,11 +26,6 @@ export function StartAttemptButton({ attemptId }: { attemptId: string }) {
   );
 }
 
-/**
- * Menyubmit subtes berjalan dan melanjutkan ke subtes berikutnya. Konfirmasinya
- * memakai <dialog> bawaan peramban, sama seperti simulasi percobaan: modalitas,
- * jebakan fokus, dan tombol Esc datang dari platform.
- */
 export function SubmitSubtestButton({
   attemptId,
   subtestId,
@@ -41,16 +35,12 @@ export function SubmitSubtestButton({
   onSebelumKirim,
 }: {
   attemptId: string;
-  /** Subtes yang sedang dilihat; server menolak bila sudah berpindah. */
+  /** Server menolak bila subtesnya sudah berpindah. */
   subtestId: string;
   terjawab: number;
   total: number;
   subtesTerakhir: boolean;
-  /**
-   * Dijalankan sampai selesai sebelum subtes ditutup — layar kerja memakainya
-   * untuk menyetor jawaban yang masih mengantre. Tanpa ini, jawaban terakhir
-   * bisa tertinggal di peramban saat subtesnya sudah dinilai.
-   */
+  /** Menyetor antrean jawaban sebelum subtes ditutup dan dinilai. */
   onSebelumKirim?: () => Promise<void>;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -109,8 +99,7 @@ export function SubmitSubtestButton({
           )}
 
           <div className="mt-6 flex flex-col gap-2.5 sm:flex-row-reverse">
-            {/* Tombol kirim milik form di luar dialog: menutup dialognya lebih
-                dulu supaya fokus kembali ke halaman sebelum aksi berjalan. */}
+            {/* Tutup dialog dulu agar fokus kembali ke halaman sebelum aksi berjalan. */}
             <button
               type="submit"
               onClick={() => dialog.current?.close()}

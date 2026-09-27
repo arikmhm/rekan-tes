@@ -10,15 +10,8 @@ import { Spanduk } from "../_components/spanduk";
 
 export const metadata: Metadata = { title: "Produk" };
 
-// Daftar produk dibaca ulang tiap permintaan; tanpa ini daftarnya membeku sampai
-// deploy berikutnya.
 export const dynamic = "force-dynamic";
 
-/**
- * Halaman depan ruang peserta: etalase produk, ditambah peringatan verifikasi
- * email bila masih menggantung — peringatan itu soal akun, bukan soal produk,
- * jadi ia tinggal di sini dan bukan di dalam daftarnya.
- */
 export default async function PesertaPage({
   searchParams,
 }: {
@@ -44,9 +37,7 @@ export default async function PesertaPage({
         </Link>
       )}
 
-      {/* Spanduk yang sama dengan halaman produk publik, diatur dari panel
-          admin yang sama pula. Sorotan bawaan etalase dimatikan karena itu akan
-          jadi korsel kedua yang menempel tepat di bawah korsel pertama. */}
+      {/* Sorotan bawaan etalase dimatikan: spanduk sudah jadi korsel. */}
       <Spanduk slides={await listBanners()} />
 
       <div className="mt-8">

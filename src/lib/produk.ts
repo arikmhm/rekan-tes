@@ -5,16 +5,9 @@ import { and, asc, countDistinct, eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { formatDuration } from "@/lib/format";
 
-/**
- * Masa akses setelah pembayaran berhasil. Ditampilkan di detail tes sebelum
- * pembelian; RT-009 menghitung `orders.access_expires_at` dari nilai yang sama.
- */
+/** Sumber tunggal masa akses: tampilan detail dan `orders.access_expires_at`. */
 export const ACCESS_DAYS = 30;
 
-/**
- * Daftar produk publik. Hanya tes `published` yang muncul; status lain tidak pernah
- * bocor ke halaman publik karena filter berada di query, bukan di UI.
- */
 export async function listPublishedTests() {
   return db
     .select({
@@ -25,9 +18,7 @@ export async function listPublishedTests() {
       subtestCount: countDistinct(schema.testSubtests.id),
       questionCount: sql<number>`coalesce(sum(${schema.testSubtests.questionLimit}), 0)::int`,
       durationSeconds: sql<number>`coalesce(sum(${schema.testSubtests.durationSeconds}), 0)::int`,
-      // Nama subtes jadi label isi tiap kartu produk. Diambil sekalian di sini
-      // supaya daftar tidak memicu satu query tambahan per kartu. `array_remove`
-      // membuang null milik tes yang belum punya subtes sama sekali.
+      // `array_remove`: tes tanpa subtes menghasilkan null.
       subtestNames: sql<string[]>`array_remove(array_agg(${schema.subtests.name} order by ${schema.testSubtests.position}), null)`,
     })
     .from(schema.tests)
@@ -38,7 +29,6 @@ export async function listPublishedTests() {
     .orderBy(asc(schema.tests.name));
 }
 
-/** Detail satu tes terbit, atau null bila slug tidak ada atau belum terbit. */
 export async function getPublishedTest(slug: string) {
   const [tes] = await db
     .select()
@@ -69,13 +59,7 @@ export async function getPublishedTest(slug: string) {
   };
 }
 
-/**
- * Jenis produk yang bisa tampil di daftar produk. Hari ini baru simulasi yang punya
- * jalur beli dan kerjakan; jenis lain sudah dikenali tampilannya supaya
- * menambahkannya nanti tidak menuntut halamannya dirombak lagi. Yang belum ada
- * justru bagian beratnya: sumber datanya sendiri dan cara mengantarkannya ke
- * pembeli — sebuah ebook tidak bisa "dikerjakan" seperti simulasi.
- */
+/** Baru "simulasi" yang punya jalur beli; jenis lain baru dikenali tampilannya. */
 export type JenisProduk = "simulasi" | "bank-soal" | "materi";
 
 export const JENIS: Record<JenisProduk, { label: string; ringkas: string }> = {
@@ -95,7 +79,6 @@ export const JENIS: Record<JenisProduk, { label: string; ringkas: string }> = {
   },
 };
 
-/** Angka kunci sebuah produk. Ikonnya dipilih halaman, bukan lapisan data. */
 export type FaktaProduk = {
   ikon: "subtes" | "soal" | "durasi" | "akses";
   teks: string;
@@ -112,12 +95,6 @@ export type Produk = {
   fakta: FaktaProduk[];
 };
 
-/**
- * Daftar produk publik dalam bentuk yang tidak terikat tabel `tests`. Selama produknya
- * hanya simulasi, isinya sama dengan listPublishedTests — bedanya halaman
- * produk tidak lagi membaca kolom tes secara langsung, sehingga jenis produk
- * baru cukup ditambahkan di sini.
- */
 export async function listProduk(): Promise<Produk[]> {
   const tes = await listPublishedTests();
 
@@ -136,10 +113,6 @@ export async function listProduk(): Promise<Produk[]> {
   }));
 }
 
-/**
- * Spanduk korsel halaman produk, urut tampil. Tidak ada status draf: yang
- * tercatat berarti tayang, jadi pembacanya tidak perlu menyaring apa pun.
- */
 export async function listBanners() {
   return db
     .select({

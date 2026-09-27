@@ -17,11 +17,6 @@ const hairline = "border-[#105C78]/20";
 
 type Tes = NonNullable<Awaited<ReturnType<typeof getPublishedTest>>>;
 
-/**
- * Halaman detail satu produk beserta tombol belinya. Dipakai daftar produk publik
- * maupun ruang peserta: produknya sama, jadi halamannya satu — yang berbeda
- * hanya kemana tombol kembali menuju dan pernik di sekelilingnya.
- */
 export function DetailProduk({
   tes,
   kembali,
@@ -29,13 +24,9 @@ export function DetailProduk({
 }: {
   tes: Tes;
   kembali: { href: string; teks: string };
-  /** Ajakan mencoba simulasi gratis; dimatikan di ruang peserta karena ia
-      membawa peserta keluar dari kerangkanya. */
+  /** Dimatikan di ruang peserta agar tidak keluar dari kerangkanya. */
   tautanGratis?: boolean;
 }) {
-  // Dipakai sebagai pembanding panjang bilah durasi tiap subtes, sehingga
-  // pengunjung melihat subtes mana yang paling menyita waktu tanpa membandingkan
-  // angka satu per satu.
   const durasiTerpanjang = Math.max(
     ...tes.subtests.map((s) => s.durationSeconds),
     1,
@@ -87,8 +78,6 @@ export function DetailProduk({
         </p>
       </div>
 
-      {/* Kartu beli diletakkan lebih dulu di layar sempit supaya harga dan
-          tombolnya tidak terkubur di bawah daftar subtes. */}
       <div className="mt-9 grid gap-8 lg:grid-cols-[1fr_21rem] lg:items-start">
         <div className="lg:order-first">
           <ul className="grid gap-3 sm:grid-cols-3">
@@ -138,8 +127,6 @@ export function DetailProduk({
                   </p>
                 </div>
 
-                {/* Bilah sebanding durasi: subtes terpanjang jadi acuan penuh,
-                    jadi porsi waktu tiap bagian terbaca sekilas. */}
                 <div className="mt-4 h-1 overflow-hidden rounded-full bg-brand/10">
                   <div
                     className="h-full rounded-full bg-brand-orange/70"
@@ -153,8 +140,6 @@ export function DetailProduk({
           </ol>
         </div>
 
-        {/* Kartu beli menempel saat daftar subtes digulir: harga dan tombolnya
-            tidak perlu dicari lagi setelah pengunjung selesai membaca. */}
         <aside
           className={`order-first rounded-2xl border ${hairline} bg-white p-6 sm:p-7 lg:order-none lg:sticky lg:top-8`}
         >

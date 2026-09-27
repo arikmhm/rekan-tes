@@ -35,10 +35,7 @@ import { FormError } from "../../_components/shell";
 
 type Kategori = { id: string; code: string; name: string };
 
-/**
- * Bentuk yang disunting di layar: pilihan selalu lima slot agar kunci jawaban
- * dapat menunjuk slot yang tetap, tidak bergeser saat slot kosong dibuang.
- */
+/** Selalu lima slot pilihan agar kunci menunjuk slot tetap. */
 type Draf = {
   kunci: string;
   categoryId: string;
@@ -75,7 +72,6 @@ function dariSoal(s: SoalBaru): Draf {
   };
 }
 
-/** Slot kosong dibuang dan posisi dirapatkan, sama seperti formulir satuan. */
 function keSoal(d: Draf): SoalBaru {
   const terisi = d.opsi
     .map((content, slot) => ({ content: content.trim(), slot }))
@@ -90,15 +86,9 @@ function keSoal(d: Draf): SoalBaru {
   };
 }
 
-/**
- * Pembuatan soal dua langkah: memilih sumber dulu, lalu memeriksa dan menyimpan
- * seluruh daftar sekaligus. Impor JSON dan tulis manual bertemu di daftar yang
- * sama, sehingga pratinjau dan penyimpanannya cuma satu jalur.
- */
 export function PembuatSoal({ kategori }: { kategori: Kategori[] }) {
   const [langkah, setLangkah] = useState(1);
   const [daftar, setDaftar] = useState<Draf[]>([]);
-  /** Baris JSON yang ditolak; ditampilkan di kedua langkah agar tidak hilang. */
   const [tolakan, setTolakan] = useState<string[]>([]);
   const [status, setStatus] = useState("draft");
   const [galat, setGalat] = useState<string | null>(null);
@@ -151,9 +141,7 @@ export function PembuatSoal({ kategori }: { kategori: Kategori[] }) {
         </StepperNav>
       </div>
 
-      {/* Kolom minmax(0,1fr): tanpa itu lebar kolom ikut isi terpanjang, dan
-          satu ringkasan soal yang panjang menarik halaman melewati tepi layar
-          ponsel. */}
+      {/* minmax(0,1fr): tanpa itu isi terpanjang menarik halaman melewati layar. */}
       <StepperPanel>
         <StepperContent value={1} className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
           <SumberJson kategori={kodeKeId} tolakan={tolakan} onBaca={terimaJson} />
@@ -221,7 +209,6 @@ export function PembuatSoal({ kategori }: { kategori: Kategori[] }) {
   );
 }
 
-/** Baris JSON yang tidak jadi soal. Diam-diam menghilang jauh lebih buruk. */
 function DaftarTolakan({ tolakan }: { tolakan: string[] }) {
   if (tolakan.length === 0) return null;
 
@@ -237,7 +224,6 @@ function DaftarTolakan({ tolakan }: { tolakan: string[] }) {
   );
 }
 
-/** Tempel teks atau pilih berkas; keduanya berujung pada parser yang sama. */
 function SumberJson({
   kategori,
   tolakan,
@@ -346,13 +332,7 @@ function SumberManual({
   );
 }
 
-/**
- * Satu soal dalam daftar. Terbuka sendiri saat masih bermasalah supaya yang
- * perlu dikerjakan tidak bersembunyi di balik ringkasan.
- *
- * ponytail: seluruh daftar dirender ulang setiap ketikan. Bungkus dengan memo
- * bila mengetik pada daftar panjang mulai terasa tersendat.
- */
+/** ponytail: seluruh daftar dirender ulang tiap ketikan; memo bila mulai tersendat. */
 function KartuDraf({
   draf,
   nomor,

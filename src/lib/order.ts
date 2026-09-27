@@ -14,16 +14,12 @@ import { pollPaymentStatus } from "./webhook";
 
 const PROVIDER = "doku";
 
-/** Umur QRIS. Sama dengan default DOKU dan cukup untuk sekali bayar. */
+/** Sama dengan default DOKU. */
 const QRIS_VALID_MINUTES = 60;
 
 /**
- * Membuat order lalu menerbitkan QRIS lewat DOKU SNAP.
- *
- * Harga diambil dari database, tidak pernah dari formulir, dan disalin ke order
- * sebagai snapshot. Order pending yang sudah ada dipakai ulang agar satu
- * peserta tidak menumpuk order untuk tes yang sama, dan QRIS yang masih hidup
- * dipakai kembali ketimbang menerbitkan QR baru.
+ * Harga dari database, bukan formulir. Order pending dan QRIS yang masih hidup
+ * dipakai ulang agar peserta tidak menumpuk order untuk tes yang sama.
  */
 export async function startCheckout(_prev: string | null, form: FormData) {
   const user = await requireVerifiedUser();
@@ -62,7 +58,7 @@ export async function startCheckout(_prev: string | null, form: FormData) {
     if (hidup?.qrContent) redirect(`/peserta/pesanan/${pending.id}`);
   }
 
-  // Order lama mempertahankan harganya; daftar produk boleh berubah setelahnya.
+  // Order lama mempertahankan harganya.
   const amount = pending?.amount ?? tes.priceAmount;
   const orderId =
     pending?.id ??
@@ -73,9 +69,8 @@ export async function startCheckout(_prev: string | null, form: FormData) {
         .returning()
     )[0].id;
 
-  // `X-EXTERNAL-ID` DOKU harus numerik, jadi bukan UUID seperti primary key
-  // aplikasi. Disimpan sebelum DOKU dipanggil agar notifikasi yang datang tetap
-  // dapat dicocokkan meski balasan generate gagal kami proses.
+  // Disimpan sebelum DOKU dipanggil agar notifikasi tetap dapat dicocokkan
+  // meski balasan generate gagal diproses.
   const requestId = externalId();
   const [payment] = await db
     .insert(schema.payments)
@@ -97,7 +92,7 @@ export async function startCheckout(_prev: string | null, form: FormData) {
       validMinutes: QRIS_VALID_MINUTES,
     });
   } catch (error) {
-    // Pesan asli berisi detail konfigurasi dan balasan DOKU; cukup untuk log.
+    // Pesan asli memuat detail konfigurasi; hanya untuk log.
     console.error("Generate QRIS DOKU gagal:", error);
     return "Pembayaran belum dapat dimulai. Coba beberapa saat lagi atau hubungi kami.";
   }
@@ -112,22 +107,14 @@ export async function startCheckout(_prev: string | null, form: FormData) {
     })
     .where(eq(schema.payments.id, payment.id));
 
-  // QR ditampilkan di halaman kami sendiri; peserta tidak pernah keluar dari
-  // aplikasi, jadi tidak ada redirect yang perlu dipercaya sebagai bukti bayar.
   redirect(`/peserta/pesanan/${orderId}`);
 }
 
-/**
- * Backup selain webhook: peserta menekan tombol untuk menanyakan status
- * transaksi langsung ke DOKU, dipakai saat notifikasi belum atau tidak pernah
- * sampai. Dipicu manual, bukan otomatis di setiap render, supaya tidak
- * memanggil DOKU tanpa alasan selama halaman dibuka.
- */
+/** Cadangan webhook lewat Query QRIS. Manual, agar DOKU tidak dipanggil tiap render. */
 export async function checkPaymentStatus(_prev: string | null, form: FormData) {
   const orderId = String(form.get("orderId") ?? "");
 
-  // `getOrder` sudah memverifikasi kepemilikan lewat `assertOwner`; dipakai
-  // ulang di sini agar tidak ada jalur kedua yang memeriksa hal yang sama.
+  // `getOrder` sudah memeriksa kepemilikan.
   const order = await getOrder(orderId);
   if (!order) return "Pesanan tidak ditemukan.";
 
@@ -158,17 +145,13 @@ export async function checkPaymentStatus(_prev: string | null, form: FormData) {
     return "Belum terbaca sebagai lunas. Pastikan pembayaran sudah selesai, lalu coba lagi.";
   }
   if (hasil.result === "not_found" || hasil.result === "amount_mismatch") {
-    // Seharusnya tidak terjadi karena `pembayaran` sudah dicocokkan lewat
-    // invoice miliknya sendiri; ditangani agar tidak diam-diam gagal.
     return "Status pembayaran tidak dapat diverifikasi. Hubungi kami bila ini berulang.";
   }
 
-  // "activated" atau "already_paid": halaman menampilkan status baru begitu
-  // `revalidatePath` di atas membuat render berikutnya membaca ulang database.
   return null;
 }
 
-/** Satu order beserta percobaan pembayarannya, hanya untuk pemiliknya. */
+/** Hanya untuk pemiliknya. */
 export async function getOrder(id: string) {
   const [order] = await db
     .select({
@@ -180,8 +163,6 @@ export async function getOrder(id: string) {
       createdAt: schema.orders.createdAt,
       testName: schema.tests.name,
       testSlug: schema.tests.slug,
-      // Attempt lahir dari notifikasi pembayaran; halaman pesanan memakainya
-      // sebagai pintu masuk ke sesi pengerjaan.
       attemptId: schema.testAttempts.id,
     })
     .from(schema.orders)
@@ -210,7 +191,6 @@ export async function getOrder(id: string) {
   return { ...order, payments };
 }
 
-/** Riwayat pesanan milik satu user, terbaru dulu. Dipakai di ruang peserta. */
 export async function listOrdersForUser(userId: string) {
   return db
     .select({
@@ -221,8 +201,6 @@ export async function listOrdersForUser(userId: string) {
       createdAt: schema.orders.createdAt,
       testName: schema.tests.name,
       testSlug: schema.tests.slug,
-      // Ikut ditampilkan di pustaka supaya peserta melihat status
-      // pengerjaannya tanpa perlu buka satu per satu halaman pesanan.
       attemptId: schema.testAttempts.id,
       attemptStatus: schema.testAttempts.status,
       attemptScore: schema.testAttempts.finalScore,

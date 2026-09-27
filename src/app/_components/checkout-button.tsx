@@ -4,10 +4,7 @@ import { useActionState } from "react";
 
 import { startCheckout } from "@/lib/order";
 
-/**
- * Tombol beli. Harga tidak ikut dikirim: server membacanya sendiri dari slug,
- * sehingga nilai apa pun dari peramban tidak dapat memengaruhi order.
- */
+/** Hanya slug yang dikirim; harga dibaca server. */
 export function CheckoutButton({ slug }: { slug: string }) {
   const [error, action, pending] = useActionState(startCheckout, null);
 

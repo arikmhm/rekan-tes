@@ -12,16 +12,10 @@ import {
 export type Opsi = { value: string; label: string };
 
 /**
- * Satu kolom pilihan untuk formulir admin: combobox shadcn yang bisa diketik
- * untuk menyaring, menggantikan `select` bawaan yang kaku.
+ * Combobox yang tetap terkirim sebagai FormData lewat `name` (Base UI merender
+ * input tersembunyi), jadi Server Action dan form GET tidak berubah.
  *
- * Nilainya tetap ikut terkirim sebagai FormData lewat `name`, karena Base UI
- * merender input tersembunyi sendiri dan memakai `value` dari opsi bentuk
- * `{ value, label }`. Jadi seluruh Server Action dan formulir filter GET tidak
- * perlu diubah sama sekali.
- *
- * ponytail: kalau daftarnya sampai ratusan dan penyaringan di peramban mulai
- * terasa berat, ganti `items` dengan pencarian ke server.
+ * ponytail: penyaringan di peramban; ganti dengan pencarian server bila ratusan.
  */
 export function Pilihan({
   id,
@@ -35,11 +29,9 @@ export function Pilihan({
   disabled,
 }: {
   id?: string;
-  /** Nama kolom FormData. Kosongkan pada pemakaian terkendali. */
   name?: string;
   opsi: Opsi[];
   defaultValue?: string;
-  /** Diisi hanya untuk pemakaian terkendali, berpasangan dengan `onUbah`. */
   value?: string;
   onUbah?: (nilai: string) => void;
   placeholder?: string;

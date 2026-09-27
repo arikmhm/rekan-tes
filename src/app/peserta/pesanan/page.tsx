@@ -18,13 +18,10 @@ import { LABEL_ORDER, tanggal } from "../_components/label";
 
 export const metadata: Metadata = { title: "Pesanan" };
 
-// Status pesanan berubah dari notifikasi pembayaran, jadi halaman ini selalu
-// membaca ulang database.
 export const dynamic = "force-dynamic";
 
 const hairline = "border-[#105C78]/20";
 
-/** Hanya pesanan lunas yang berwarna; sisanya cukup abu agar tidak menyita mata. */
 const warnaStatus: Record<string, string> = {
   paid: "bg-brand-orange/15 text-brand-orange",
   pending: "bg-cream text-brand/70",
@@ -56,9 +53,6 @@ export default async function PesananPage() {
           </Link>
         </div>
       ) : (
-        /* Tabel dibungkus kartu yang sama dengan kartu di etalase dan pustaka,
-           jadi halamannya sepadan meski isinya baris, bukan kartu. Tabelnya
-           sendiri sudah menggulir mendatar saat kolomnya tidak muat. */
         <div
           className={`overflow-hidden rounded-2xl border ${hairline} bg-white`}
         >

@@ -4,14 +4,8 @@ import type { Award } from "lucide-react";
 
 const hairline = "border-[#105C78]/20";
 
-/**
- * Perkakas layar hasil yang dipakai bersama simulasi percobaan dan sesi
- * berbayar. Keduanya menjawab pertanyaan yang sama dan karena itu harus
- * tampil sama; menyalin markupnya dua kali berarti keduanya pelan-pelan
- * berbeda sendiri.
- */
+/** Layar hasil bersama untuk simulasi percobaan dan sesi berbayar. */
 
-/** Kartu hasil: judul kecil berikon di atas, isi bebas di bawahnya. */
 export function Kartu({
   judul,
   Ikon,
@@ -22,7 +16,6 @@ export function Kartu({
   judul: string;
   Ikon: typeof Award;
   tanda?: string;
-  /** Rentang kolom atau perataan tambahan saat kartu duduk di dalam grid. */
   kelas?: string;
   children: React.ReactNode;
 }) {
@@ -48,7 +41,6 @@ export function Kartu({
   );
 }
 
-/** Cincin akurasi. Angkanya tetap tertulis, jadi bukan cuma bentuk. */
 export function Donat({
   persen,
   angka,
@@ -58,7 +50,6 @@ export function Donat({
   persen: number;
   angka: number;
   dari: number;
-  /** Cincin ringkas untuk sebaran subtes: hanya persennya yang muat di dalam. */
   kecil?: boolean;
 }) {
   const r = 52;
@@ -103,15 +94,7 @@ export function Donat({
   );
 }
 
-/**
- * Sebaran nilai per subtes: satu cincin untuk tiap subtes, sama seperti cincin
- * akurasi di kartu utama — hanya saja di sini angkanya dipecah per subtes.
- *
- * Dulu radar. Radar butuh minimal tiga sumbu untuk membentuk bidang, jadi tes
- * dua subtes hanya menghasilkan satu garis lurus, dan label sumbunya terlalu
- * sempit untuk nama subtes yang mirip. Cincin terbaca sama jelasnya pada dua
- * subtes maupun enam.
- */
+/** Cincin per subtes, bukan radar: radar gagal pada tes dua subtes. */
 export function Sebaran({
   data,
   keterangan = "Persentase jawaban benar di tiap subtes.",
@@ -143,14 +126,7 @@ export function Sebaran({
   );
 }
 
-/**
- * Pemakaian waktu tiap subtes. Kartu waktu hanya bicara soal waktu — benar dan
- * salahnya sudah punya kartunya sendiri — jadi yang dibandingkan di sini adalah
- * waktu terpakai terhadap jatahnya, bukan terhadap jumlah soal.
- *
- * `jatah` boleh kosong: simulasi percobaan memakai satu jatah untuk seluruh
- * sesi, jadi batangnya dibandingkan terhadap subtes yang paling lama.
- */
+/** Tanpa `jatah` (simulasi percobaan), batang dibandingkan terhadap subtes terlama. */
 export function WaktuSubtes({
   data,
 }: {
@@ -194,7 +170,6 @@ export function WaktuSubtes({
   );
 }
 
-/** mm:ss untuk durasi yang masih di bawah satu jam, jam:mm:ss di atasnya. */
 export function menitDetik(detik: number) {
   const jam = Math.floor(detik / 3600);
   const menit = Math.floor(detik / 60) % 60;

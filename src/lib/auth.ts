@@ -10,7 +10,6 @@ import { db, schema } from "@/db";
 import { sendEmail } from "./email";
 import { env } from "./env";
 
-/** Menyuntikkan kredensial Resend sekali, agar dua pemanggil di bawah ringkas. */
 const kirim = (to: string, subject: string, text: string) =>
   sendEmail({ apiKey: env.RESEND_API_KEY, from: env.EMAIL_FROM, to, subject, text });
 
@@ -20,10 +19,8 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema }),
   emailAndPassword: {
     enabled: true,
-    // Login tidak diblokir oleh email belum terverifikasi; pembatasan berlaku
-    // pada checkout (RT-009), sesuai PRD.
+    // Verifikasi hanya ditagih di checkout (`requireVerifiedUser`).
     requireEmailVerification: false,
-    // Password baru mematikan seluruh session lama.
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
       await kirim(
@@ -51,10 +48,7 @@ export const auth = betterAuth({
   },
   user: {
     additionalFields: {
-      /**
-       * Server-owned. `input: false` membuat Better Auth menolak nilai role
-       * yang dikirim klien saat registrasi maupun update profil.
-       */
+      /** Server-owned: `input: false` menolak role dari klien. */
       role: {
         type: "string",
         required: false,
@@ -65,14 +59,9 @@ export const auth = betterAuth({
   },
   advanced: {
     database: {
-      // Menjaga invariant DATABASE_DESIGN: primary key text berisi UUID v4.
       generateId: () => crypto.randomUUID(),
     },
   },
-  /**
-   * `nextCookies` wajib paling akhir: itulah yang membuat cookie session ikut
-   * tertulis saat Better Auth dipanggil dari Server Action, bukan hanya dari
-   * route handler. Tanpa itu, keluar lewat action tidak menghapus cookie.
-   */
+  /** `nextCookies` wajib terakhir agar cookie tertulis dari Server Action. */
   plugins: [username(), nextCookies()],
 });

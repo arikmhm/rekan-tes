@@ -16,15 +16,8 @@ export async function generateMetadata({
   return { title: tes.name };
 }
 
-// Daftar produk dibaca ulang tiap permintaan; harga dan isi produk boleh berubah
-// tanpa menunggu deploy berikutnya.
 export const dynamic = "force-dynamic";
 
-/**
- * Detail produk di dalam ruang peserta. Halamannya sama dengan daftar produk publik,
- * hanya tanpa kerangka pengunjung — peserta yang sudah masuk tidak perlu
- * dikeluarkan dari dasbornya hanya untuk membaca rincian dan membayar.
- */
 export default async function ProdukDetailPage({
   params,
 }: {

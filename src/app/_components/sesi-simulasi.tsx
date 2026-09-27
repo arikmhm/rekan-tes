@@ -32,13 +32,7 @@ const hairline = "border-[#105C78]/20";
 
 const HURUF = ["A", "B", "C", "D"];
 
-/**
- * Satu sesi simulasi gratis, mengisi seluruh halaman. Semua state hidup di
- * memori peramban: tidak ada attempt, tidak ada jawaban terkirim, tidak ada
- * yang menyentuh basis data. Paketnya datang dari props, sehingga rute yang
- * sama melayani berapa pun jenis simulasi gratis.
- */
-/** Tujuan tombol keluar dan penutup layar hasil; berbeda antara sesi gratis dan pratinjau admin. */
+/** Berbeda antara sesi gratis dan pratinjau admin. */
 export type JalanKeluar = {
   keluar: string;
   lanjutHref: string;
@@ -53,6 +47,7 @@ const JALAN_GRATIS: Omit<JalanKeluar, "keluar"> = {
     "Contoh tampilan hasil. Di simulasi berbayar skor dihitung berbobot dan riwayatnya tersimpan di akunmu.",
 };
 
+/** Sesi simulasi sepenuhnya di memori peramban: tanpa attempt, tanpa basis data. */
 export function SesiSimulasi({
   paket,
   label = "Simulasi gratis",
@@ -77,14 +72,11 @@ export function SesiSimulasi({
     Array(soal.length).fill(0),
   );
 
-  // Penanda kapan soal yang sedang dibuka mulai dilihat. Dipakai untuk mengisi
-  // waktuSoal setiap kali peserta berpindah — tanpa ini peta kecepatan di layar
-  // hasil tidak punya bahan.
+  // Kapan soal yang sedang dibuka mulai dilihat, bahan peta kecepatan.
   const masuk = useRef(0);
   const dialogKirim = useRef<HTMLDialogElement>(null);
 
-  // Jam mulai dipasang setelah sesi terpasang, bukan saat render: membaca jam
-  // di badan komponen membuat hasil render bergantung pada waktu.
+  // Diisi saat mount: membaca jam di badan render tidak murni.
   useEffect(() => {
     masuk.current = Date.now();
   }, []);
@@ -105,8 +97,7 @@ export function SesiSimulasi({
     setDikirim(true);
   }
 
-  // Waktu habis mengunci sesi sama seperti pengerjaan sungguhan, jadi statusnya
-  // diturunkan dari sisa waktu — bukan disalin ke state lain lewat efek.
+  // Diturunkan dari sisa waktu, bukan disalin ke state lewat efek.
   const selesai = dikirim || sisa === 0;
 
   useEffect(() => {
@@ -136,9 +127,7 @@ export function SesiSimulasi({
 
   return (
     <div className="flex flex-1 flex-col">
-      {/* Konfirmasi kirim memakai <dialog> bawaan peramban: modalitas, jebakan
-          fokus, dan tombol Esc datang dari platform. Ditaruh di luar <main>
-          supaya tidak ikut tersapu saat isi berganti ke layar hasil. */}
+      {/* Di luar <main> agar tidak tersapu saat berganti ke layar hasil. */}
       <dialog
         ref={dialogKirim}
         aria-labelledby="judul-kirim"
@@ -207,8 +196,6 @@ export function SesiSimulasi({
         </div>
       </dialog>
 
-      {/* Header menempel seperti aplikasi ujian sungguhan: identitas sesi dan
-          sisa waktu tidak boleh ikut tergulir bersama soal. */}
       <header
         className={`sticky top-0 z-10 border-b ${hairline} bg-white/95 backdrop-blur`}
       >
@@ -217,8 +204,6 @@ export function SesiSimulasi({
             <span className="shrink-0 text-sm font-semibold tracking-tight text-brand">
               Rekan Tes
             </span>
-            {/* Judul sesi dilepas di layar sempit: berebut tempat dengan nama
-                situs dan hitung mundur, dan ketiganya jadi terpotong semua. */}
             <span
               className="hidden h-4 w-px bg-brand/20 sm:block"
               aria-hidden
@@ -304,8 +289,6 @@ export function SesiSimulasi({
                 })}
               </div>
 
-              {/* Kendali perpindahan menempel di bawah soalnya sendiri, sejalan
-                  dengan arah baca: baca soal, pilih jawaban, lanjut. */}
               <div
                 className={`mt-7 flex items-center justify-between border-t ${hairline} pt-5`}
               >
@@ -343,12 +326,7 @@ export function SesiSimulasi({
   );
 }
 
-/**
- * Peta soal di sisi kanan: nomor mana yang sudah dijawab, mana yang dilewati,
- * dan mana yang sedang dibuka — plus jalan pintas melompat ke soal mana pun.
- * Statusnya tidak hanya dibedakan lewat warna, karena warna saja tak terbaca
- * pembaca layar maupun mata yang sulit membedakannya.
- */
+/** Status nomor tidak hanya dibedakan warna, demi pembaca layar dan buta warna. */
 function Navigasi({
   jawaban,
   nomor,
@@ -443,12 +421,6 @@ function Navigasi({
   );
 }
 
-/**
- * Layar hasil: ringkasan di atas, lalu peta kecepatan yang menyetir panel
- * pembahasan di sebelahnya, dan hitungan benar-salah-kosong sebagai penutup.
- * Semua angkanya dihitung ulang dari jawaban dan waktu yang tercatat di sesi —
- * tidak ada yang disimpan ke mana pun.
- */
 function Hasil({
   soal,
   durasi,
@@ -477,8 +449,7 @@ function Hasil({
   const idealPerSoal = Math.round(durasi / soal.length);
 
   const perSubtes = ringkasSubtes(soal, jawaban, waktuSoal);
-  // Subtes dengan persentase terendah jadi bahan rekomendasi. Kalau seri, yang
-  // pertama muncul di urutan soal yang dipilih — bukan hasil acak.
+  // Seri: yang pertama menang, bukan acak.
   const terlemah = perSubtes.reduce((a, b) => (b.persen < a.persen ? b : a));
 
   const s = soal[dilihat];
@@ -545,8 +516,6 @@ function Hasil({
             {menitDetik(terpakai)}
           </p>
 
-          {/* Simulasi percobaan memakai satu jatah untuk seluruh sesi, jadi
-              subtesnya tidak punya jatah sendiri untuk dibandingkan. */}
           <WaktuSubtes
             data={perSubtes.map((x) => ({ nama: x.nama, detik: x.detik }))}
           />
@@ -719,7 +688,6 @@ function Hasil({
   );
 }
 
-/** Warna dan label satu kotak di peta kecepatan. */
 function laraSoal(jawab: number | null, tepat: boolean, cepat: boolean) {
   if (jawab === null)
     return { label: "kosong", kelas: `${hairline} bg-white text-brand/40` };
@@ -751,10 +719,6 @@ const KETERANGAN: [string, string][] = [
   ["border-brand-orange/40 bg-brand-orange/15", "Salah & lambat"],
 ];
 
-/**
- * Benar, total, dan waktu terpakai tiap subtes — dipakai cincin sebaran, daftar
- * waktu, sekaligus kalimat rekomendasi.
- */
 function ringkasSubtes(
   soal: Soal[],
   jawaban: (number | null)[],

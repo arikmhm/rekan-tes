@@ -66,14 +66,7 @@ const updatedAt = () => timestamp("updated_at", { withTimezone: true }).notNull(
 // Konten
 // ---------------------------------------------------------------------------
 
-/**
- * Spanduk korsel di kepala halaman produk. Berkas gambarnya tinggal di
- * penyimpanan objek (Cloudflare R2) dan tabel ini hanya memegang alamatnya —
- * gambar tidak pernah masuk basis data maupun repositori.
- *
- * Tidak ada kolom status: spanduk yang tidak ingin tampil dihapus saja, dan
- * satu-satunya urutan yang berlaku adalah `position`.
- */
+/** Gambar tinggal di Cloudflare R2. Tanpa status: spanduk yang tidak tampil dihapus. */
 export const banners = pgTable(
   "banners",
   {
@@ -232,15 +225,9 @@ export const orders = pgTable(
       .references(() => tests.id),
     amount: integer("amount").notNull(),
     status: orderStatus("status").notNull().default("pending"),
-    // Diisi saat pembayaran berhasil, 30 hari setelahnya. Lihat RT-009.
+    // Baru terisi saat pembayaran berhasil.
     accessExpiresAt: timestamp("access_expires_at", { withTimezone: true }),
-    /**
-     * Tiga kolom di bawah hanya terisi pada order yang diberikan admin sebagai
-     * penggantian akses (RT-015), dan sekaligus menjadi jejak auditnya: siapa
-     * yang memberi, alasannya, dan order mana yang digantikan. Order itu
-     * sendiri sudah satu baris per pemberian, jadi tidak perlu tabel log
-     * terpisah yang bisa melenceng dari order yang dicatatnya.
-     */
+    /** Hanya pada order penggantian akses; sekaligus jejak auditnya, tanpa tabel log. */
     grantedBy: text("granted_by").references(() => user.id),
     grantReason: text("grant_reason"),
     replacesOrderId: text("replaces_order_id").references((): AnyPgColumn => orders.id),
@@ -251,7 +238,6 @@ export const orders = pgTable(
     index("orders_user_created_idx").on(t.userId, t.createdAt),
     index("orders_status_created_idx").on(t.status, t.createdAt),
     check("orders_amount_non_negative", sql`${t.amount} >= 0`),
-    // Alasan wajib menyertai pemberi: jejak audit tanpa keduanya tidak berguna.
     check(
       "orders_grant_reason_with_granter",
       sql`(${t.grantedBy} is null and ${t.grantReason} is null) or (${t.grantedBy} is not null and ${t.grantReason} is not null)`,
@@ -269,9 +255,8 @@ export const payments = pgTable(
     provider: text("provider").notNull(),
     externalId: text("external_id").notNull(),
     requestId: text("request_id").notNull(),
-    /** Payload QRIS dari DOKU; dirender menjadi QR di halaman pesanan. */
     qrContent: text("qr_content"),
-    /** `referenceNo` milik DOKU dari respons generate; dibutuhkan Query QRIS. */
+    /** Dibutuhkan Query QRIS. */
     referenceNo: text("reference_no"),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     amount: integer("amount").notNull(),
@@ -281,9 +266,7 @@ export const payments = pgTable(
     updatedAt: updatedAt(),
   },
   (t) => [
-    // Webhook idempotent.
     uniqueIndex("payments_provider_external_id_key").on(t.provider, t.externalId),
-    // Pembuatan checkout tidak diproses dua kali.
     uniqueIndex("payments_provider_request_id_key").on(t.provider, t.requestId),
     index("payments_order_idx").on(t.orderId),
     check("payments_amount_non_negative", sql`${t.amount} >= 0`),
@@ -296,7 +279,6 @@ export const payments = pgTable(
 
 export const testAttempts = pgTable("test_attempts", {
   id: id(),
-  // Satu order memberikan maksimal satu attempt.
   orderId: text("order_id")
     .notNull()
     .unique()
@@ -339,19 +321,15 @@ export const attemptAnswers = pgTable(
     testSubtestQuestionId: text("test_subtest_question_id")
       .notNull()
       .references(() => testSubtestQuestions.id),
-    // Null berarti soal dilewati.
     selectedOptionId: text("selected_option_id").references(() => questionOptions.id),
     isCorrect: boolean("is_correct"),
-    // Lama soal ini dibuka peserta, dijumlahkan di klien lalu disetor bersama
-    // jawabannya. Soal yang dibuka tetapi tidak dijawab tetap punya barisnya,
-    // dengan `selected_option_id` null — itulah arti "dilewati" di atas.
+    // Soal yang dibuka tanpa dijawab tetap punya baris, dengan opsi null.
     secondsSpent: integer("seconds_spent").notNull().default(0),
     answeredAt: timestamp("answered_at", { withTimezone: true }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
-    // Kunci upsert autosave.
     uniqueIndex("attempt_answers_subtest_question_key").on(
       t.attemptSubtestId,
       t.testSubtestQuestionId,

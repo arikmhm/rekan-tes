@@ -4,11 +4,6 @@ import { useActionState } from "react";
 
 import { checkPaymentStatus } from "@/lib/order";
 
-/**
- * Backup manual selain webhook. Peserta menekan tombol ini untuk menanyakan
- * status transaksi langsung ke DOKU, dipakai bila status belum berubah
- * padahal pembayaran sudah selesai.
- */
 export function CheckPaymentButton({ orderId }: { orderId: string }) {
   const [pesan, action, pending] = useActionState(checkPaymentStatus, null);
 

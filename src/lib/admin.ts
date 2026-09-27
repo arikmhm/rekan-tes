@@ -37,7 +37,6 @@ import { testPublishProblem } from "./test-publish";
 const STATUS = ["draft", "published", "archived"] as const;
 const DIFFICULTY = ["easy", "medium", "hard"] as const;
 
-
 // ---------------------------------------------------------------------------
 // Kategori
 // ---------------------------------------------------------------------------
@@ -100,7 +99,6 @@ const questionSchema = z.object({
   status: z.enum(STATUS),
 });
 
-
 export async function saveQuestion(_prev: string | null, form: FormData) {
   await requireAdminMutation();
 
@@ -119,7 +117,6 @@ export async function saveQuestion(_prev: string | null, form: FormData) {
   const opsi = readOptions(form);
   const terkunci = id ? await sudahDikerjakan(id) : false;
 
-  // Publikasi menuntut soal yang benar-benar dapat dikerjakan.
   if (nilai.status === "published") {
     const masalah = publishProblem(opsi);
     if (masalah) return masalah;
@@ -142,8 +139,7 @@ export async function saveQuestion(_prev: string | null, form: FormData) {
       target = baru.id;
     }
 
-    // Soal yang sudah pernah dikerjakan tidak boleh berubah pilihan maupun
-    // kunci jawabannya; hasil attempt lama harus tetap dapat dipercaya.
+    // Pilihan dan kunci soal yang sudah dikerjakan dibekukan.
     if (!terkunci) {
       await tx.delete(schema.questionOptions).where(eq(schema.questionOptions.questionId, target));
       if (opsi.length > 0) {
@@ -161,13 +157,8 @@ export async function saveQuestion(_prev: string | null, form: FormData) {
 }
 
 /**
- * Menyimpan banyak soal sekaligus dari langkah pratinjau. Dipakai baik oleh
- * impor JSON maupun penulisan manual: keduanya menghasilkan daftar yang sama,
- * jadi hanya ada satu jalur penyimpanan yang perlu dipercaya.
- *
- * Menerima argumen biasa, bukan FormData: bentuknya bersarang (pilihan di
- * dalam soal) dan meratakannya ke nama field hanya menambah dua penerjemahan
- * yang bisa melenceng.
+ * Satu jalur simpan untuk impor JSON maupun tulis manual. Argumen biasa, bukan
+ * FormData, karena bentuknya bersarang.
  */
 export async function createQuestions(daftar: unknown, status: unknown) {
   await requireAdminMutation();
@@ -193,9 +184,8 @@ export async function createQuestions(daftar: unknown, status: unknown) {
     if (masalah) return `Soal ${urutan + 1}: ${masalah}.`;
   }
 
-  // Id dibuat di sini, bukan dibaca dari `returning()`: urutan baris hasil
-  // insert banyak baris tidak dijamin, sedangkan pilihan harus menempel pada
-  // soal yang benar.
+  // Id dibuat di sini: urutan `returning()` pada insert banyak baris tidak
+  // dijamin, padahal pilihan harus menempel pada soal yang benar.
   const soal = parsed.data.map((s) => ({
     id: crypto.randomUUID(),
     ...s,
@@ -258,7 +248,6 @@ export async function duplicateQuestion(_prev: string | null, form: FormData) {
       );
     }
 
-    // Versi lama diarsipkan agar tidak lagi dipakai pada tes baru.
     await tx
       .update(schema.questions)
       .set({ status: "archived", updatedAt: new Date() })
@@ -332,16 +321,14 @@ export async function getQuestion(id: string) {
   return { ...soal, options, locked: await sudahDikerjakan(id) };
 }
 
-/** Soal yang sudah pernah dijawab peserta tidak boleh berubah secara substantif. */
+/** Soal yang sudah pernah dijawab peserta dibekukan pilihan dan kuncinya. */
 async function sudahDikerjakan(questionId: string) {
   const assignments = db
     .select({ id: schema.testSubtestQuestions.id })
     .from(schema.testSubtestQuestions)
     .where(eq(schema.testSubtestQuestions.questionId, questionId));
 
-  // Baris jawaban kini juga dibuat untuk soal yang hanya dibuka — itu yang
-  // mencatat lama pengerjaan. Penguncian tetap mengikuti arti aslinya: yang
-  // benar-benar dijawab, bukan yang sekadar terlihat.
+  // Baris tanpa opsi hanya mencatat waktu, bukan jawaban.
   const [row] = await db
     .select({ ada: schema.attemptAnswers.id })
     .from(schema.attemptAnswers)
@@ -355,8 +342,6 @@ async function sudahDikerjakan(questionId: string) {
 
   return Boolean(row);
 }
-
-// ---------------------------------------------------------------------------
 
 function isOneOf<T extends string>(value: string | undefined, allowed: readonly T[]): value is T {
   return value !== undefined && (allowed as readonly string[]).includes(value);
@@ -467,7 +452,6 @@ export async function saveTest(_prev: string | null, form: FormData) {
     name: form.get("name"),
     description: form.get("description"),
     priceAmount: form.get("priceAmount"),
-    // Formulir produk baru tidak mengirim status: yang baru dibuat selalu draft.
     status: form.get("status") ?? "draft",
   });
 
@@ -486,8 +470,7 @@ export async function saveTest(_prev: string | null, form: FormData) {
           .set({ ...nilai, updatedAt: new Date() })
           .where(eq(schema.tests.id, target));
       } else {
-        // Alamat halaman diturunkan dari nama sekali saat pembuatan lalu tidak
-        // pernah diubah lagi, supaya tautan dan riwayat pesanan tidak putus.
+        // Slug hanya dibuat sekali agar tautan lama tidak putus.
         const dasar = slugify(nilai.name) || "tes";
         const serupa = await tx
           .select({ slug: schema.tests.slug })
@@ -505,8 +488,7 @@ export async function saveTest(_prev: string | null, form: FormData) {
         target = baru.id;
       }
 
-      // Kelengkapan diperiksa di dalam transaksi yang sama dengan perubahan
-      // status, sehingga tes tidak pernah sempat terbit dalam keadaan rusak.
+      // Satu transaksi dengan perubahan status: tes rusak tidak sempat terbit.
       if (nilai.status === "published") {
         const ringkasan = await tx
           .select({
@@ -641,7 +623,6 @@ export async function removeTestSubtest(form: FormData) {
   revalidatePath(`/admin/tes/${baris.testId}`);
 }
 
-/** Menukar posisi dengan subtes tetangga. Urutan subtes terlihat oleh peserta. */
 export async function moveTestSubtest(form: FormData) {
   await requireAdminMutation();
 
@@ -674,8 +655,7 @@ export async function moveTestSubtest(form: FormData) {
         .set({ position, updatedAt: new Date() })
         .where(eq(schema.testSubtests.id, baris));
 
-    // UNIQUE(test_id, position) melarang dua baris berbagi posisi walau sesaat,
-    // jadi salah satu diparkir di posisi yang pasti tidak terpakai.
+    // UNIQUE(test_id, position) melarang tukar langsung, jadi satu diparkir dulu.
     await set(ini.id, POSISI_PARKIR);
     await set(tetangga.id, ini.position);
     await set(ini.id, tetangga.position);
@@ -684,10 +664,6 @@ export async function moveTestSubtest(form: FormData) {
   revalidatePath(`/admin/tes/${ini.testId}`);
 }
 
-/**
- * Menugaskan satu atau banyak soal sekaligus. Mengisi satu subtes berarti
- * puluhan penugasan, jadi formulirnya mengirim daftar, bukan satu soal.
- */
 export async function addAssignment(_prev: string | null, form: FormData) {
   await requireAdminMutation();
 
@@ -706,8 +682,7 @@ export async function addAssignment(_prev: string | null, form: FormData) {
   if (!konfigurasi) return "Konfigurasi subtes tidak ditemukan.";
   if (await testTerkunci(konfigurasi.testId)) return PESAN_TERKUNCI;
 
-  // Pilihan di formulir sudah difilter, tetapi assignment tetap diperiksa di
-  // server: form dapat dikirim dari mana saja.
+  // Filter formulir tidak cukup: form dapat dikirim dari mana saja.
   const soal = await db
     .select({ categoryId: schema.questions.categoryId, status: schema.questions.status })
     .from(schema.questions)
@@ -720,9 +695,8 @@ export async function addAssignment(_prev: string | null, form: FormData) {
     return "Hanya soal berstatus published yang dapat ditugaskan.";
   }
 
-  // Posisi dibaca sekali lalu dinaikkan per baris. `posisiBerikutnya` tidak
-  // dipakai di sini karena subquery-nya menghasilkan angka yang sama untuk
-  // semua baris dalam satu insert, sehingga posisinya bentrok.
+  // Bukan `posisiBerikutnya`: subquery-nya memberi angka sama untuk semua baris
+  // dalam satu insert.
   const [akhir] = await db
     .select({
       posisi: sql<number>`coalesce(max(${schema.testSubtestQuestions.position}), 0)::int`,
@@ -789,18 +763,11 @@ export async function listTests() {
 }
 
 /**
- * Bahan pratinjau admin: susunan soal yang benar-benar akan dikerjakan peserta,
- * lengkap dengan kunci dan pembahasan, dibentuk sebagai paket simulasi di
- * memori. Sengaja tidak membuat attempt — pratinjau tidak boleh meninggalkan
- * jejak apa pun di basis data.
+ * Pratinjau admin sebagai paket simulasi di memori, tanpa membuat attempt.
+ * Aturan soal yang tampil sama dengan sesi peserta, tanpa menyaring status.
  *
- * Aturan "soal mana yang tampil" disalin dari sesi peserta: urutan `position`
- * lalu dipotong `question_limit`, tanpa menyaring status soal, supaya admin
- * melihat isi tesnya apa adanya sebelum diterbitkan.
- *
- * ponytail: satu hitung mundur untuk seluruh sesi (jumlah durasi subtes),
- * sedangkan tes sungguhan menghitung per subtes. Cukup untuk mengoreksi isi
- * soal; kalau pratinjau perlu meniru pergantian subtes, ia butuh runner sendiri.
+ * ponytail: satu hitung mundur untuk seluruh sesi, bukan per subtes. Butuh
+ * runner sendiri bila pratinjau harus meniru pergantian subtes.
  */
 export async function getTestPreview(id: string) {
   await requireAdmin();
@@ -830,8 +797,6 @@ export async function getTestPreview(id: string) {
     .where(eq(schema.testSubtests.testId, id))
     .orderBy(asc(schema.testSubtests.position));
 
-  // Satu query untuk seluruh subtes, pilihan jawaban sekalian ikut di-join:
-  // paket pratinjau dibentuk sekali di sini, bukan per subtes.
   const baris = konfigurasi.length
     ? await db
         .select({
@@ -866,8 +831,6 @@ export async function getTestPreview(id: string) {
 
       return {
         subtes: k.nama,
-        // Kode subtes dipakai sebagai label sumbu radar: sudah pendek dan
-        // ditentukan admin sendiri, tidak perlu ditebak dari nama panjangnya.
         singkat: k.code,
         prompt: pilihan[0].prompt,
         opsi: pilihan.map((p) => p.opsi),
@@ -935,8 +898,6 @@ export async function getTest(id: string) {
         .orderBy(asc(schema.testSubtestQuestions.position))
     : [];
 
-  // Kandidat seluruh kategori yang terpakai diambil sekali, lalu dikelompokkan
-  // di memori. Satu query lebih murah daripada satu query per subtes.
   const kandidat = konfigurasi.length
     ? await db
         .select({
@@ -977,13 +938,10 @@ export async function getTest(id: string) {
 const PESAN_TERKUNCI =
   "Tes ini sudah pernah dikerjakan, jadi susunan subtes dan soalnya dibekukan.";
 
-/** Posisi parkir sementara saat menukar dua posisi. Di luar jangkauan nyata. */
+/** Di luar jangkauan posisi nyata. */
 const POSISI_PARKIR = 1_000_000;
 
-/**
- * Tes yang sudah pernah dikerjakan tidak boleh berubah susunannya: attempt lama
- * menunjuk konfigurasi ini, dan hasilnya harus tetap dapat dibaca apa adanya.
- */
+/** Attempt lama menunjuk susunan tes ini, jadi susunannya dibekukan. */
 async function testTerkunci(testId: string) {
   const konfigurasi = db
     .select({ id: schema.testSubtests.id })
@@ -999,7 +957,6 @@ async function testTerkunci(testId: string) {
   return Boolean(row);
 }
 
-/** Posisi berikutnya dihitung database, sehingga tidak perlu dibaca dulu. */
 function posisiBerikutnya(
   table: PgTable,
   position: PgColumn,
@@ -1013,10 +970,6 @@ function posisiBerikutnya(
 // Dasbor
 // ---------------------------------------------------------------------------
 
-/**
- * Angka ringkas untuk dasbor admin beserta daftar tes yang belum siap terbit.
- * Dihitung database agar halaman tidak perlu menarik seluruh baris.
- */
 export async function adminStats() {
   await requireAdmin();
 
@@ -1031,8 +984,7 @@ export async function adminStats() {
     })
     .from(sql`(select 1) as x`);
 
-  // Subtes yang jumlah assignment-nya belum memenuhi question limit. Inilah
-  // yang menghalangi publikasi, jadi ditampilkan sebagai daftar tindakan.
+  // Subtes yang soalnya kurang dari `question_limit`: penghalang publikasi.
   const kurang = await db
     .select({
       testId: schema.tests.id,
@@ -1096,7 +1048,6 @@ export async function saveBanner(_prev: string | null, form: FormData) {
       .set({ ...nilai, updatedAt: new Date() })
       .where(eq(schema.banners.id, id));
   } else {
-    // Spanduk baru masuk paling belakang; urutannya diatur setelah itu.
     const [{ terbesar }] = await db
       .select({ terbesar: sql<number>`coalesce(max(${schema.banners.position}), 0)` })
       .from(schema.banners);
@@ -1109,7 +1060,6 @@ export async function saveBanner(_prev: string | null, form: FormData) {
   return null;
 }
 
-/** Menukar urutan dengan spanduk tetangga; urutan ini yang dilihat pengunjung. */
 export async function moveBanner(form: FormData) {
   await requireAdminMutation();
 

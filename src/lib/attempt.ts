@@ -17,14 +17,12 @@ import {
 } from "./attempt-flow";
 import { assertOwner } from "./authz";
 
-/** Tipe `tx` di dalam `db.transaction`, dipakai helper penilaian di bawah. */
 type Transaksi = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /**
- * Satu attempt beserta order dan progres seluruh subtesnya, hanya untuk
- * pemiliknya. Konfigurasi subtes tes di-LEFT JOIN dengan progres attempt
- * karena baris progres baru ada setelah attempt dimulai; sebelum itu halaman
- * petunjuk tetap perlu menampilkan susunan subtes yang akan dikerjakan.
+ * Attempt beserta progres subtesnya, hanya untuk pemiliknya. LEFT JOIN karena
+ * baris progres baru ada setelah attempt dimulai, sementara halaman petunjuk
+ * sudah perlu susunan subtesnya.
  */
 export async function getAttempt(id: string) {
   const [attempt] = await db
@@ -61,9 +59,6 @@ export async function getAttempt(id: string) {
       id: schema.attemptSubtests.id,
       status: schema.attemptSubtests.status,
       startedAt: schema.attemptSubtests.startedAt,
-      // Dipakai halaman hasil untuk menghitung waktu yang benar-benar terpakai
-      // tiap subtes, bukan rentang dari mulai sampai kumpul yang ikut memuat
-      // jeda di antara subtes.
       submittedAt: schema.attemptSubtests.submittedAt,
     })
     .from(schema.testSubtests)
@@ -78,13 +73,11 @@ export async function getAttempt(id: string) {
     .where(eq(schema.testSubtests.testId, attempt.testId))
     .orderBy(asc(schema.testSubtests.position));
 
-  // Subtes yang barisnya belum dibuat setara "belum dimulai", sehingga aturan
-  // urutan di `attempt-flow.ts` tidak perlu tahu soal baris yang belum ada.
+  // Baris yang belum ada setara "belum dimulai".
   const now = new Date();
   const habis = await applyTimeouts(attempt.id, rows.map((r) => ({ ...r, status: r.status ?? "not_started" })), now);
 
   const aktif = activeSubtest(habis.subtests);
-  // Subtes berjalan: yang aktif, barisnya sudah ada, dan jamnya sedang hidup.
   const berjalan =
     aktif && aktif.id && aktif.status === "in_progress" ? { ...aktif, id: aktif.id } : null;
 
@@ -104,22 +97,14 @@ function sisaDetik(deadline: Date | null, now: Date) {
 }
 
 /**
- * Menutup subtes yang deadline-nya sudah lewat lalu menjalankan penerusnya,
- * sebelum halaman maupun Server Action mana pun melihat datanya. Ditaruh di
- * dalam `getAttempt` dengan sengaja: setiap jalur masuk memakai fungsi itu,
- * jadi satu guard di sini menutup semua jalur sekaligus — tanpa cron yang bisa
- * mati diam-diam. Penulisan hanya terjadi saat benar-benar ada yang lewat, dan
- * setiap `UPDATE` dijaga status sehingga dua request bersamaan tetap aman.
+ * Menutup subtes yang lewat deadline dan menjalankan penerusnya. Semua jalur
+ * masuk lewat `getAttempt`, jadi satu guard ini menggantikan cron. Setiap
+ * `UPDATE` dijaga status sehingga request bersamaan tetap aman.
  *
- * ponytail: penutupan terjadi saat dibaca, bukan saat waktunya benar-benar
- * habis. Attempt yang tidak pernah dibuka lagi tetap tercatat `in_progress`
- * walau seluruh deadline-nya sudah lewat, dan `final_score`-nya belum terisi.
- * Sudah ada satu pembaca langsung: daftar pesanan di `/peserta/pesanan` menampilkan status
- * dan skor dari kolomnya, jadi sesi seperti itu tampil "sedang dikerjakan"
- * tanpa skor sampai peserta membukanya sekali — lalu benar dengan sendirinya.
- * Cukup untuk MVP karena tidak ada angka yang salah, hanya tertunda. Begitu
- * ada laporan agregat atau panel admin (RT-015) yang menghitung dari kolom
- * status, jalankan penyapu berkala atau ikut hitung deadline di query itu.
+ * ponytail: ditutup saat dibaca, bukan saat waktu habis. Attempt yang tak
+ * dibuka lagi tetap `in_progress` tanpa `final_score` (terlihat di
+ * `/peserta/pesanan` dan panel admin). Tambah penyapu berkala bila ada laporan
+ * yang menghitung dari kolom status.
  */
 async function applyTimeouts<T extends SubtestProgress & { id: string | null }>(
   attemptId: string,
@@ -171,7 +156,6 @@ async function applyTimeouts<T extends SubtestProgress & { id: string | null }>(
     }
   });
 
-  // Cermin perubahan di memori; render berikutnya tidak perlu query ulang.
   const ubah = new Map<string, Partial<T>>();
   for (const step of steps) {
     if (step.close.id) ubah.set(step.close.id, { status: "submitted_by_timeout" } as Partial<T>);
@@ -190,14 +174,9 @@ async function applyTimeouts<T extends SubtestProgress & { id: string | null }>(
 }
 
 /**
- * Menilai satu subtes yang baru ditutup: membekukan benar/salah setiap jawaban
- * dari kunci yang berlaku saat itu, lalu menjumlahkan bobotnya menjadi skor
- * subtes. Dipanggil dari kedua jalur penutupan — submit manual dan timeout —
- * sehingga tidak ada subtes tertutup yang lolos tanpa nilai.
- *
- * `is_correct` disimpan, bukan dihitung ulang saat hasil dibaca, supaya
- * koreksi soal di kemudian hari tidak diam-diam mengubah hasil attempt lama.
- * Perhitungannya idempotent: mengulangnya menghasilkan angka yang sama.
+ * Membekukan `is_correct` dari kunci yang berlaku sekarang lalu menjumlahkan
+ * bobotnya, supaya koreksi soal belakangan tidak mengubah hasil lama. Dipanggil
+ * dari submit manual maupun timeout; idempotent.
  */
 async function scoreSubtest(tx: Transaksi, attemptSubtestId: string) {
   await tx.execute(sql`
@@ -219,7 +198,6 @@ async function scoreSubtest(tx: Transaksi, attemptSubtestId: string) {
   `);
 }
 
-/** Skor akhir attempt: jumlah skor subtesnya. Dipanggil saat attempt ditutup. */
 async function finalizeAttempt(tx: Transaksi, attemptId: string) {
   await tx.execute(sql`
     update ${schema.testAttempts}
@@ -231,20 +209,9 @@ async function finalizeAttempt(tx: Transaksi, attemptId: string) {
 }
 
 /**
- * Soal subtes berjalan beserta pilihan dan jawaban peserta. Kolom `is_correct`
- * dan `explanation` tidak pernah ikut di-select, sehingga kunci jawaban tidak
- * dapat bocor ke peramban lewat payload React — bukan disembunyikan di UI,
- * memang tidak pernah meninggalkan database.
- */
-/**
- * Soal yang benar-benar tampil pada satu subtes: assignment terurut `position`,
- * dipotong `question_limit`. Satu-satunya definisi "soal mana yang dikerjakan",
- * dipakai halaman pengerjaan maupun halaman hasil — kalau keduanya memakai
- * aturan sendiri-sendiri, pembahasan bisa memuat soal yang tidak pernah
- * ditampilkan atau melewatkan soal yang dijawab.
- *
- * Kunci jawaban dan pembahasan sengaja tidak ikut di-select di sini; pemanggil
- * yang berhak (halaman hasil) mengambilnya terpisah.
+ * Satu-satunya definisi "soal yang dikerjakan", dipakai halaman pengerjaan dan
+ * hasil agar pembahasan memuat soal yang sama persis. Kunci dan pembahasan
+ * tidak di-select di sini, jadi tidak pernah sampai ke payload peramban.
  */
 async function presentedQuestions(testSubtestId: string, questionLimit: number) {
   return db
@@ -292,18 +259,11 @@ async function loadQuestions(aktif: { id: string; testSubtestId: string; questio
     options: opsi.filter((o) => o.questionId === s.questionId),
     selectedOptionId:
       jawaban.find((j) => j.testSubtestQuestionId === s.assignmentId)?.selectedOptionId ?? null,
-    // Hitungan waktu dilanjutkan dari yang sudah tersimpan, bukan diulang dari
-    // nol — sesi yang dimuat ulang tidak menghapus waktu yang sudah berjalan.
     secondsSpent:
       jawaban.find((j) => j.testSubtestQuestionId === s.assignmentId)?.secondsSpent ?? 0,
   }));
 }
 
-/**
- * Memulai attempt: menetapkan `started_at` attempt, membuat baris progres
- * untuk seluruh subtes, lalu menjalankan subtes pertama. Seluruh waktu berasal
- * dari server, tidak pernah dari peramban.
- */
 export async function startAttempt(_prev: string | null, form: FormData) {
   const attempt = await getAttempt(String(form.get("attemptId") ?? ""));
   if (!attempt) return "Sesi tidak ditemukan.";
@@ -321,9 +281,8 @@ export async function startAttempt(_prev: string | null, form: FormData) {
   const now = new Date();
 
   await db.transaction(async (tx) => {
-    // Guard idempotency yang sama bentuknya dengan aktivasi pembayaran: baris
-    // hanya berubah bila masih `not_started`. Klik ganda atau dua tab tidak
-    // menggeser `started_at` yang sudah berjalan dan tidak membuat baris ganda.
+    // Hanya berubah bila masih `not_started`: klik ganda atau dua tab tidak
+    // menggeser `started_at` maupun membuat baris ganda.
     const dimulai = await tx
       .update(schema.testAttempts)
       .set({ status: "in_progress", startedAt: now, updatedAt: now })
@@ -341,7 +300,7 @@ export async function startAttempt(_prev: string | null, form: FormData) {
         attemptId: attempt.id,
         testSubtestId: s.testSubtestId,
         // Hanya subtes pertama yang jamnya berjalan; sisanya menyusul saat
-        // subtes sebelumnya disubmit, supaya durasinya tidak habis menunggu.
+        // pendahulunya disubmit.
         ...(s.testSubtestId === pertama?.testSubtestId
           ? { status: "in_progress" as const, startedAt: now }
           : {}),
@@ -353,11 +312,7 @@ export async function startAttempt(_prev: string | null, form: FormData) {
   return null;
 }
 
-/**
- * Menyubmit subtes yang sedang berjalan lalu menjalankan subtes berikutnya,
- * atau menutup attempt bila itu yang terakhir. Satu transaksi, sehingga tidak
- * pernah ada keadaan "subtes tertutup tapi tidak ada penerusnya".
- */
+/** Satu transaksi: tidak pernah ada subtes tertutup tanpa penerusnya berjalan. */
 export async function submitSubtest(_prev: string | null, form: FormData) {
   const attempt = await getAttempt(String(form.get("attemptId") ?? ""));
   if (!attempt) return "Sesi tidak ditemukan.";
@@ -366,10 +321,8 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
   const aktifId = aktif?.id;
   if (!aktif || !aktifId) return "Tidak ada subtes yang sedang berjalan.";
 
-  // Halaman ikut mengirim subtes mana yang dilihat peserta saat menekan tombol.
-  // Tanpa ini, halaman yang sudah basi — misalnya subtesnya keburu ditutup
-  // karena waktu habis dan penerusnya sudah berjalan — akan menyubmit subtes
-  // berikutnya seketika dan menghabiskan waktunya tanpa satu soal pun terlihat.
+  // Halaman basi (subtesnya sudah ditutup timeout) tidak boleh menyubmit
+  // penerusnya yang belum pernah terlihat.
   if (String(form.get("subtestId") ?? "") !== aktifId) {
     return "Subtes sudah berpindah karena waktunya habis. Muat ulang halaman.";
   }
@@ -389,8 +342,7 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
       )
       .returning({ id: schema.attemptSubtests.id });
 
-    // Submit kedua dari tab lain tidak boleh ikut menjalankan subtes berikutnya
-    // untuk kedua kalinya, jadi berhenti begitu tidak ada baris yang berubah.
+    // Submit kedua dari tab lain berhenti di sini.
     if (disubmit.length === 0) return;
 
     await scoreSubtest(tx, aktifId);
@@ -421,23 +373,13 @@ export async function submitSubtest(_prev: string | null, form: FormData) {
 }
 
 /**
- * Menyimpan sekelompok jawaban sekaligus, beserta lama tiap soal dibuka. Klien
- * menahan pilihan peserta di memori dan menyetornya berkala (RT-013), jadi satu
- * subtes cukup beberapa request — bukan satu request penuh per klik.
+ * Setoran berkala dari klien: jawaban plus lama tiap soal dibuka. `optionId`
+ * null berarti soal hanya dibuka, dicatat waktunya tanpa dinilai.
  *
- * `optionId` boleh null: soal yang dibuka tetapi belum dijawab tetap punya
- * barisnya sendiri supaya waktunya tercatat. Baris seperti itu tidak pernah
- * dinilai — `scoreSubtest` hanya menyentuh baris yang punya opsi terpilih.
- *
- * Assignment dan opsi divalidasi terhadap soal subtes yang sedang berjalan —
- * datanya berasal dari `getAttempt`, jadi id yang dikarang klien tidak akan
- * ditemukan. Subtes yang sudah ditutup, termasuk yang baru saja ditutup karena
- * waktunya habis, otomatis tidak lagi `in_progress` sehingga penolakan setelah
- * deadline tidak butuh pemeriksaan waktu kedua.
- *
- * Seluruh kelompok ditolak bila ada satu saja entri yang tidak sah: klien
- * menyimpan kembali ke antrean dan memberi tahu peserta, alih-alih diam-diam
- * menelan sebagian jawaban. Upsert-nya idempotent, jadi kiriman ulang aman.
+ * Id divalidasi terhadap soal subtes yang sedang `in_progress` menurut
+ * `getAttempt`, jadi setoran setelah deadline tertolak tanpa cek waktu kedua.
+ * Satu entri tidak sah menolak seluruh kelompok agar klien mengantre ulang,
+ * bukan kehilangan sebagian. Upsert idempotent.
  */
 export async function saveAnswers(
   attemptId: string,
@@ -479,9 +421,7 @@ export async function saveAnswers(
     .values(baris)
     .onConflictDoUpdate({
       target: [schema.attemptAnswers.attemptSubtestId, schema.attemptAnswers.testSubtestQuestionId],
-      // `excluded` dipakai karena satu pernyataan membawa banyak baris: tiap
-      // baris harus memakai nilainya sendiri, bukan satu nilai tetap. `coalesce`
-      // menjaga jawaban yang sudah ada dari baris yang hanya membawa waktu.
+      // `coalesce`: baris yang hanya membawa waktu tidak menghapus jawaban.
       set: {
         selectedOptionId: sql`coalesce(excluded.selected_option_id, ${schema.attemptAnswers.selectedOptionId})`,
         secondsSpent: sql`greatest(excluded.seconds_spent, ${schema.attemptAnswers.secondsSpent})`,
@@ -494,14 +434,8 @@ export async function saveAnswers(
 }
 
 /**
- * Hasil dan pembahasan satu attempt yang sudah selesai. Kunci jawaban dan
- * pembahasan baru ikut terbaca di sini — jalur pengerjaan (`loadQuestions`)
- * tetap tidak pernah menyentuh keduanya, jadi status attempt adalah satu-satunya
- * pintu yang menentukan kunci boleh keluar atau tidak.
- *
- * Mengembalikan null bila attempt tidak ada atau bukan milik peminta
- * (`getAttempt` sudah menolak lewat `assertOwner`), dan `selesai: false` bila
- * pengerjaannya belum tuntas — halaman yang memanggil mengarahkan balik ke sesi.
+ * Satu-satunya jalur yang membaca kunci dan pembahasan, dan hanya untuk attempt
+ * yang selesai (`selesai: false` bila belum).
  */
 export async function getResult(attemptId: string) {
   const attempt = await getAttempt(attemptId);
@@ -518,8 +452,6 @@ export async function getResult(attemptId: string) {
   const questionIds = subtes.flatMap((x) => x.soal.map((q) => q.questionId));
   const attemptSubtestIds = attempt.subtests.map((s) => s.id).filter((id) => id !== null);
 
-  // Dua query massal, bukan per soal: jumlah soal satu attempt masih kecil,
-  // tetapi per-soal berarti puluhan round trip untuk satu halaman hasil.
   const opsi = questionIds.length
     ? await db
         .select({
@@ -566,12 +498,10 @@ export async function getResult(attemptId: string) {
         nomor: i + 1,
         options: pilihan,
         selectedOptionId: jawab?.selectedOptionId ?? null,
-        // Kebenaran dibaca dari yang dibekukan saat subtes ditutup, bukan
-        // dibandingkan ulang dengan kunci yang berlaku sekarang.
+        // Dibekukan saat subtes ditutup, bukan kunci yang berlaku sekarang.
         isCorrect: jawab?.isCorrect ?? null,
         detik: jawab?.secondsSpent ?? 0,
-        // Baris bisa ada hanya untuk mencatat waktu; yang menentukan soal ini
-        // dijawab adalah opsinya, bukan keberadaan barisnya.
+        // Baris bisa ada hanya untuk mencatat waktu.
         dijawab: Boolean(jawab?.selectedOptionId),
         explanation: pembahasan.find((p) => p.id === q.questionId)?.explanation ?? "",
       };

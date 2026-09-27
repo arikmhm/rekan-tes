@@ -21,10 +21,7 @@ const label: Record<string, string> = {
   tes: "Produk tes",
 };
 
-/**
- * Jejak halaman dari URL. Segmen id tidak punya nama yang bisa dibaca di sini,
- * jadi ditampilkan sebagai "Detail" ketimbang memuat datanya ulang.
- */
+/** Segmen id tampil sebagai "Detail" alih-alih memuat datanya ulang. */
 export function AdminBreadcrumbs() {
   const pathname = usePathname();
   const segmen = pathname.split("/").filter(Boolean).slice(1);
@@ -45,8 +42,7 @@ export function AdminBreadcrumbs() {
           const teks = label[s] ?? (s.length > 20 ? "Detail" : s);
           const terakhir = i === segmen.length - 1;
 
-          // Separator sudah berupa <li>, jadi ia bersaudara dengan item,
-          // bukan anaknya. Menyarangkannya memicu galat hidrasi.
+          // Separator sudah <li>; menyarangkannya memicu galat hidrasi.
           return (
             <Fragment key={href}>
               <BreadcrumbSeparator />

@@ -9,11 +9,6 @@ import { requireUser } from "@/lib/authz";
 import { AppSidebar } from "./_components/app-sidebar";
 import { PesertaBreadcrumbs } from "./_components/breadcrumbs";
 
-/**
- * Kerangka ruang peserta. Guard dipasang di sini, sama seperti
- * `admin/layout.tsx`, supaya seluruh route di bawah /peserta ikut tertutup
- * sejak layout.
- */
 export default async function PesertaLayout({
   children,
 }: LayoutProps<"/peserta">) {

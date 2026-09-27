@@ -7,11 +7,7 @@ import { authClient } from "@/lib/auth-client";
 
 import { fieldClass, labelClass, submitClass } from "./form";
 
-/**
- * Dua langkah pemulihan password. Token, kedaluwarsa, sifat sekali pakai, dan
- * jaminan tidak membocorkan apakah email terdaftar seluruhnya ditangani Better
- * Auth; komponen ini hanya menyediakan formulirnya.
- */
+/** Token, kedaluwarsa, dan anti-enumerasi email ditangani Better Auth. */
 export function PasswordForm({ token, error }: { token?: string; error?: string }) {
   const mode = token || error ? "reset" : "minta";
   const [pending, setPending] = useState(false);

@@ -16,7 +16,6 @@ const minimal = {
 test("menerima environment minimum dan mengabaikan variabel lain", () => {
   expect(parseEnv({ ...minimal, TZ: "Asia/Jakarta" })).toEqual({
     ...minimal,
-    // Diisi default; domain uji Resend sampai domain sendiri terverifikasi.
     EMAIL_FROM: "Rekan Tes <onboarding@resend.dev>",
   });
 });

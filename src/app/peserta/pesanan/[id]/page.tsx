@@ -49,8 +49,6 @@ export default async function PesananDetailPage({
       p.expiresAt > new Date(),
   );
 
-  // QR dirender di server menjadi SVG; tidak ada JavaScript tambahan di
-  // peramban dan isi QR tidak pernah berpindah ke pihak ketiga.
   const qrSvg = qris?.qrContent
     ? await QRCode.toString(qris.qrContent, {
         type: "svg",
@@ -61,8 +59,7 @@ export default async function PesananDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-3xl p-4 pt-5 sm:p-6 sm:pt-6">
-      {/* Status pembayaran datang dari notifikasi DOKU, bukan dari peramban,
-          jadi halaman menyegarkan dirinya sendiri selama masih menunggu. */}
+      {/* Menyegarkan diri selama menunggu notifikasi DOKU. */}
       {order.status === "pending" && <meta httpEquiv="refresh" content="15" />}
 
       <Link

@@ -9,7 +9,6 @@ import { fieldClass, labelClass, submitClass } from "./form";
 
 type Mode = "daftar" | "masuk";
 
-
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -27,7 +26,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const result =
       mode === "daftar"
         ? await authClient.signUp.email({
-            // `name` mengikuti username. Role tidak pernah dikirim dari browser.
             name: usernameValue,
             username: usernameValue,
             email: String(data.get("email") ?? "").trim(),

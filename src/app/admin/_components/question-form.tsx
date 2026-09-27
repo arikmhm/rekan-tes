@@ -159,7 +159,6 @@ export function QuestionForm({
   );
 }
 
-/** Soal yang sudah dikerjakan: tawarkan duplikasi, bukan perubahan kunci. */
 function LockedNotice({ id }: { id: string }) {
   const [error, action, pending] = useActionState(duplicateQuestion, null);
 

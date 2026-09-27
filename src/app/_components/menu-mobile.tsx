@@ -5,22 +5,14 @@ import { useEffect, useState } from "react";
 
 import { AccountNav } from "./account-nav";
 
-// Satu batang hamburger. Posisi dan rotasinya diatur lewat properti transform
-// yang berbeda (translate dan rotate), jadi keduanya bisa berjalan bersamaan
-// tanpa saling menimpa saat batang berubah menjadi silang.
+// translate dan rotate terpisah agar tidak saling menimpa saat jadi silang.
 const garis =
   "absolute h-0.5 w-5 rounded-full bg-brand transition-all duration-300 ease-out";
 
-/**
- * Navigasi ponsel: tombol hamburger yang berubah menjadi silang, dan panel yang
- * turun tepat di bawah header. Di layar sedang ke atas seluruhnya disembunyikan
- * karena tautannya sudah tampil utuh di baris header.
- */
 export function MenuMobile() {
   const [buka, setBuka] = useState(false);
 
-  // Header ikut menyingkir saat halaman digulir, jadi panel yang sedang terbuka
-  // akan terseret keluar layar. Lebih jujur menutupnya sekalian.
+  // Header menyingkir saat digulir, jadi panel ditutup sekalian.
   useEffect(() => {
     if (!buka) return;
     const tutup = () => setBuka(false);
@@ -42,8 +34,6 @@ export function MenuMobile() {
           className={`${garis} ${buka ? "rotate-45" : "-translate-y-1.5"}`}
           aria-hidden
         />
-        {/* Batang tengah cukup memudar di tempat: ia sudah berada di sumbu
-            silang, jadi tidak perlu ikut berputar. */}
         <span
           className={`${garis} ${buka ? "scale-x-0 opacity-0" : ""}`}
           aria-hidden
@@ -54,8 +44,7 @@ export function MenuMobile() {
         />
       </button>
 
-      {/* Panel tetap terpasang supaya buka-tutupnya bisa dianimasikan; saat
-          tertutup ia dinonaktifkan sepenuhnya, termasuk untuk pembaca layar. */}
+      {/* Tetap terpasang demi animasi; saat tertutup dinonaktifkan, juga untuk pembaca layar. */}
       <div
         id="menu-ponsel"
         inert={!buka}

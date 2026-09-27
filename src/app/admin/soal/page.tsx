@@ -13,7 +13,6 @@ import { AdminShell, EmptyState, StatusBadge } from "../_components/shell";
 
 export const metadata: Metadata = { title: "Bank soal" };
 
-/** Filter memakai form GET biasa, sehingga hasilnya bisa dibagikan lewat URL. */
 export default async function SoalPage({
   searchParams,
 }: {

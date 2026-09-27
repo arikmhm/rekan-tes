@@ -21,10 +21,6 @@ type Tes = {
 
 const STATUS = ["draft", "published", "archived"];
 
-/**
- * Formulir produk tes. Status `published` hanya diterima server bila seluruh
- * subtes sudah lengkap, jadi tombol ini juga berfungsi sebagai tombol terbit.
- */
 export function TestForm({ tes }: { tes?: Tes }) {
   const [error, action, pending] = useActionState(saveTest, null);
   const uid = tes?.id ?? "baru";
@@ -73,9 +69,7 @@ export function TestForm({ tes }: { tes?: Tes }) {
             defaultValue={tes?.priceAmount ?? 0}
           />
         </Field>
-        {/* Produk baru selalu lahir sebagai draft — server menolak status lain
-            sebelum subtes dan soalnya lengkap — jadi pilihannya baru muncul
-            saat menyunting. Penerbitan sendiri dilakukan di langkah terakhir. */}
+        {/* Produk baru selalu draft; server menolak terbit sebelum subtes dan soal lengkap. */}
         {tes && (
           <Field>
             <FieldLabel htmlFor={`tes-status-${uid}`}>Status</FieldLabel>

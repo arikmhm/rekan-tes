@@ -10,11 +10,6 @@ const percakapan = [
   { kanan: false, teks: "pelan-pelan juga gapapa, yang penting mulai" },
 ];
 
-/**
- * Bingkai separuh HP: sengaja tidak dibuat penuh (tanpa bezel bawah/tombol
- * home) supaya kelihatan seperti layar HP yang nongol dari bawah, bukan
- * mockup device utuh. Bubble muncul bertahap saat kartu ini masuk viewport.
- */
 export function PhoneChat() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(

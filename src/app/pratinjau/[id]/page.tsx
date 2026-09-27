@@ -8,23 +8,12 @@ import { SesiSimulasi } from "../../_components/sesi-simulasi";
 
 export const metadata: Metadata = {
   title: "Pratinjau produk tes",
-  // Pintu masuknya hanya daftar produk di panel admin.
   robots: { index: false },
 };
 
-// Isi tes bisa berubah tepat sebelum pratinjau dibuka, jadi tidak ada yang
-// boleh tercache: yang dilihat admin harus keadaan terkini.
 export const dynamic = "force-dynamic";
 
-/**
- * Mencoba produk tes sebelum diterbitkan. Berada di luar `/admin` agar lepas
- * dari sidebar panel — rasanya harus sama dengan sesi peserta, bukan halaman
- * admin biasa. Guardnya tetap ketat: `getTestPreview` memanggil `requireAdmin`,
- * dan non-admin dibalas 404 seperti seluruh route admin lainnya.
- *
- * Tidak ada attempt, tidak ada jawaban terkirim: seluruh sesi hidup di memori
- * peramban dan hilang begitu halamannya ditinggalkan.
- */
+/** Di luar `/admin` agar tanpa sidebar panel; guardnya `requireAdmin` di `getTestPreview`. */
 export default async function PratinjauPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const pratinjau = await getTestPreview(id);

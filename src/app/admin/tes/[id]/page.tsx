@@ -40,8 +40,7 @@ export default async function TesDetailPage({ params }: { params: Promise<{ id: 
   const subtesTerbit = adaSubtes && tes.subtests.every((s) => s.subtestStatus === "published");
   const terbit = tes.status === "published";
 
-  // Langkah dibuka pada pekerjaan yang benar-benar tersisa, bukan selalu dari
-  // awal: menyunting produk yang sudah jadi hampir selalu soal menerbitkan.
+  // Buka di pekerjaan yang tersisa; produk jadi hampir selalu soal menerbitkan.
   const awal = !adaSubtes ? 2 : !soalLengkap ? 3 : terbit ? 1 : 4;
 
   return (

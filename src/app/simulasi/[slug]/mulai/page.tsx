@@ -5,8 +5,6 @@ import { SesiSimulasi } from "../../../_components/sesi-simulasi";
 import { SiteFooter } from "../../../_components/site-shell";
 import { getPaket, paketSimulasi } from "../../data";
 
-// Paketnya statis dan sedikit, jadi seluruh rutenya bisa disiapkan saat build:
-// halaman ini tidak pernah menyentuh basis data.
 export function generateStaticParams() {
   return paketSimulasi.map((p) => ({ slug: p.slug }));
 }
@@ -19,7 +17,6 @@ export async function generateMetadata({
   const paket = getPaket((await params).slug);
   if (!paket) return { title: "Simulasi tidak ditemukan" };
 
-  // Halaman pengerjaan tidak perlu diindeks: pintu masuknya halaman detail.
   return {
     title: `Mengerjakan ${paket.nama}`,
     robots: { index: false },
@@ -37,10 +34,7 @@ export default async function SesiPage({
     notFound();
   }
 
-  // Sengaja tanpa SiteShell: sesi punya headernya sendiri, dan menaruh navigasi
-  // situs di tengah ujian cuma mengundang peserta keluar tak sengaja. Footernya
-  // tetap footer situs, didorong ke dasar halaman oleh sesi yang mengisi sisa
-  // tinggi layar.
+  // Tanpa SiteShell: navigasi situs di tengah ujian mengundang keluar tak sengaja.
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SesiSimulasi paket={paket} />

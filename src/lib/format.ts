@@ -1,20 +1,15 @@
-/**
- * Format angka untuk pembaca Indonesia. Dipakai halaman produk, detail tes, dan admin
- * agar harga serta durasi tampil sama di seluruh aplikasi.
- */
-
 const idr = new Intl.NumberFormat("id-ID", {
   style: "currency",
   currency: "IDR",
   maximumFractionDigits: 0,
 });
 
-/** Harga dalam rupiah penuh, tanpa desimal. Contoh: `Rp 50.000`. */
+/** `Rp 50.000` */
 export function formatPrice(amount: number) {
   return idr.format(amount);
 }
 
-/** Durasi manusiawi dari detik. Contoh: `45 menit`, `1 jam`, `1 jam 30 menit`. */
+/** `45 menit`, `1 jam`, `1 jam 30 menit` */
 export function formatDuration(seconds: number) {
   const menit = Math.round(seconds / 60);
   const jam = Math.floor(menit / 60);
@@ -25,17 +20,12 @@ export function formatDuration(seconds: number) {
 }
 
 /**
- * Label pendek dan unik untuk sumbu radar hasil. Nama subtes panjang membuat
- * sumbunya bertumpuk, jadi nama beberapa kata disingkat jadi inisialnya —
- * "Tes Wawasan Kebangsaan" menjadi "TWK".
+ * Label pendek unik untuk tampilan hasil: "Tes Wawasan Kebangsaan" → "TWK".
+ * Dihitung per daftar karena inisial mudah bertabrakan ("Kesamaan Dasar" dan
+ * "Ketelitian Dasar" sama-sama "KD"); yang bertabrakan memakai namanya sendiri.
  *
- * Disiapkan sekaligus untuk satu daftar, bukan per nama, karena inisial mudah
- * bertabrakan: "Kesamaan Dasar" dan "Ketelitian Dasar" sama-sama "KD", dan dua
- * sumbu berlabel sama terbaca sebagai satu subtes yang sama. Yang bertabrakan
- * memakai namanya sendiri, dipotong seperlunya.
- *
- * ponytail: masih tebakan dari bentuk nama. Kalau subtes perlu label pendek
- * yang benar-benar terkendali, tambahkan kolomnya di tabel subtes.
+ * ponytail: tebakan dari bentuk nama. Tambah kolom label di tabel subtes bila
+ * perlu dikendalikan.
  */
 export function labelSubtes(nama: string[]) {
   const singkat = nama.map(inisial);

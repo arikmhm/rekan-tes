@@ -52,7 +52,6 @@ export default async function TesPage() {
                     <StatusBadge status={t.status} />
                   </TableCell>
                   <TableCell className="text-right">
-                    {/* Mencoba produk seperti peserta, tanpa menyimpan apa pun. */}
                     <Button
                       variant="outline"
                       size="sm"

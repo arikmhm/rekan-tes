@@ -7,10 +7,6 @@ import { PhoneChat } from "./_components/phone-chat";
 import { SiteFooter, SiteHeader } from "./_components/site-shell";
 import { getSession } from "@/lib/authz";
 
-/**
- * Tiga sorotan produk di section "coba". Gambarnya menyusul — lihat
- * BingkaiLayar untuk cara menukar penampung dengan tangkapan layar sungguhan.
- */
 const sorotan = [
   {
     judul: "Rasanya seperti tes beneran",
@@ -34,11 +30,7 @@ const sorotan = [
 
 const hairline = "border-[#105C78]/20";
 
-/**
- * Produk yang belum terbit. Gambarannya dibuat dari markup biasa, bukan
- * tangkapan layar, karena halamannya memang belum ada — menampilkan layar palsu
- * sama saja menjanjikan sesuatu yang belum bisa ditagih.
- */
+/** Belum terbit, jadi digambar dengan markup, bukan tangkapan layar palsu. */
 const menyusul = [
   {
     judul: "Soal tes",
@@ -53,8 +45,7 @@ const menyusul = [
 ];
 
 export default async function Home() {
-  // Landing page ini murni untuk pengunjung anonim. Yang sudah login diarahkan
-  // ke halaman kerja mereka masing-masing, bukan disodori materi promosi lagi.
+  // Beranda hanya untuk pengunjung anonim.
   const session = await getSession();
   if (session) {
     redirect(session.user.role === "admin" ? "/admin" : "/peserta");
@@ -66,9 +57,6 @@ export default async function Home() {
 
       <main id="top">
         <section className="relative overflow-hidden">
-          {/* Pola rasi bintang di latar hero. Opasitasnya sengaja sangat rendah
-              dan dilebur ke bawah, jadi ia memberi tekstur tanpa ikut bersaing
-              dengan judul maupun tombol di atasnya. */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.09] mask-[linear-gradient(to_bottom,black,transparent)]"
@@ -102,9 +90,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Rekaman sesi pengerjaan sebagai gambar produk: berjalan sendiri,
-            mengulang, tanpa suara, dan tidak menerima klik sama sekali — ini
-            gambar yang bergerak, bukan pemutar video yang perlu dilayani. */}
+        {/* Gambar bergerak, bukan pemutar video: tanpa kendali dan tanpa klik. */}
         <div className="mx-auto w-full max-w-6xl pb-16 px-5 sm:px-0 md:px-0 sm:pb-20">
           <video
             src="/hero.mp4"
@@ -127,11 +113,7 @@ export default async function Home() {
             </div>
           </div>
         </section> */}
-        {/* Simulasi percobaannya sendiri tinggal di /simulasi. Menanamkannya di
-            sini berarti setiap pengunjung beranda ikut mengunduh mesin kuisnya,
-            padahal cuma sebagian yang benar-benar mencoba. */}
-        {/* Warna latarnya sendiri: seksi ini memamerkan produknya, jadi ia
-            perlu terbaca sebagai satu blok utuh di antara seksi putih. */}
+        {/* Simulasi tinggal di /simulasi agar beranda tidak mengunduh mesin kuisnya. */}
         <section id="coba" className="bg-gray-50 px-5 py-16 sm:px-8 sm:py-24">
           <div className="mx-auto max-w-6xl">
             <span className="text-xs font-medium tracking-wide text-brand-orange uppercase">
@@ -141,8 +123,6 @@ export default async function Home() {
               Latihannya semirip mungkin dengan hari-H.
             </h2>
 
-            {/* Gambar berganti sisi tiap blok supaya mata tidak membaca tiga
-                susunan yang persis sama. */}
             <div className="mt-12 space-y-14 sm:mt-14 sm:space-y-20">
               {sorotan.map((s, i) => (
                 <article
@@ -179,7 +159,6 @@ export default async function Home() {
               ))}
             </div>
 
-            {/* Ajakan baru muncul setelah pengunjung melihat barangnya. */}
             <div
               className={`mt-14 flex flex-col items-start gap-5 border-t ${hairline} pt-10 sm:mt-20 sm:flex-row sm:items-center sm:justify-between`}
             >
@@ -203,16 +182,10 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Penutup halaman: alurnya dulu, baru ajakan. Pengunjung yang sudah
-            mencoba simulasi di atas tinggal perlu tahu langkah setelahnya. */}
-        {/* Etalase singkat di kaki beranda: apa saja yang dijual, satu
-            kalimat masing-masing. Rinciannya urusan halaman produk. */}
         <section
           id="produk"
           className="relative overflow-hidden px-5 py-16 sm:px-8 sm:pb-24"
         >
-          {/* Pola yang sama dengan hero, kali ini menutup halaman: ia menebal ke
-              bawah sehingga kaki halaman tidak berakhir sebagai putih kosong. */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 bottom-0 h-96 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.09] mask-[linear-gradient(to_top,black,transparent)]"
@@ -227,8 +200,6 @@ export default async function Home() {
             </p>
 
             <div className="mt-10 grid gap-4 lg:grid-cols-2 lg:grid-rows-2">
-              {/* Simulasi memegang kartu besar: ia satu-satunya yang sudah
-                  bisa dibeli hari ini. */}
               <article
                 className={`flex flex-col justify-between overflow-hidden rounded-2xl border ${hairline} bg-white lg:row-span-2`}
               >
@@ -281,8 +252,6 @@ export default async function Home() {
                     </p>
                   </div>
 
-                  {/* Gambaran isi produk, bukan tangkapan layar: barangnya
-                      memang belum ada, jadi jangan berpura-pura sudah. */}
                   <div
                     className="hidden w-40 shrink-0 self-stretch sm:block lg:w-44"
                     aria-hidden
@@ -301,16 +270,11 @@ export default async function Home() {
   );
 }
 
-/**
- * Bingkai tangkapan layar produk: matras putih tipis dengan bayangan rendah,
- * supaya gambar antarmuka yang latarnya juga terang tidak lumer ke latar seksi.
- */
 function BingkaiLayar({
   gambar,
   alt,
 }: {
-  /** Ukuran asli berkasnya ikut dikirim agar ruangnya dipesan sebelum gambar
-      selesai diunduh — tanpa itu isi halaman melompat saat gambar mendarat. */
+  /** Ukuran asli, agar ruangnya dipesan sebelum gambar selesai diunduh. */
   gambar: { src: string; lebar: number; tinggi: number };
   alt: string;
 }) {
@@ -330,7 +294,6 @@ function BingkaiLayar({
   );
 }
 
-/** Gambaran bank soal: beberapa pilihan jawaban, satu di antaranya terpilih. */
 function GambarSoal() {
   return (
     <div className="flex h-full flex-col justify-center gap-2 bg-cream/40 py-6 pr-6 pl-4">
@@ -357,7 +320,6 @@ function GambarSoal() {
   );
 }
 
-/** Gambaran ebook: tumpukan halaman dengan sampul di depan. */
 function GambarEbook() {
   return (
     <div className="relative grid h-full place-items-center bg-cream/40 py-6">

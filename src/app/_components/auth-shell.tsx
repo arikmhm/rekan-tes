@@ -19,11 +19,7 @@ const sorotan = [
   },
 ];
 
-/**
- * Kerangka halaman akun: panel bermerek di kiri, formulir di kanan. Panelnya
- * dilepas di bawah lg — di layar sempit ia hanya akan mendorong formulir turun,
- * padahal formulir itulah yang dicari orang saat membuka halaman ini.
- */
+/** Panel merek dilepas di bawah lg agar formulir tidak terdorong turun. */
 export function AuthShell({
   title,
   description,
@@ -42,8 +38,6 @@ export function AuthShell({
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.18] mask-[linear-gradient(to_bottom,black,transparent)]"
         />
-        {/* Kotak oranye miring yang separuh keluar bingkai: aksen yang sama
-            dipakai beranda, cukup untuk memecah bidang biru tanpa gambar. */}
         <div
           aria-hidden
           className="pointer-events-none absolute -right-24 -bottom-24 size-80 rotate-12 rounded-[3rem] border border-brand-orange/30 bg-brand-orange/10"
@@ -91,7 +85,6 @@ export function AuthShell({
       </aside>
 
       <div className="flex flex-1 flex-col px-5 py-10 sm:px-8 sm:py-14">
-        {/* Jalan pulang saat panel kiri tidak tampil. */}
         <Link
           href="/"
           className="w-fit text-lg font-semibold tracking-tight text-brand transition-opacity hover:opacity-70 lg:hidden"

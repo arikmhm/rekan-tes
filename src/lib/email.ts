@@ -1,12 +1,7 @@
 /**
- * Pengiriman email lewat REST API Resend. SDK `resend` tidak dipasang karena
- * satu POST JSON tidak membutuhkannya.
+ * REST API Resend tanpa SDK; kredensial lewat argumen agar teruji tanpa `server-only`.
  *
- * Fungsi ini murni terhadap environment: kredensial diterima sebagai argumen
- * sehingga modul tidak perlu guard `server-only` dan tetap dapat diuji.
- *
- * ponytail: hanya plain text. Tambahkan versi HTML ketika ada email yang
- * memang membutuhkan format, bukan untuk tautan verifikasi dan reset.
+ * ponytail: plain text saja; tambah HTML bila ada email yang butuh format.
  */
 export async function sendEmail(message: {
   apiKey: string;
@@ -24,16 +19,12 @@ export async function sendEmail(message: {
   });
 
   if (!response.ok) {
-    // Alamat penerima tidak ikut dicatat agar log tidak menyimpan data pribadi.
+    // Penerima tidak dicatat: data pribadi.
     throw new Error(`Resend menolak pengiriman (${response.status}): ${await response.text()}`);
   }
 }
 
-/**
- * Alamat saja dari `EMAIL_FROM` yang berbentuk `Nama <alamat@domain>`. Halaman
- * legal memakainya sebagai kontak, sehingga kontak ikut berubah begitu domain
- * pengirim diganti dan tidak ada alamat kedua yang perlu dijaga.
- */
+/** `Nama <alamat@domain>` → alamat; dipakai sebagai kontak di halaman legal. */
 export function emailAddress(from: string) {
   return from.match(/<([^>]+)>/)?.[1].trim() ?? from.trim();
 }

@@ -31,7 +31,6 @@ export default async function TesDetailPage({
   return (
     <SiteShell>
       <div className="relative overflow-hidden">
-        {/* Pola yang sama dengan halaman produk, hanya di kepala halaman lalu lenyap. */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[url('/patterns/jigsaw.svg')] bg-repeat opacity-[0.04] mask-[linear-gradient(to_bottom,black,transparent)]"

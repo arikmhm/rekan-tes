@@ -9,18 +9,14 @@ export const ROLE_ADMIN = "admin";
 export const ROLE_PARTICIPANT = "participant";
 
 /**
- * Penolakan memakai `redirect` dan `notFound`, bukan `forbidden`/`unauthorized`
- * dari Next.js, karena keduanya masih memerlukan flag eksperimental
- * `authInterrupts`. Batas otorisasi tidak diletakkan di atas API eksperimental.
- * `notFound` juga tidak membocorkan keberadaan route admin kepada non-admin.
+ * `redirect`/`notFound`, bukan `forbidden`/`unauthorized` yang masih butuh flag
+ * eksperimental `authInterrupts`. `notFound` juga menyembunyikan route admin.
  */
 
-/** Session milik request saat ini, atau null bila belum login. */
 export async function getSession() {
   return auth.api.getSession({ headers: await headers() });
 }
 
-/** User yang sedang login, atau diarahkan ke halaman masuk. */
 export async function requireUser() {
   const session = await getSession();
 
@@ -31,16 +27,11 @@ export async function requireUser() {
   return session.user;
 }
 
-/** Satu sumber pemeriksaan admin; dua pemanggil di bawah beda cara menolak. */
 async function adminOrNull() {
   const session = await getSession();
   return session?.user.role === ROLE_ADMIN ? session.user : null;
 }
 
-/**
- * User admin untuk halaman, atau ditolak di server. Bukan sekadar
- * menyembunyikan UI: non-admin ditolak sebelum data apa pun dibaca.
- */
 export async function requireAdmin() {
   const user = await adminOrNull();
 
@@ -51,10 +42,7 @@ export async function requireAdmin() {
   return user;
 }
 
-/**
- * Versi untuk Server Action. `notFound()` di dalam action menghasilkan 500,
- * bukan penolakan yang bersih, jadi mutasi memakai error biasa.
- */
+/** Untuk Server Action: `notFound()` di dalam action menghasilkan 500. */
 export async function requireAdminMutation() {
   const user = await adminOrNull();
 
@@ -65,13 +53,7 @@ export async function requireAdminMutation() {
   return user;
 }
 
-/**
- * User yang sudah memverifikasi email. Dipakai pada jalur pembelian (RT-009):
- * PRD mewajibkan verifikasi sebelum membeli, bukan sebelum login. Yang belum
- * terverifikasi diarahkan ke profilnya sendiri — di sana tombol kirim ulang
- * tautannya sudah ada, dan ia tidak terlempar keluar dari ruang peserta di
- * tengah pembelian.
- */
+/** Jalur pembelian. Yang belum terverifikasi diarahkan ke profil, tempat tombol kirim ulang. */
 export async function requireVerifiedUser() {
   const user = await requireUser();
 
@@ -82,10 +64,7 @@ export async function requireVerifiedUser() {
   return user;
 }
 
-/**
- * Memastikan resource memang milik peminta. Admin dikecualikan agar dapat
- * menangani kendala operasional pada RT-015.
- */
+/** Admin dikecualikan untuk menangani kendala operasional. */
 export async function assertOwner(ownerId: string) {
   const session = await getSession();
 

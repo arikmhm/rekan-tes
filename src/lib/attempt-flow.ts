@@ -1,8 +1,4 @@
-/**
- * Aturan urutan pengerjaan attempt. Dipisahkan dari query database dengan
- * alasan yang sama seperti `test-publish.ts`: file `"use server"` hanya boleh
- * mengekspor fungsi async, dan aturan ini harus dapat diuji tanpa database.
- */
+/** Aturan murni attempt, terpisah dari `attempt.ts` agar teruji tanpa database. */
 
 export type SubtestProgress = {
   position: number;
@@ -11,16 +7,11 @@ export type SubtestProgress = {
   durationSeconds: number;
 };
 
-/** Status akhir subtes; keduanya sama-sama berarti tidak dapat dibuka lagi. */
 export function isDone(status: string) {
   return status === "submitted" || status === "submitted_by_timeout";
 }
 
-/**
- * Alasan sebuah attempt belum boleh dikerjakan, atau null bila boleh. Order
- * adalah sumber hak akses, bukan attempt: attempt hanya ada karena order lunas,
- * dan masa akses order yang habis mencabut haknya walau attempt masih berjalan.
- */
+/** Hak akses bersumber dari order: masa akses habis mencabutnya walau attempt berjalan. */
 export function attemptAccessProblem(
   order: { status: string; accessExpiresAt: Date | null },
   now: Date,
@@ -34,54 +25,34 @@ export function attemptAccessProblem(
   return null;
 }
 
-/**
- * Subtes yang boleh dibuka peserta: subtes pertama menurut `position` yang
- * belum disubmit. Peserta tidak pernah diberi pilihan subtes lain, sehingga
- * subtes yang sudah disubmit tidak dapat dibuka kembali dan subtes berikutnya
- * tidak dapat dilompati — urutan dijaga oleh struktur, bukan oleh pemeriksaan
- * tambahan di setiap route.
- */
+/** Satu-satunya subtes yang boleh dibuka: yang pertama belum disubmit. */
 export function activeSubtest<T extends SubtestProgress>(rows: T[]): T | null {
   return sorted(rows).find((r) => !isDone(r.status)) ?? null;
 }
 
-/** Subtes setelah `position`, yaitu yang berhak jalan begitu satu disubmit. */
 export function nextSubtest<T extends SubtestProgress>(rows: T[], position: number): T | null {
   return sorted(rows).find((r) => r.position > position) ?? null;
 }
 
-/**
- * Batas waktu satu subtes berjalan, dihitung dari `started_at` milik server
- * dan durasi konfigurasi tes. Tidak disimpan sebagai kolom sendiri agar tidak
- * ada dua sumber kebenaran yang bisa berbeda.
- */
+/** Dihitung, bukan disimpan, agar tidak ada dua sumber kebenaran. */
 export function subtestDeadline(row: SubtestProgress): Date | null {
   return row.startedAt ? new Date(row.startedAt.getTime() + row.durationSeconds * 1000) : null;
 }
 
-/** Query sudah mengurutkan, tetapi urutan adalah aturannya — jangan diasumsikan. */
 function sorted<T extends SubtestProgress>(rows: T[]) {
   return [...rows].sort((a, b) => a.position - b.position);
 }
 
 export type TimeoutStep<T> = {
-  /** Subtes yang deadline-nya sudah lewat dan harus ditutup. */
   close: T;
-  /** Waktu penutupan: deadline itu sendiri, bukan saat halaman dibuka. */
+  /** Deadline itu sendiri, bukan saat halaman dibuka. */
   at: Date;
-  /** Subtes berikutnya yang jamnya mulai berjalan sejak `at`, bila ada. */
   start: T | null;
 };
 
 /**
- * Subtes yang seharusnya sudah tertutup karena waktunya habis, beserta
- * penerusnya. Dihitung, bukan dijadwalkan: tidak ada cron atau job yang bisa
- * mati diam-diam, dan hasilnya sama saja apakah peserta menutup peramban satu
- * menit atau satu minggu.
- *
- * Subtes penerus dimulai pada deadline pendahulunya, bukan pada `now`, supaya
- * menutup peramban tidak menghadiahi waktu tambahan. Karena itu satu kunjungan
- * dapat menutup beberapa subtes sekaligus — makanya berbentuk daftar langkah.
+ * Penerus dimulai pada deadline pendahulunya, bukan `now`, agar menutup
+ * peramban tidak menambah waktu. Satu kunjungan bisa menutup beberapa subtes.
  */
 export function timeoutPlan<T extends SubtestProgress>(rows: T[], now: Date): TimeoutStep<T>[] {
   const list = sorted(rows);
@@ -105,22 +76,13 @@ export function timeoutPlan<T extends SubtestProgress>(rows: T[], now: Date): Ti
 }
 
 export type HasilSoal = {
-  /** Bobot assignment; hanya diperoleh bila jawabannya benar. */
   weight: number;
-  /** Ada baris jawaban untuk soal ini. Soal yang dilewati tidak punya baris. */
+  /** Ada opsi terpilih; baris tanpa opsi hanya mencatat waktu. */
   dijawab: boolean;
-  /** Kebenaran yang dibekukan saat subtes ditutup, bukan dihitung ulang. */
   isCorrect: boolean | null;
 };
 
-/**
- * Ringkasan satu subtes. Jawaban salah dan kosong sama-sama bernilai nol; MVP
- * tidak memakai penalti, jadi skor tidak pernah turun karena menebak.
- *
- * `isCorrect` yang masih null pada soal yang dijawab dihitung sebagai salah,
- * bukan benar: kalau penilaian pernah gagal, kesalahannya tidak boleh
- * menguntungkan skor.
- */
+/** `isCorrect` null pada soal yang dijawab dihitung salah, bukan benar. */
 export function ringkasSubtes(soal: HasilSoal[]) {
   const benar = soal.filter((s) => s.dijawab && s.isCorrect === true);
   const salah = soal.filter((s) => s.dijawab && s.isCorrect !== true);
@@ -135,13 +97,9 @@ export function ringkasSubtes(soal: HasilSoal[]) {
 }
 
 /**
- * Jawaban cadangan peramban yang layak dipulihkan saat layar kerja dibuka:
- * assignment-nya memang ada di subtes ini, opsinya benar-benar milik soal itu,
- * dan nilainya berbeda dari yang sudah tercatat server. Tanpa saringan ini,
- * sisa `localStorage` dari sesi lama — atau isinya yang diutak-atik — ikut
- * masuk ke antrean simpan dan ditolak server satu per satu.
- *
- * Murni supaya dapat diuji tanpa peramban; server tetap memvalidasi ulang.
+ * Cadangan `localStorage` yang layak masuk antrean simpan: milik subtes ini,
+ * opsinya sah, dan berbeda dari yang tercatat server. Sisa sesi lama atau isi
+ * yang diutak-atik tersaring di sini; server tetap memvalidasi ulang.
  */
 export function jawabanPulih(
   tersimpan: Record<string, string>,

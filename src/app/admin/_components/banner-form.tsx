@@ -15,7 +15,6 @@ type Spanduk = {
   alt: string;
 };
 
-/** Formulir satu spanduk: dipakai untuk menambah maupun menyunting. */
 export function BannerForm({ spanduk }: { spanduk?: Spanduk }) {
   const [error, action, pending] = useActionState(saveBanner, null);
   const uid = spanduk?.id ?? "baru";
@@ -59,11 +58,6 @@ export function BannerForm({ spanduk }: { spanduk?: Spanduk }) {
   );
 }
 
-/**
- * Satu baris spanduk: pratinjau gambarnya, urutannya, dan formulir suntingnya.
- * Pratinjau memakai `<img>` biasa — gambarnya sudah dilayani CDN penyimpanan
- * objek, jadi melewatkannya lagi ke pengoptimal hanya menambah perjalanan.
- */
 export function BannerRow({
   spanduk,
   pertama,

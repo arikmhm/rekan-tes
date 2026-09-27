@@ -142,9 +142,8 @@ export function AppSidebar({ nama }: { nama: string }) {
                   Lihat situs
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                {/* Form, bukan onClick: keluar harus tetap bekerja walau
-                    JavaScript-nya belum siap. `closeOnClick={false}` menjaga
-                    tombolnya tetap ada di DOM sampai formulirnya terkirim. */}
+                {/* Form agar keluar jalan tanpa JavaScript. `closeOnClick={false}` menjaga
+                    tombolnya di DOM sampai formulir terkirim. */}
                 <form action={keluar}>
                   <DropdownMenuItem
                     closeOnClick={false}

@@ -7,18 +7,13 @@ const hairline = "border-[#105C78]/20";
 
 export const URUTAN_JENIS = Object.keys(JENIS) as JenisProduk[];
 
-/**
- * Penyaring jenis produk. Dipakai etalase maupun pustaka: keduanya menyaring
- * hal yang sama, jadi penyaringnya pun satu — tinggal berbeda halaman tujuan
- * dan angka yang dihitung pemanggilnya.
- */
 export function SaringanJenis({
   dasar,
   aktif,
   jumlah,
   total,
 }: {
-  /** Halaman tempat penyaring ini tinggal, tanpa query. */
+  /** Tanpa query. */
   dasar: string;
   aktif: JenisProduk | null;
   jumlah: Record<JenisProduk, number>;
@@ -42,8 +37,6 @@ export function SaringanJenis({
 
         return (
           <Fragment key={label}>
-            {/* Garis pemisah menandai batas antara "semua" dan penyaring
-                jenis produk. */}
             {kunci === URUTAN_JENIS[0] && (
               <span className="mx-1 h-5 w-px bg-brand/20" aria-hidden />
             )}
@@ -69,7 +62,6 @@ export function SaringanJenis({
   );
 }
 
-/** Menghitung isi tiap jenis dari daftar apa pun yang punya kolom `jenis`. */
 export function hitungJenis(daftar: { jenis: JenisProduk }[]) {
   return Object.fromEntries(
     URUTAN_JENIS.map((j) => [j, daftar.filter((x) => x.jenis === j).length]),

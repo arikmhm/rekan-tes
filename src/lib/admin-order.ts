@@ -11,11 +11,7 @@ import { grantReasonProblem } from "./order-consistency";
 
 const ORDER_STATUS = ["pending", "paid", "expired", "cancelled", "refunded"] as const;
 
-/**
- * Daftar order untuk panel operasional. Pencarian menyasar hal yang benar-benar
- * dipegang peserta saat mengeluh: username, email, nomor invoice, atau id order
- * yang mereka salin dari URL.
- */
+/** Pencarian menyasar yang dipegang peserta saat mengeluh: username, email, invoice, id order. */
 export async function listOrdersForAdmin(filter: { q?: string; status?: string }) {
   await requireAdmin();
 
@@ -27,8 +23,6 @@ export async function listOrdersForAdmin(filter: { q?: string; status?: string }
         .where(ilike(schema.payments.externalId, `%${q}%`))
     : null;
 
-  // Dicocokkan ke daftar status yang sah, bukan di-cast: nilainya datang dari
-  // query string dan bisa berisi apa saja.
   const status = ORDER_STATUS.find((s) => s === filter.status);
 
   const where = [
@@ -63,12 +57,10 @@ export async function listOrdersForAdmin(filter: { q?: string; status?: string }
     .leftJoin(schema.testAttempts, eq(schema.testAttempts.orderId, schema.orders.id))
     .where(where.length ? and(...where) : undefined)
     .orderBy(desc(schema.orders.createdAt))
-    // ponytail: batas tetap seperti daftar admin lain. Tambahkan paginasi
-    // ketika jumlah order sungguhan melewati angka ini.
+    // ponytail: batas tetap; paginasi bila order melewati angka ini.
     .limit(100);
 }
 
-/** Satu order dengan seluruh pembayaran, attempt, dan jejak penggantiannya. */
 export async function getOrderForAdmin(id: string) {
   await requireAdmin();
 
@@ -124,7 +116,6 @@ export async function getOrderForAdmin(id: string) {
       .from(schema.testAttempts)
       .where(eq(schema.testAttempts.orderId, id)),
 
-    // Order pengganti yang lahir dari order ini; bagian lain dari jejak audit.
     db
       .select({
         id: schema.orders.id,
@@ -151,16 +142,7 @@ export async function getOrderForAdmin(id: string) {
   };
 }
 
-/**
- * Memberi akses pengganti: membuat order baru bernilai nol beserta attempt
- * barunya, menunjuk order yang digantikan, dan menyimpan alasan serta admin
- * pemberinya di baris order itu sendiri.
- *
- * Sengaja tidak menyentuh order lama sama sekali — tidak menghapus hasil,
- * tidak menghidupkan ulang attempt yang sudah selesai, tidak mengubah
- * statusnya. Hak baru berdiri sendiri sehingga histori tetap dapat dibaca
- * apa adanya, dan peserta mendapat kesempatan yang benar-benar baru.
- */
+/** Order baru bernilai nol plus attempt baru; order lama sengaja tidak disentuh. */
 export async function grantReplacementAccess(_prev: string | null, form: FormData) {
   const admin = await requireAdminMutation();
 
@@ -187,8 +169,7 @@ export async function grantReplacementAccess(_prev: string | null, form: FormDat
       .values({
         userId: lama.userId,
         testId: lama.testId,
-        // Penggantian bukan penjualan: nilainya nol dan tidak pernah menunggu
-        // pembayaran, sehingga tidak mengotori angka pendapatan.
+        // Nol agar tidak masuk angka pendapatan.
         amount: 0,
         status: "paid",
         accessExpiresAt: new Date(Date.now() + ACCESS_DAYS * 24 * 60 * 60_000),

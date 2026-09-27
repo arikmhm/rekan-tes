@@ -1,14 +1,10 @@
-/**
- * Pembacaan soal dari JSON dan bentuk soal baru yang diterima Server Action.
- * Berdiri di luar `admin.ts` karena file `"use server"` hanya boleh mengekspor
- * fungsi async, dan agar parser-nya dapat diuji tanpa database.
- */
+/** Parser impor soal, di luar `admin.ts` agar teruji tanpa database. */
 
 import { z } from "zod";
 
 import { OPTION_LABELS } from "./question-input";
 
-/** Bentuk yang sudah siap disimpan; kategori sudah berupa id, bukan kode. */
+/** Kategori sudah berupa id, bukan kode. */
 export const soalBaruSchema = z.object({
   categoryId: z.string().min(1, "kategori wajib dipilih"),
   prompt: z.string().trim().min(5, "pertanyaan minimal 5 karakter"),
@@ -22,10 +18,6 @@ export const soalBaruSchema = z.object({
 
 export type SoalBaru = z.infer<typeof soalBaruSchema>;
 
-/**
- * Bentuk JSON yang diminta dari penyusun soal atau model AI. Memakai istilah
- * Indonesia karena itu yang dibaca manusia saat menyusun promptnya.
- */
 const jsonSchema = z.array(
   z.object({
     kategori: z.string().trim().min(1),
@@ -37,11 +29,7 @@ const jsonSchema = z.array(
   }),
 );
 
-/**
- * Menerjemahkan `benar` menjadi indeks pilihan. Nomor urut (1) dan label huruf
- * ("B") dua-duanya diterima: keluaran model berganti-ganti di antara keduanya,
- * dan menolak salah satunya hanya menciptakan impor gagal yang tidak perlu.
- */
+/** Nomor urut (1) maupun huruf ("B") diterima: keluaran model berganti-ganti. */
 function indeksBenar(benar: number | string, jumlah: number) {
   if (typeof benar === "number") {
     return benar >= 1 && benar <= jumlah ? benar - 1 : -1;
@@ -55,12 +43,8 @@ function indeksBenar(benar: number | string, jumlah: number) {
 }
 
 /**
- * Masalah pertama pada satu soal, atau null bila lengkap. Dipakai pratinjau di
- * peramban dan pemeriksaan di server, sehingga aturannya tidak bisa berbeda
- * antara yang dilihat admin dan yang benar-benar disimpan.
- *
- * Berbeda dari formulir satuan, penyimpanan massal menuntut soal yang sudah
- * utuh: yang diimpor adalah keluaran jadi, bukan coretan setengah jalan.
+ * Dipakai pratinjau dan server agar aturannya sama. Berbeda dari formulir
+ * satuan, simpan massal menuntut soal yang sudah utuh.
  */
 export function masalahSoal(soal: unknown): string | null {
   const parsed = soalBaruSchema.safeParse(soal);
@@ -75,17 +59,10 @@ export function masalahSoal(soal: unknown): string | null {
 
 export type HasilBaca = {
   soal: SoalBaru[];
-  /** Satu pesan per soal yang ditolak; soal lain tetap terbaca. */
   galat: string[];
 };
 
-/**
- * Membaca teks JSON menjadi daftar soal. Soal yang bermasalah dilaporkan per
- * nomor dan tidak menggugurkan sisanya — impor 50 soal tidak layak batal hanya
- * karena satu kode kategori salah ketik.
- *
- * `kategori` memetakan kode kategori ke id.
- */
+/** Soal bermasalah dilaporkan per nomor tanpa menggugurkan sisanya. */
 export function bacaJson(teks: string, kategori: Map<string, string>): HasilBaca {
   let mentah: unknown;
   try {
@@ -130,7 +107,6 @@ export function bacaJson(teks: string, kategori: Map<string, string>): HasilBaca
   return { soal, galat };
 }
 
-/** Contoh yang ditempel admin ke prompt AI-nya. */
 export const CONTOH_JSON = `[
   {
     "kategori": "TIU",

@@ -1,12 +1,6 @@
 import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-/**
- * Tabel yang dikelola Better Auth. Bentuknya mengikuti definisi versi
- * terpasang; `src/db/auth-schema.test.ts` membandingkan file ini dengan
- * `getAuthTables()` sehingga perbedaan terdeteksi saat versi dinaikkan.
- *
- * Kolom memakai snake_case, sesuai default adapter Drizzle.
- */
+/** Ditulis tangan; `auth-schema.test.ts` membandingkannya dengan `getAuthTables()`. */
 
 const id = () => text("id").primaryKey();
 
@@ -18,7 +12,7 @@ export const user = pgTable("user", {
   image: text("image"),
   username: text("username").unique(),
   displayUsername: text("display_username"),
-  /** Server-owned. Peserta tidak dapat mengirim atau mengubah nilai ini. */
+  /** Server-owned. */
   role: text("role").notNull().default("participant"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -50,7 +44,6 @@ export const account = pgTable("account", {
   accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
   refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
   scope: text("scope"),
-  /** Hash password berada di sini, bukan pada tabel `user`. */
   password: text("password"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

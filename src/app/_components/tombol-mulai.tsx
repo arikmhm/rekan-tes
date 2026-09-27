@@ -6,14 +6,7 @@ import { useRef } from "react";
 
 const hairline = "border-[#105C78]/20";
 
-/**
- * Tombol mulai beserta konfirmasinya. Memakai elemen <dialog> bawaan peramban,
- * jadi modalitas, jebakan fokus, tombol Esc, dan latar gelapnya ditangani
- * platform — tanpa pustaka dialog sendiri.
- *
- * Konfirmasinya bukan basa-basi: begitu halaman pengerjaan terbuka, hitung
- * mundur langsung berjalan dan tidak bisa dijeda.
- */
+/** Konfirmasi wajib: begitu halaman pengerjaan terbuka, hitung mundur tak bisa dijeda. */
 export function TombolMulai({
   href,
   jumlahSoal,

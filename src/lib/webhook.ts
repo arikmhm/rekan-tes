@@ -14,11 +14,7 @@ export type ActivationResult =
   | { result: "amount_mismatch"; expected: number }
   | { result: "still_pending" };
 
-/**
- * Mengaktifkan order dan memberi satu attempt setelah notifikasi QRIS `SUCCESS`
- * tervalidasi tanda tangannya. Invoice dan nominal dicocokkan sebelum
- * perubahan apa pun; keduanya sumber kebenaran, bukan yang dikirim notifikasi.
- */
+/** Invoice dan nominal dicocokkan dengan database sebelum perubahan apa pun. */
 export async function activatePayment(notif: QrisNotification): Promise<ActivationResult> {
   return db.transaction(async (tx) => {
     const [payment] = await tx
@@ -29,9 +25,8 @@ export async function activatePayment(notif: QrisNotification): Promise<Activati
     if (!payment) return { result: "not_found" };
     if (payment.amount !== notif.amount) return { result: "amount_mismatch", expected: payment.amount };
 
-    // Guard idempotency yang sebenarnya: baris hanya berubah bila belum
-    // `paid`. Notifikasi duplikat atau yang datang bersamaan akan kalah di
-    // kunci baris ini dan tidak pernah memberi attempt kedua.
+    // Guard idempotency: notifikasi duplikat atau bersamaan kalah di kunci baris
+    // ini dan tidak pernah memberi attempt kedua.
     const diperbarui = await tx
       .update(schema.payments)
       .set({ status: "paid", paidAt: new Date(), updatedAt: new Date() })
@@ -56,15 +51,10 @@ export async function activatePayment(notif: QrisNotification): Promise<Activati
 }
 
 /**
- * Jalur backup selain webhook: menanyakan status transaksi langsung ke DOKU,
- * lalu memakai fungsi aktivasi yang sama. Dipanggil dari halaman pesanan saat
- * masih `pending`, untuk kasus notifikasi yang belum atau tidak pernah sampai
- * (mis. Notification URL salah konfigurasi, atau diuji dari localhost yang
- * memang tidak bisa dituju DOKU).
+ * Cadangan webhook: Query QRIS lalu fungsi aktivasi yang sama.
  *
- * ponytail: tidak ada rate limit atau cache di sini — setiap kunjungan/refresh
- * halaman pesanan yang masih pending memanggil DOKU. Cukup untuk MVP; beri
- * jeda minimum antar panggilan bila trafik sungguhan membuat ini berarti.
+ * ponytail: tanpa rate limit, setiap tekan tombol memanggil DOKU. Beri jeda
+ * minimum antar panggilan bila mulai disalahgunakan.
  */
 export async function pollPaymentStatus(
   credentials: DokuCredentials,

@@ -9,11 +9,7 @@ import { grantReplacementAccess } from "@/lib/admin-order";
 
 import { FormError } from "./shell";
 
-/**
- * Memberi akses pengganti. Alasannya wajib dan tersimpan permanen pada order
- * baru, jadi formulir ini menyebutkan konsekuensinya sebelum ditekan, bukan
- * sesudah.
- */
+/** Alasan tersimpan permanen, jadi konsekuensinya disebut sebelum ditekan. */
 export function GrantAccessForm({ orderId }: { orderId: string }) {
   const [error, action, pending] = useActionState(grantReplacementAccess, null);
 

@@ -10,19 +10,12 @@ import { hitungJenis, SaringanJenis, URUTAN_JENIS } from "./saringan-jenis";
 
 const hairline = "border-[#105C78]/20";
 
-// Tiga produk pertama disorot di korsel: dua muat sekaligus di layar lebar,
-// jadi yang ketiga memberi korselnya sesuatu untuk digeser. Lebih dari itu ia
-// berubah jadi daftar kedua, padahal daftar aslinya ada tepat di bawahnya.
+// Dua muat di layar lebar; yang ketiga memberi korsel alasan untuk digeser.
 const SOROTAN = 3;
 
 const slide = "w-full shrink-0 snap-start sm:w-[calc(50%-0.5rem)]";
 
-/**
- * Etalase produk: korsel sorotan, penyaring jenis, lalu daftarnya. Satu
- * etalase untuk dua tempat — halaman produk publik dan halaman depan ruang
- * peserta — karena barang yang dipajang memang sama; yang berbeda cuma alamat
- * halamannya.
- */
+/** Dipakai halaman produk publik dan ruang peserta; bedanya hanya alamat. */
 export async function EtalaseProduk({
   jenis,
   dasar,
@@ -30,18 +23,15 @@ export async function EtalaseProduk({
   sorotan = true,
 }: {
   jenis?: string;
-  /** Halaman tempat etalase ini tinggal, dipakai penyaring jenis. */
   dasar: string;
-  /** Awalan alamat halaman detail produk, tanpa slug di ujungnya. */
+  /** Awalan alamat detail, tanpa slug. */
   detail: string;
-  /** Korsel sorotan di kepala etalase; dimatikan bila halamannya sudah punya
-      korsel sendiri. */
+  /** Dimatikan bila halamannya sudah punya korsel sendiri. */
   sorotan?: boolean;
 }) {
   const produk = await listProduk();
 
-  // Penyaring hidup di URL, sama seperti daftar produk publik: hasilnya bisa
-  // ditautkan dan tetap jalan tanpa JavaScript.
+  // Penyaring di URL: bisa ditautkan dan jalan tanpa JavaScript.
   const aktif = URUTAN_JENIS.find((j) => j === jenis) ?? null;
   const tampil = aktif ? produk.filter((p) => p.jenis === aktif) : produk;
 
@@ -115,9 +105,7 @@ export async function EtalaseProduk({
           </Link>
         </div>
       ) : (
-        // Lebar kartu mengikuti ruang yang tersisa di sebelah sidebar, bukan
-        // lebar jendela: begitu kolomnya muat 768px, daftar pecah jadi dua
-        // supaya kartunya tidak melar selebar halaman.
+        // Container query: lebar mengikuti ruang di sebelah sidebar, bukan jendela.
         <div className="@container mt-6">
           <ul className="grid gap-5 @3xl:grid-cols-2">
             {tampil.map((p) => (

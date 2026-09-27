@@ -24,7 +24,6 @@ type Kategori = { id: string; code: string; name: string };
 
 const STATUS = ["draft", "published", "archived"];
 
-/** Formulir satu subtes: dipakai untuk membuat maupun menyunting. */
 export function SubtestForm({ subtes, kategori }: { subtes?: Subtes; kategori: Kategori[] }) {
   const [error, action, pending] = useActionState(saveSubtest, null);
   const uid = subtes?.id ?? "baru";

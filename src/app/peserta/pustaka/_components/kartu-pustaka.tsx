@@ -21,13 +21,7 @@ export type MilikPeserta = {
   accessExpiresAt: Date | null;
 };
 
-/**
- * Satu produk milik peserta. Anatominya sengaja sama dengan kartu etalase —
- * chip jenis, judul, fakta berikon, lalu baris aksi di kaki kartu — supaya
- * berpindah dari etalase ke pustaka tidak terasa berpindah aplikasi. Yang
- * berbeda hanya isinya: bukan harga dan isi paket, melainkan keadaan
- * pengerjaan.
- */
+/** Anatominya sengaja sama dengan kartu etalase. */
 export function KartuPustaka({ milik }: { milik: MilikPeserta }) {
   const rampung = selesai(milik.attemptStatus);
   const tujuan = milik.attemptId
@@ -65,9 +59,7 @@ export function KartuPustaka({ milik }: { milik: MilikPeserta }) {
         {JENIS[milik.jenis].label}
       </span>
 
-      {/* Tautan utama menutupi seluruh kartu lewat ::after, jadi kartunya bisa
-          diklik di mana saja tanpa menyarangkan tautan di dalam tautan —
-          "Rincian pesanan" tetap jadi tautan tersendiri di atasnya. */}
+      {/* Tautan utama menutupi kartu lewat ::after, tanpa tautan bersarang. */}
       <h2 className="mt-3 text-2xl leading-snug font-medium tracking-[-0.01em] text-brand">
         <Link href={tujuan} className="after:absolute after:inset-0">
           {milik.nama}

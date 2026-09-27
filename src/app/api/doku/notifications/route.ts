@@ -4,11 +4,7 @@ import { NOTIFICATION_PATH, parseQrisNotification, verifyNotificationSignature }
 import { parseDokuEnv } from "@/lib/env-schema";
 import { activatePayment } from "@/lib/webhook";
 
-/**
- * Menerima HTTP Notification DOKU untuk QRIS. Terdaftar di DOKU Back Office
- * sebagai Notification URL; path-nya harus sama persis dengan
- * `NOTIFICATION_PATH` yang dipakai untuk memverifikasi tanda tangan.
- */
+/** Path harus sama persis dengan `NOTIFICATION_PATH` (ikut ditandatangani). */
 export async function POST(request: Request) {
   const rawBody = await request.text();
   const { secretKey } = parseDokuEnv(process.env);
@@ -44,8 +40,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid payload" }, { status: 400 });
   }
 
-  // Checkout DOKU hanya boleh mengabaikan status gagal (lihat best-practice
-  // DOKU); status non-sukses cukup diakui tanpa mengubah apa pun.
+  // Best practice DOKU: status non-sukses diakui tanpa mengubah apa pun.
   if (notifikasi.status !== "SUCCESS") {
     return NextResponse.json({ received: true });
   }
@@ -53,15 +48,12 @@ export async function POST(request: Request) {
   const hasil = await activatePayment(notifikasi);
 
   if (hasil.result === "not_found" || hasil.result === "amount_mismatch") {
-    // Dicatat untuk investigasi: invoice yang tidak dikenal atau nominal yang
-    // tidak cocok bisa berarti percobaan penipuan atau kesalahan konfigurasi.
+    // Invoice asing atau nominal janggal: penipuan atau salah konfigurasi.
     console.error("Notifikasi DOKU ditolak:", hasil.result, notifikasi.invoiceNumber, notifikasi.amount);
     return NextResponse.json({ error: hasil.result }, { status: 400 });
   }
 
-  // Satu-satunya jejak bahwa notifikasi benar-benar sampai dan diproses.
-  // Tanpa ini, "webhook tidak pernah tiba" dan "webhook tiba lalu berhasil"
-  // tidak bisa dibedakan dari log.
+  // Membedakan "webhook tak pernah tiba" dari "tiba dan berhasil" di log.
   console.log("Notifikasi DOKU diproses:", hasil.result, notifikasi.invoiceNumber);
 
   return NextResponse.json({ received: true });

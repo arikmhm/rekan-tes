@@ -11,11 +11,7 @@ const sql = readdirSync(dir)
   .map((f) => readFileSync(join(dir, f), "utf8"))
   .join("\n");
 
-/**
- * Menjaga jaminan yang tidak boleh hilang dari migrasi. Perilaku nyatanya
- * sudah diuji terhadap Neon; test ini mencegah constraint terhapus tanpa
- * sengaja saat schema berubah.
- */
+/** Mencegah constraint terhapus tanpa sengaja dari migrasi. */
 const wajib: [string, RegExp][] = [
   ["satu order maksimal satu attempt", /test_attempts_order_id_unique/],
   ["assignment soal tidak duplikat", /test_subtest_questions_subtest_question_key/],

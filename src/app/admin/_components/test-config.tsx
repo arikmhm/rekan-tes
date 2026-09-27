@@ -10,7 +10,6 @@ import { addAssignment, addTestSubtest, updateTestSubtest } from "@/lib/admin";
 
 import { FormError } from "./shell";
 
-/** Memasukkan satu subtes ke dalam tes. Posisi ditentukan server di urutan akhir. */
 export function AddSubtestForm({
   testId,
   pilihan,
@@ -51,7 +50,6 @@ export function AddSubtestForm({
   );
 }
 
-/** Durasi dan jumlah soal satu subtes di dalam tes. */
 export function SubtestConfigForm({
   id,
   durationSeconds,
@@ -98,11 +96,7 @@ export function SubtestConfigForm({
   );
 }
 
-/**
- * Menugaskan soal ke subtes. Daftar sudah dibatasi ke soal terbit yang
- * sekategori dengan subtes; server memeriksa ulang keduanya. Dicentang banyak
- * sekaligus karena mengisi satu subtes bisa berarti puluhan soal.
- */
+/** Daftar sudah disaring ke soal terbit sekategori; server memeriksa ulang. */
 export function AddAssignmentForm({
   testSubtestId,
   candidates,

@@ -15,17 +15,11 @@ import { KartuPustaka, type MilikPeserta } from "./_components/kartu-pustaka";
 
 export const metadata: Metadata = { title: "Pustaka" };
 
-// Status pengerjaan berubah sepanjang sesi, jadi halaman ini membaca ulang
-// database setiap kali dibuka.
 export const dynamic = "force-dynamic";
 
 const hairline = "border-[#105C78]/20";
 
-/**
- * Produk yang sudah dibayar beserta jalan masuk untuk memakainya. Isinya
- * disaring dari pesanan lunas, bukan tabel tersendiri: kepemilikan produk hari
- * ini memang lahir dari order yang berstatus `paid`.
- */
+/** Kepemilikan diturunkan dari order `paid`, bukan tabel tersendiri. */
 export default async function PustakaPage({
   searchParams,
 }: {
@@ -33,9 +27,7 @@ export default async function PustakaPage({
 }) {
   const user = await requireUser();
 
-  // Semua isi pustaka hari ini lahir dari order simulasi — jenis lain belum
-  // punya jalur pemenuhan sama sekali. Jenisnya tetap dilekatkan di sini supaya
-  // penyaringnya tinggal membaca data, bukan dirombak saat jenis lain terbit.
+  // Baru jenis simulasi yang punya jalur pemenuhan.
   const milik: MilikPeserta[] = (await listOrdersForUser(user.id))
     .filter((o) => o.status === "paid")
     .map((o) => ({
@@ -48,8 +40,6 @@ export default async function PustakaPage({
       accessExpiresAt: o.accessExpiresAt,
     }));
 
-  // Penyaring hidup di URL, sama seperti etalase: hasilnya bisa ditautkan dan
-  // tetap jalan tanpa JavaScript.
   const dipilih = (await searchParams).jenis;
   const aktif = URUTAN_JENIS.find((j) => j === dipilih) ?? null;
   const tampil = aktif ? milik.filter((m) => m.jenis === aktif) : milik;
@@ -86,8 +76,6 @@ export default async function PustakaPage({
           </Link>
         </div>
       ) : (
-        // Lebar kartu mengikuti ruang yang tersisa di sebelah sidebar, bukan
-        // lebar jendela — sama seperti etalase.
         <div className="@container mt-6">
           <ul className="grid gap-5 @3xl:grid-cols-2">
             {tampil.map((m) => (

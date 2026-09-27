@@ -14,8 +14,6 @@ import { SiteShell } from "../../_components/site-shell";
 import { TombolMulai } from "../../_components/tombol-mulai";
 import { getPaket, isiPerSubtes, paketSimulasi } from "../data";
 
-// Paketnya statis dan sedikit, jadi seluruh rutenya bisa disiapkan saat build:
-// halaman ini tidak pernah menyentuh basis data.
 export function generateStaticParams() {
   return paketSimulasi.map((p) => ({ slug: p.slug }));
 }
@@ -97,8 +95,6 @@ export default async function SimulasiDetailPage({
             </p>
           </div>
 
-          {/* Kartu mulai diletakkan lebih dulu di layar sempit supaya tombolnya
-            tidak terkubur di bawah rincian isi paket. */}
           <div className="mt-9 grid gap-8 lg:grid-cols-[1fr_21rem] lg:items-start">
             <div className="lg:order-first">
               <ul className="grid gap-3 sm:grid-cols-3">
@@ -203,7 +199,6 @@ export default async function SimulasiDetailPage({
           </div>
         </div>
 
-        {/* Pola yang sama dengan halaman produk dan beranda, duduk di kaki halaman. */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-[url('/patterns/endless-constellation.svg')] bg-repeat opacity-[0.07] mask-[linear-gradient(to_top,black,transparent)]"

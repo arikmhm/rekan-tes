@@ -2,11 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-/**
- * Bingkai header yang menempel di puncak layar: menyingkir saat halaman digulir
- * turun agar isi halaman dapat ruang penuh, lalu muncul lagi begitu pengunjung
- * menggulir naik sedikit saja — tanpa harus kembali ke puncak halaman.
- */
 export function HeaderGeser({ children }: { children: React.ReactNode }) {
   const [sembunyi, setSembunyi] = useState(false);
 
@@ -15,11 +10,8 @@ export function HeaderGeser({ children }: { children: React.ReactNode }) {
 
     function onScroll() {
       const y = window.scrollY;
-      // Gulir sependek beberapa piksel — termasuk pantulan di ujung halaman —
-      // diabaikan supaya header tidak berkedip naik-turun.
+      // Abaikan gulir kecil (termasuk pantulan) agar header tidak berkedip.
       if (Math.abs(y - terakhir) < 8) return;
-      // Sepanjang masih di dekat puncak header selalu tampil, jadi ia tidak
-      // sempat menghilang tepat saat halaman baru dibuka.
       setSembunyi(y > terakhir && y > 80);
       terakhir = y;
     }

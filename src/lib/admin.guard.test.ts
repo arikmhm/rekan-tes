@@ -3,12 +3,7 @@ import { join } from "node:path";
 
 import { expect, test } from "vitest";
 
-/**
- * `admin.ts` berisi Server Action yang dapat dipanggil langsung lewat HTTP,
- * bukan hanya dari halaman admin. Penolakan per-halaman saja tidak cukup, jadi
- * test ini memastikan setiap fungsi yang diekspor membuka dengan pemeriksaan
- * admin. Tanpa ini, satu action baru tanpa guard lolos tanpa terlihat.
- */
+/** Server Action bisa dipanggil langsung lewat HTTP: setiap ekspor wajib dijaga admin. */
 const source = readFileSync(join(process.cwd(), "src/lib/admin.ts"), "utf8");
 
 const MUTATIONS = [

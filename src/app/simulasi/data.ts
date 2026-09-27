@@ -1,18 +1,12 @@
-/**
- * Paket simulasi gratis: soal contoh yang bisa dikerjakan siapa saja tanpa akun.
- * Isinya sengaja ditulis di berkas ini, bukan di basis data — tidak ada attempt,
- * tidak ada jawaban tersimpan, dan halamannya tidak perlu menyentuh database
- * sama sekali. Simulasi berbayar yang sesungguhnya hidup di halaman produk /produk.
- */
+/** Soal simulasi gratis, sengaja statis agar halamannya tanpa database. */
 
 export type Soal = {
-  /** Nama subtes seperti yang dipakai di halaman produk. */
   subtes: string;
-  /** Versi pendek nama subtes, dipakai sebagai label sumbu radar hasil. */
+  /** Label pendek di layar hasil. */
   singkat: string;
   prompt: string;
   opsi: string[];
-  /** Indeks jawaban benar di dalam `opsi`. */
+  /** Indeks di `opsi`. */
   kunci: number;
   pembahasan: string;
 };
@@ -205,10 +199,7 @@ const numerik: Soal[] = [
   },
 ];
 
-/**
- * Urutannya menentukan urutan kartu di halaman simulasi gratis: paket pengenalan
- * lebih dulu, paket yang lebih sempit fokusnya menyusul.
- */
+/** Urutan kartu di halaman simulasi gratis. */
 export const paketSimulasi: Paket[] = [
   {
     slug: "campuran-tes-bank",
@@ -232,12 +223,10 @@ export function getPaket(slug: string) {
   return paketSimulasi.find((p) => p.slug === slug) ?? null;
 }
 
-/** Subtes yang diwakili sebuah paket, tanpa pengulangan, untuk label kartu. */
 export function daftarSubtes(paket: Paket) {
   return [...new Set(paket.soal.map((s) => s.subtes))];
 }
 
-/** Isi paket per subtes, berurutan seperti kemunculannya di daftar soal. */
 export function isiPerSubtes(paket: Paket) {
   const per = new Map<string, number>();
   for (const s of paket.soal) per.set(s.subtes, (per.get(s.subtes) ?? 0) + 1);

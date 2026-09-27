@@ -16,13 +16,8 @@ type Tes = {
 };
 
 /**
- * Langkah terakhir: satu ceklis yang menentukan produk terbit atau tetap draft.
- * `saveTest` menyimpan seluruh kolom produk, jadi nilai yang tidak diubah
- * dikirim ulang apa adanya — dan pemeriksaan kelengkapan sebelum terbit tetap
- * berjalan di dalam transaksi yang sama seperti dari formulir informasi.
- *
- * Ceklis yang dilepas pada produk yang sudah terbit berarti menariknya kembali
- * dari etalase; satu kendali untuk dua arah, bukan dua tombol berbeda.
+ * `saveTest` menyimpan semua kolom, jadi nilai lain dikirim ulang apa adanya.
+ * Melepas ceklis pada produk terbit berarti menariknya dari etalase.
  */
 export function FormulirTerbit({ tes }: { tes: Tes }) {
   const [error, action, pending] = useActionState(saveTest, null);

@@ -4,11 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /**
- * Sisa waktu subtes. Nilai awalnya dihitung server dari deadline server, dan
- * hitungannya memakai waktu yang berlalu sejak komponen dipasang — bukan jam
- * peramban — sehingga jam klien yang salah setel tidak menggeser sisa waktu.
- * Server tetap pemegang kebenaran: begitu mencapai nol, halaman diminta render
- * ulang dan server yang memutuskan subtes ditutup.
+ * Menghitung waktu berlalu sejak mount, bukan jam peramban, agar jam klien yang
+ * salah setel tidak berpengaruh. Di nol, server yang memutuskan subtes ditutup.
  */
 export function Countdown({ remainingSeconds }: { remainingSeconds: number }) {
   const router = useRouter();

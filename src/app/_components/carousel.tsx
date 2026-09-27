@@ -3,11 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 
-/**
- * Korsel sorotan. Penggeserannya memakai scroll-snap milik peramban — sentuhan,
- * roda, dan papan ketik sudah ditangani di sana — sehingga tombol panah tinggal
- * memanggil scrollBy, tanpa pustaka korsel sama sekali.
- */
+/** scroll-snap peramban; panah cukup memanggil `scrollBy`. */
 export function Korsel({ children }: { children: React.ReactNode }) {
   const jalur = useRef<HTMLDivElement>(null);
 
@@ -25,8 +21,6 @@ export function Korsel({ children }: { children: React.ReactNode }) {
         {children}
       </div>
 
-      {/* Panah hanya untuk tetikus: di layar sentuh geseran jari sudah cukup,
-          dan tombol melayang justru menutupi isi slide. */}
       {[
         {
           arah: -1 as const,

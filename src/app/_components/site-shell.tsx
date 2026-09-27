@@ -10,20 +10,13 @@ import { MenuMobile } from "./menu-mobile";
 /** Tanggal berlaku dokumen legal. Perbarui bersama isi dokumennya. */
 export const TERAKHIR_DIPERBARUI = "13 September 2026";
 
-/** Kontak resmi: alamat pengirim email layanan, satu sumber untuk semua halaman. */
 export const KONTAK = emailAddress(env.EMAIL_FROM);
 
-/**
- * Kerangka halaman publik selain landing page. Disclaimer independensi berada
- * di footer, sehingga setiap halaman produk dan detail selalu memuatnya.
- */
 export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SiteHeader />
 
-      {/* Kolom fleks supaya halaman yang ingin menjejak penuh cukup memakai
-          flex-1, tanpa menghitung tinggi header dan footer sendiri. */}
       <main className="flex flex-1 flex-col">{children}</main>
 
       <SiteFooter />
@@ -31,12 +24,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/**
- * Footer publik, satu untuk semua halaman. Satu baris saja: hak cipta lalu
- * ketiga dokumen legal. Penyangkalan selengkapnya — platform ini independen,
- * bukan mitra resmi rekrutmen bank, dan pembayaran tidak menjamin kelulusan —
- * dimuat syarat layanan yang ditautkan di sini.
- */
+/** Penyangkalan independensi selengkapnya ada di syarat layanan yang ditautkan. */
 export function SiteFooter() {
   return (
     <footer className="border-t border-[#105C78]/20 bg-white">
@@ -48,19 +36,9 @@ export function SiteFooter() {
   );
 }
 
-/**
- * Sorotan tautan navigasi: garis tipis yang tumbuh dari tengah ke samping.
- * Warnanya sengaja tidak berubah saat disorot — hanya garisnya yang muncul,
- * jadi teksnya tidak berkedip warna setiap kali kursor lewat.
- */
 export const tautanNav =
   "relative py-1 after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-brand-orange after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100";
 
-/**
- * Header publik, satu untuk semua halaman termasuk landing page. Di layar lebar
- * seluruh tautan tampil berjajar; di ponsel tempatnya tidak cukup, jadi isinya
- * pindah ke panel hamburger.
- */
 export function SiteHeader() {
   return (
     <HeaderGeser>
@@ -95,7 +73,6 @@ export function SiteHeader() {
   );
 }
 
-/** Dokumen legal wajib. Dipakai footer publik dan footer landing page. */
 export function LegalLinks() {
   return (
     <p className="flex flex-wrap gap-x-5 gap-y-1">
@@ -121,10 +98,6 @@ export function LegalLinks() {
   );
 }
 
-/**
- * Kerangka satu dokumen legal. Gaya heading dan daftar diatur sekali di sini
- * agar isi halaman tetap berupa teks, bukan tumpukan class.
- */
 export function LegalDoc({
   title,
   updated,

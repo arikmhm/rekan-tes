@@ -12,8 +12,7 @@ import { formatPrice } from "@/lib/format";
 
 const hairline = "border-[#105C78]/20";
 
-// Empat label sudah cukup memberi gambaran isi produk; sisanya diringkas jadi
-// satu chip agar kartu tidak berubah tinggi mengikuti jumlah labelnya.
+// Sisanya diringkas jadi satu chip agar tinggi kartu tetap.
 const CHIP_TAMPIL = 4;
 
 const IKON: Record<FaktaProduk["ikon"], typeof Layers> = {
@@ -23,17 +22,11 @@ const IKON: Record<FaktaProduk["ikon"], typeof Layers> = {
   akses: CalendarClock,
 };
 
-/**
- * Satu kartu produk. Dipakai daftar produk publik maupun daftar produk di ruang
- * peserta — keduanya menampilkan produk yang sama, jadi tampilannya pun satu.
- */
 export function KartuProduk({
   produk,
   href,
 }: {
   produk: Produk;
-  /** Tujuan kartu: daftar produk publik dan ruang peserta punya halaman detailnya
-      masing-masing, isi kartunya sama. */
   href: string;
 }) {
   return (

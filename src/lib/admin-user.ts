@@ -8,15 +8,7 @@ import { requireAdmin } from "./authz";
 
 const ROLE = ["participant", "admin"] as const;
 
-/**
- * Daftar pengguna untuk panel operasional, beserta angka yang benar-benar
- * ditanyakan saat menangani keluhan: berapa pesanan yang dibuat, berapa yang
- * lunas, dan kapan terakhir memesan.
- *
- * Satu query dengan agregat, bukan query hitung per pengguna. `orders` ke
- * `test_attempts` berkardinalitas 1:0..1 sehingga ikut dijoin tanpa
- * menggandakan baris dan membuat hitungan pesanan membengkak.
- */
+/** `orders` → `test_attempts` 1:0..1, jadi join tidak menggandakan hitungan. */
 export async function listUsersForAdmin(filter: { q?: string; role?: string; verified?: string }) {
   await requireAdmin();
 
@@ -51,7 +43,6 @@ export async function listUsersForAdmin(filter: { q?: string; role?: string; ver
     .where(where.length ? and(...where) : undefined)
     .groupBy(schema.user.id)
     .orderBy(desc(schema.user.createdAt))
-    // ponytail: batas tetap seperti daftar admin lain. Tambahkan paginasi
-    // ketika jumlah pengguna sungguhan melewati angka ini.
+    // ponytail: batas tetap; paginasi bila pengguna melewati angka ini.
     .limit(100);
 }

@@ -22,11 +22,7 @@ const label: Record<string, string> = {
   hasil: "Hasil",
 };
 
-/**
- * Sesi pengerjaan tinggal di /peserta/simulasi/<id>, padahal daftar simulasi
- * miliknya ada di pustaka. Remah "Simulasi" karena itu menunjuk ke sana, bukan
- * ke /peserta/simulasi yang memang bukan halaman.
- */
+/** /peserta/simulasi bukan halaman, jadi remahnya menunjuk ke pustaka. */
 const INDUK: Record<string, { href: string; teks: string }> = {
   simulasi: { href: "/peserta/pustaka", teks: "Pustaka" },
 };
@@ -37,25 +33,18 @@ const labelJenis: Record<string, string> = {
   materi: "Ebook",
 };
 
-/**
- * Jejak halaman ruang peserta. Halaman depan berisi daftar produk, jadi
- * jejaknya sekaligus menggantikan judul halaman. Di pustaka, jenis yang sedang
- * disaring ikut jadi remah terakhir meski ia hidup di query, bukan di path.
- */
+/** Di pustaka, filter jenis dari query ikut jadi remah terakhir. */
 export function PesertaBreadcrumbs() {
   const pathname = usePathname();
   const jenis = useSearchParams().get("jenis");
   const segmen = pathname.split("/").filter(Boolean).slice(1);
 
-  // Di halaman depan, "Produk" ikut jadi remah agar jejaknya tetap menyebut
-  // isi halaman alih-alih berhenti di nama ruangnya.
   const remah =
     segmen.length === 0
       ? [{ href: "/peserta", teks: "Produk" }]
       : segmen.map((s, i) => ({
           href: `/peserta/${segmen.slice(0, i + 1).join("/")}`,
-          // Segmen id tidak punya nama yang terbaca di sini; memuat datanya
-          // ulang cuma demi remah tidak sepadan, jadi cukup disebut "Rincian".
+          // Segmen id tidak dimuat ulang hanya demi nama remah.
           teks: label[s] ?? (s.length > 20 ? "Rincian" : s),
         }));
 
@@ -68,8 +57,7 @@ export function PesertaBreadcrumbs() {
     remah.unshift(induk);
   }
 
-  // Daftar produk tinggal di /peserta, bukan di /peserta/produk — remah
-  // pertamanya karena itu menunjuk ke halaman depan ruang peserta.
+  // Daftar produk tinggal di /peserta, bukan /peserta/produk.
   if (segmen[0] === "produk") {
     remah[0] = { href: "/peserta", teks: "Produk" };
   }
@@ -93,8 +81,7 @@ export function PesertaBreadcrumbs() {
         {remah.map(({ href, teks }, i) => {
           const terakhir = i === remah.length - 1;
 
-          // Separator sudah berupa <li>, jadi ia bersaudara dengan item,
-          // bukan anaknya. Menyarangkannya memicu galat hidrasi.
+          // Separator sudah <li>; menyarangkannya memicu galat hidrasi.
           return (
             <Fragment key={href}>
               <BreadcrumbSeparator />

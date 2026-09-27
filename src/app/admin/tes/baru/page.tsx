@@ -10,10 +10,7 @@ import { StepperTes } from "../_components/stepper-tes";
 
 export const metadata: Metadata = { title: "Produk baru" };
 
-/**
- * Langkah pertama berdiri sendiri karena subtes dan soal menempel pada id tes;
- * keduanya baru bisa diisi setelah produknya tersimpan sebagai draft.
- */
+/** Subtes dan soal menempel pada id tes, jadi produk disimpan sebagai draft dulu. */
 export default function TesBaruPage() {
   const menyusul = (apa: string) => (
     <EmptyState>Simpan informasi produk lebih dulu, lalu {apa} di sini.</EmptyState>

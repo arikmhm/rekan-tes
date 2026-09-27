@@ -16,8 +16,6 @@ import { SesiKerja } from "../../../_components/sesi-kerja";
 
 export const metadata: Metadata = { title: "Sesi pengerjaan" };
 
-// Status attempt berubah lewat Server Action dan waktu server; halaman selalu
-// dibaca ulang dari database agar tidak ada deadline basi yang tercache.
 export const dynamic = "force-dynamic";
 
 const hairline = "border-[#105C78]/20";
@@ -52,9 +50,6 @@ export default async function SesiPage({
 
   return (
     <div className="mx-auto w-full max-w-6xl p-4 pt-5 sm:p-6 sm:pt-6">
-      {/* Di layar kerja identitas sesi dan sisa waktu pindah ke bilah sesi,
-          jadi judul besar hanya tampil saat sesi belum atau sudah tidak
-          berjalan — persis seperti simulasi percobaan. */}
       {!sedangKerja && (
         <>
           <p className="text-xs font-medium text-brand/60">Sesi pengerjaan</p>
@@ -111,16 +106,14 @@ export default async function SesiPage({
         />
       ) : (
         <SesiKerja
-          // Subtes berganti berarti sesi kerja baru: nomor dan antrean simpan
-          // milik subtes sebelumnya tidak boleh ikut terbawa.
+          // Subtes baru = state kerja baru; antrean lama tidak terbawa.
           key={aktif.id}
           attemptId={attempt.id}
           subtesId={aktif.id ?? ""}
           subtesNama={aktif.name}
           posisi={aktif.position}
           jumlahSubtes={attempt.subtests.length}
-          // Hanya yang dibutuhkan layar kerja yang menyeberang ke klien; bobot
-          // penilaian tetap tinggal di server.
+          // Bobot tetap di server.
           soal={attempt.questions.map((q) => ({
             assignmentId: q.assignmentId,
             nomor: q.nomor,
@@ -134,8 +127,6 @@ export default async function SesiPage({
         />
       )}
 
-      {/* Daftar subtes hanya menemani layar yang bukan layar kerja: saat soal
-          terbuka, yang dibutuhkan cuma soal dan navigasinya. */}
       {!sedangKerja && (
         <>
           <h2 className="mt-10 text-lg font-medium text-brand">
@@ -173,7 +164,6 @@ export default async function SesiPage({
   );
 }
 
-/** Petunjuk wajib tampil sebelum timer subtes pertama berjalan. */
 function Petunjuk({
   attemptId,
   accessExpiresAt,

@@ -18,19 +18,12 @@ import {
 
 export type LangkahTes = {
   judul: string;
-  /** Belum bisa dibuka; dipakai halaman produk baru yang belum punya id. */
+  /** Produk baru yang belum punya id. */
   nonaktif?: boolean;
   isi: React.ReactNode;
 };
 
-/**
- * Kerangka langkah penyusunan produk. Isinya dirender di server dan dititipkan
- * sebagai prop, jadi hanya perpindahan langkah yang berjalan di peramban.
- *
- * Tidak ada keadaan yang ditahan di sini: tiap langkah menyimpan sendiri ke
- * database saat disubmit. Stepper-nya menata urutan kerja, bukan menampung
- * draft yang belum tersimpan.
- */
+/** Isi langkah dirender server; tiap langkah menyimpan sendiri, stepper tidak menahan draft. */
 export function StepperTes({ awal, langkah }: { awal: number; langkah: LangkahTes[] }) {
   const [aktif, setAktif] = useState(awal);
 
@@ -47,16 +40,11 @@ export function StepperTes({ awal, langkah }: { awal: number; langkah: LangkahTe
             <StepperItem
               key={l.judul}
               step={i + 1}
-              // Centang murni soal posisi: langkah di belakang yang sudah
-              // dilewati. Kelengkapan datanya tidak dipakai di sini — menandai
-              // langkah di depan sebagai selesai membuat penanda posisi hilang,
-              // dan syarat terbit toh sudah dirinci di langkah terakhir.
+              // Centang hanya menandai posisi, bukan kelengkapan data.
               disabled={l.nonaktif}
               className="relative flex-1 items-start"
             >
               <StepperTrigger className="flex flex-col gap-2.5">
-                {/* Selesai dan sedang dibuka memakai warna yang sama di komponen
-                    aslinya, jadi langkah aktif diberi cincin dan judul tebal. */}
                 <StepperIndicator className="data-[state=active]:ring-primary/30 data-[state=active]:ring-4">
                   {i + 1}
                 </StepperIndicator>
@@ -74,9 +62,7 @@ export function StepperTes({ awal, langkah }: { awal: number; langkah: LangkahTe
 
       <StepperPanel>
         {langkah.map((l, i) => (
-          // Kolom minmax(0,1fr) menahan lebar kolom agar tidak ikut isi
-          // terpanjang; tanpa itu tabel dan ringkasan menarik halaman melewati
-          // tepi layar ponsel.
+          // minmax(0,1fr): tanpa itu isi terpanjang menarik halaman melewati layar.
           <StepperContent
             key={l.judul}
             value={i + 1}
@@ -84,8 +70,6 @@ export function StepperTes({ awal, langkah }: { awal: number; langkah: LangkahTe
           >
             {l.isi}
 
-            {/* Navigasi antarlangkah. Tidak menyimpan apa pun: tiap langkah
-                punya tombol simpannya sendiri, ini hanya berpindah halaman. */}
             <div className="flex gap-3">
               {i > 0 && (
                 <Button type="button" variant="outline" onClick={() => setAktif(i)}>

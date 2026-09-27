@@ -1,10 +1,3 @@
-/**
- * Pembacaan dan validasi formulir soal. Dipisahkan dari `admin.ts` karena file
- * `"use server"` hanya boleh mengekspor fungsi async, dan agar logika ini dapat
- * diuji langsung.
- */
-
-/** Jumlah slot pilihan pada formulir. Slot kosong diabaikan saat menyimpan. */
 export const OPTION_SLOTS = 5;
 
 export const OPTION_LABELS = ["A", "B", "C", "D", "E"];
@@ -16,10 +9,7 @@ export type QuestionOptionInput = {
   position: number;
 };
 
-/**
- * Membaca slot pilihan. Slot kosong dibuang dan posisi dirapatkan, sehingga
- * admin boleh mengosongkan slot di tengah tanpa meninggalkan lubang posisi.
- */
+/** Slot kosong dibuang dan posisi dirapatkan. */
 export function readOptions(form: {
   get: (key: string) => FormDataEntryValue | null;
 }): QuestionOptionInput[] {
@@ -38,10 +28,7 @@ export function readOptions(form: {
     }));
 }
 
-/**
- * Syarat soal yang boleh terbit. Mengembalikan pesan galat, atau null bila
- * lolos. Draft sengaja dibiarkan lolos agar dapat disimpan setengah jalan.
- */
+/** Hanya untuk soal yang terbit; draft boleh setengah jadi. */
 export function publishProblem(options: QuestionOptionInput[]): string | null {
   if (options.length < 2) return "Soal terbit butuh minimal dua pilihan jawaban.";
 

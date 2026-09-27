@@ -33,14 +33,13 @@ type Opsi = {
 
 export type SoalHasil = {
   assignmentId: string;
-  /** Nomor berurut di seluruh sesi, bukan di dalam subtesnya sendiri. */
+  /** Berurut di seluruh sesi, bukan per subtes. */
   nomor: number;
   subtes: string;
   prompt: string;
   weight: number;
   dijawab: boolean;
   isCorrect: boolean | null;
-  /** Lama soal ini dibuka peserta, dalam detik. */
   detik: number;
   selectedOptionId: string | null;
   options: Opsi[];
@@ -56,18 +55,12 @@ export type SubtesHasil = {
   kosong: number;
   skor: number;
   maksimal: number;
-  /** Waktu terpakai subtes ini, atau null bila jamnya tidak tercatat. */
   detik: number | null;
-  /** Jatah waktu subtes ini, dalam detik. */
   jatah: number;
   soal: SoalHasil[];
 };
 
-/**
- * Jatah waktu wajar satu soal: durasi subtesnya dibagi rata jumlah soalnya.
- * Per subtes, bukan per sesi, karena tiap subtes punya jatah dan jumlah soal
- * yang berbeda — rata-rata sesi akan menghukum subtes yang soalnya padat.
- */
+/** Per subtes, bukan per sesi: rata-rata sesi menghukum subtes yang padat. */
 function idealSoal(subtes: SubtesHasil[], soal: SoalHasil) {
   const milik = subtes.find((x) => x.soal.some((q) => q.assignmentId === soal.assignmentId));
   if (!milik || milik.soal.length === 0) return 0;
@@ -75,7 +68,6 @@ function idealSoal(subtes: SubtesHasil[], soal: SoalHasil) {
   return Math.round(milik.jatah / milik.soal.length);
 }
 
-/** Warna satu kotak di peta jawaban. */
 function rupaSoal(s: SoalHasil) {
   if (!s.dijawab)
     return { label: "kosong", kelas: `${hairline} bg-white text-brand/40` };
@@ -93,11 +85,6 @@ const KETERANGAN: [string, string][] = [
   [`${hairline} bg-white`, "Kosong"],
 ];
 
-/**
- * Layar hasil sesi berbayar. Tata letaknya sengaja sama persis dengan hasil
- * simulasi percobaan — perkakas kartunya pun dipakai bersama — supaya peserta
- * yang sudah mencoba versi gratis menemukan bacaan yang sama di sini.
- */
 export function PapanHasil({
   subtes,
   total,
@@ -112,9 +99,7 @@ export function PapanHasil({
     salah: number;
     kosong: number;
   };
-  /** Jatah waktu seluruh subtes, dalam detik. */
   durasi: number;
-  /** Waktu yang benar-benar terpakai, atau null bila jamnya tidak tercatat. */
   terpakai: number | null;
 }) {
   const [dilihat, setDilihat] = useState(0);
@@ -130,8 +115,7 @@ export function PapanHasil({
         ? 0
         : Math.round((s.benar / (s.benar + s.salah + s.kosong)) * 100),
   }));
-  // Subtes dengan persentase terendah jadi bahan rekomendasi. Kalau seri, yang
-  // pertama muncul di urutan subtes yang dipilih — bukan hasil acak.
+  // Seri: yang pertama menang, bukan acak.
   const terlemah = perSubtes.reduce(
     (a, b) => (b.persen < a.persen ? b : a),
     perSubtes[0],

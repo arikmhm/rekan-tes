@@ -1,11 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
-/**
- * Kepala halaman admin. Kerangka aplikasinya sendiri (sidebar dan header)
- * berada di `src/app/admin/layout.tsx`, sehingga bagian ini hanya mengurus
- * judul, penjelasan, dan aksi utama halaman.
- */
 export function AdminShell({
   title,
   description,
@@ -36,7 +31,6 @@ export function AdminShell({
   );
 }
 
-/** Menampilkan pesan galat dari Server Action. */
 export function FormError({ message }: { message: string | null }) {
   if (!message) return null;
 
@@ -47,7 +41,6 @@ export function FormError({ message }: { message: string | null }) {
   );
 }
 
-/** Warna status konten: terbit menonjol, arsip meredup, draft menunggu. */
 export function StatusBadge({ status }: { status: string }) {
   if (status === "published") return <Badge>{status}</Badge>;
   if (status === "archived") return <Badge variant="secondary">{status}</Badge>;
@@ -59,7 +52,6 @@ export function StatusBadge({ status }: { status: string }) {
   );
 }
 
-/** Kotak kosong yang menjelaskan langkah berikutnya, bukan sekadar "kosong". */
 export function EmptyState({ children }: { children: React.ReactNode }) {
   return (
     <div className="text-muted-foreground rounded-xl border border-dashed p-10 text-center text-sm">
@@ -68,7 +60,6 @@ export function EmptyState({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Status transaksi punya arti berbeda dari status konten, jadi warnanya sendiri. */
 export function OrderBadge({ status }: { status: string }) {
   if (status === "paid") return <Badge>{status}</Badge>;
   if (status === "refunded" || status === "cancelled") {

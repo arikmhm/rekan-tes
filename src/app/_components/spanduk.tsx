@@ -14,15 +14,7 @@ const hairline = "border-[#105C78]/20";
 
 type Slide = { id: string; imageUrl: string; alt: string };
 
-/**
- * Spanduk di kepala halaman produk. Isinya diatur admin di `/admin/spanduk`;
- * selama belum ada satu pun, satu bidang kosong memegang tempatnya supaya tata
- * letak halaman tidak berubah begitu spanduk pertama masuk.
- *
- * Gambarnya dilayani CDN penyimpanan objek, jadi dipakai `<img>` biasa —
- * melewatkannya lagi ke pengoptimal hanya menambah satu perjalanan tanpa
- * menghemat apa pun.
- */
+/** `<img>` biasa: gambarnya sudah dari CDN R2, pengoptimal tidak menghemat apa pun. */
 export function Spanduk({ slides }: { slides: Slide[] }) {
   if (slides.length === 0) return <Kosong />;
 
@@ -43,8 +35,6 @@ export function Spanduk({ slides }: { slides: Slide[] }) {
         ))}
       </CarouselContent>
 
-      {/* Panah hanya muncul saat kursor ada di atas spanduk; di layar sentuh
-          geseran jari sudah menanganinya. */}
       <CarouselPrevious
         className={`left-4 hidden border ${hairline} bg-white/90 text-brand opacity-0 transition-opacity group-hover/spanduk:opacity-100 focus-visible:opacity-100 sm:inline-flex`}
       />
@@ -55,7 +45,7 @@ export function Spanduk({ slides }: { slides: Slide[] }) {
   );
 }
 
-/** Tempat spanduk saat belum ada isinya; ukurannya sama persis dengan slide. */
+/** Menjaga tata letak selama belum ada spanduk. */
 function Kosong() {
   return (
     <div

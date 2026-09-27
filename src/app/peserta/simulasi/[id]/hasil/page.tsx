@@ -54,8 +54,6 @@ export default async function HasilPage({
   );
 
   let urut = 0;
-  // Label sumbu disiapkan sekaligus supaya dua subtes tidak berakhir dengan
-  // singkatan yang sama — "Kesamaan Dasar" dan "Ketelitian Dasar" keduanya "KD".
   const singkat = labelSubtes(subtes.map((s) => s.name));
 
   const papan: SubtesHasil[] = subtes.map((s, i) => ({

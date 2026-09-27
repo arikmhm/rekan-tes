@@ -30,7 +30,7 @@ export function SaringanJenis({
 
   return (
     <div
-      className={`mt-8 flex flex-wrap items-center gap-2 border-b ${hairline} pb-5`}
+      className={`mt-8 flex items-center gap-2 overflow-x-auto border-b [scrollbar-width:none] ${hairline} pb-5`}
     >
       {saringan.map(({ kunci, label, angka }) => {
         const dipakai = kunci === aktif;
@@ -38,13 +38,13 @@ export function SaringanJenis({
         return (
           <Fragment key={label}>
             {kunci === URUTAN_JENIS[0] && (
-              <span className="mx-1 h-5 w-px bg-brand/20" aria-hidden />
+              <span className="mx-1 h-5 w-px shrink-0 bg-brand/20" aria-hidden />
             )}
 
             <Link
               href={kunci ? `${dasar}?jenis=${kunci}` : dasar}
               aria-current={dipakai ? "page" : undefined}
-              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-normal transition-colors ${
+              className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-normal transition-colors ${
                 dipakai
                   ? "border-brand bg-brand text-white"
                   : `${hairline} bg-white text-brand hover:border-brand-orange`

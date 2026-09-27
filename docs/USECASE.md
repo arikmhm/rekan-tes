@@ -1,7 +1,7 @@
 # Use Case Diagram — Rekan Tes
 
 Diagram disusun dari kode yang benar-benar ada (`src/lib/*.ts`, route `src/app/**`)
-dan disilangkan dengan user story pada [PRD.md](./PRD.md).
+dan disilangkan dengan aturan produk di [PRD.md](./PRD.md).
 
 ## Aktor
 
@@ -103,6 +103,7 @@ flowchart LR
       C10("Lepas assignment soal")
       C11("Terbitkan produk tes")
       C12("Validasi kelengkapan tes")
+      C13("Kelola spanduk korsel")
     end
 
     subgraph OPS["Operasional"]
@@ -157,6 +158,7 @@ flowchart LR
   ADMIN --- C9
   ADMIN --- C10
   ADMIN --- C11
+  ADMIN --- C13
   ADMIN --- O1
   ADMIN --- O2
   ADMIN --- O3
@@ -234,7 +236,7 @@ flowchart LR
   classDef uc fill:#ffffff,stroke:#105C78,color:#0b3d51
 
   class PENGUNJUNG,PESERTA,ADMIN,DOKU,EMAIL,WAKTU aktor
-  class A1,A2,A3,A4,A5,A6,A7,A8,K1,K2,K3,K4,K5,K6,B0,B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C11,C12,O1,O2,O3,O4,O5,O6,O7 uc
+  class A1,A2,A3,A4,A5,A6,A7,A8,K1,K2,K3,K4,K5,K6,B0,B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C11,C12,C13,O1,O2,O3,O4,O5,O6,O7 uc
 ```
 
 ## Catatan pemetaan ke kode
@@ -246,9 +248,10 @@ flowchart LR
 | Simulasi gratis | `src/app/simulasi/**` (data statis, tanpa auth) |
 | Checkout & QRIS | `src/lib/order.ts` → `startCheckout`, `checkPaymentStatus`; `src/lib/doku.ts` |
 | Notifikasi pembayaran | `src/app/api/doku/notifications/route.ts` → `verifyNotificationSignature` → `src/lib/webhook.ts` `activatePayment` |
-| Mulai / kerjakan / submit | `src/lib/attempt.ts` → `startAttempt`, `saveAnswer`, `getResult`; aturan di `src/lib/attempt-flow.ts` |
+| Mulai / kerjakan / submit | `src/lib/attempt.ts` → `startAttempt`, `saveAnswers`, `getResult`; aturan di `src/lib/attempt-flow.ts` |
 | Bank soal & impor JSON | `src/lib/admin.ts` → `saveQuestion`, `createQuestions`, `duplicateQuestion`; `src/lib/question-import.ts` |
 | Produk tes & assignment | `src/lib/admin.ts` → `saveTest`, `addAssignment`, `removeAssignment` |
+| Spanduk korsel | `src/lib/admin.ts` → `saveBanner`, `moveBanner`, `removeBanner`; tampil lewat `src/lib/produk.ts` |
 | Validasi terbit | `src/lib/test-publish.ts` → `testPublishProblem` |
 | Operasional admin | `src/lib/admin-user.ts`, `src/lib/admin-order.ts` (`grantReplacementAccess`), `src/lib/order-consistency.ts` |
 | Otorisasi | `src/lib/authz.ts` → `requireUser`, `requireVerifiedUser`, `requireAdmin`, `assertOwner` |

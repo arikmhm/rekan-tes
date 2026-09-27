@@ -17,7 +17,7 @@ import { user } from "./auth-schema";
 export * from "./auth-schema";
 
 // ---------------------------------------------------------------------------
-// Status. Lihat docs/DATABASE_DESIGN.md bagian 7.
+// Status
 // ---------------------------------------------------------------------------
 
 export const contentStatus = pgEnum("content_status", ["draft", "published", "archived"]);

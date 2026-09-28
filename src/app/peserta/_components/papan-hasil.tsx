@@ -164,13 +164,13 @@ export function PapanHasil({
               {akurasi >= 70 ? "Sudah kuat" : "Butuh latihan"}
             </span>
             {akurasi >= 70
-              ? "Pertahankan ritmenya dan rapikan subtes yang masih tertinggal."
-              : "Peluang berkembang masih lebar. Mulai dari pembahasan soal yang salah."}
+              ? "Pertahankan, lalu rapikan subtes yang tertinggal."
+              : "Mulai dari pembahasan soal yang salah."}
           </p>
 
           <p className="mt-4 text-xs leading-5 font-normal text-brand/50">
-            Skor adalah jumlah bobot soal yang dijawab benar. Salah dan kosong
-            bernilai nol, tanpa pengurangan nilai.
+            Skor adalah jumlah bobot soal yang benar. Salah dan kosong bernilai
+            nol.
           </p>
         </Kartu>
 
@@ -212,19 +212,18 @@ export function PapanHasil({
               <span className="block font-medium text-brand">
                 Fokus berikutnya
               </span>
-              Nilai terendah ada di{" "}
               <strong className="font-medium">{terlemah.nama}</strong> (
               {terlemah.benar}/
               {terlemah.benar + terlemah.salah + terlemah.kosong} ·{" "}
-              {terlemah.persen}%). Mulai dari pembahasan subtes tersebut.
+              {terlemah.persen}%), nilai terendahmu.
             </p>
           )}
         </Kartu>
 
         <Kartu judul="Peta jawaban" Ikon={Grid2x2Check} kelas="lg:self-start">
           <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
-            Klik nomor soal untuk membuka pembahasannya. Warna menunjukkan
-            ketepatan jawabanmu, angka di bawahnya lama pengerjaan.
+            Klik nomor untuk melihat pembahasan. Angka di bawahnya lama
+            pengerjaan.
           </p>
 
           {subtes.map((x) => (

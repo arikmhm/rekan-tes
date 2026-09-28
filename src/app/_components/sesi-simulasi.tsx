@@ -502,8 +502,8 @@ function Hasil({
               {akurasi >= 70 ? "Sudah kuat" : "Butuh latihan"}
             </span>
             {akurasi >= 70
-              ? "Pertahankan ritmenya dan rapikan subtes yang masih tertinggal."
-              : "Peluang berkembang masih lebar. Mulai dari pembahasan soal yang salah."}
+              ? "Pertahankan, lalu rapikan subtes yang tertinggal."
+              : "Mulai dari pembahasan soal yang salah."}
           </p>
         </Kartu>
 
@@ -534,17 +534,16 @@ function Hasil({
             <span className="block font-medium text-brand">
               Fokus berikutnya
             </span>
-            Nilai terendah ada di{" "}
             <strong className="font-medium">{terlemah.nama}</strong> (
-            {terlemah.benar}/{terlemah.total} · {terlemah.persen}%). Ulangi sesi
-            ini setelah membaca pembahasan subtes tersebut.
+            {terlemah.benar}/{terlemah.total} · {terlemah.persen}%), nilai
+            terendahmu.
           </p>
         </Kartu>
 
         <Kartu judul="Peta kecepatan soal" Ikon={Gauge} kelas="lg:self-start">
           <p className="mt-4 text-xs leading-5 font-normal text-brand/60">
-            Klik nomor soal untuk membuka pembahasannya. Warna menunjukkan
-            ketepatan, angka di bawahnya lama pengerjaan.
+            Klik nomor untuk melihat pembahasan. Angka di bawahnya lama
+            pengerjaan.
           </p>
 
           <div className="mt-5 grid grid-cols-5 gap-2">

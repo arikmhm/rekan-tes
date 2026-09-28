@@ -38,7 +38,10 @@ export function SaringanJenis({
         return (
           <Fragment key={label}>
             {kunci === URUTAN_JENIS[0] && (
-              <span className="mx-1 h-5 w-px shrink-0 bg-brand/20" aria-hidden />
+              <span
+                className="mx-1 h-5 w-px shrink-0 bg-brand/20"
+                aria-hidden
+              />
             )}
 
             <Link

@@ -1,11 +1,4 @@
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarClock,
-  ClipboardList,
-  Clock,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { ACCESS_DAYS, getPublishedTest, JENIS } from "@/lib/produk";
@@ -27,29 +20,6 @@ export function DetailProduk({
   /** Dimatikan di ruang peserta agar tidak keluar dari kerangkanya. */
   tautanGratis?: boolean;
 }) {
-  const durasiTerpanjang = Math.max(
-    ...tes.subtests.map((s) => s.durationSeconds),
-    1,
-  );
-
-  const yangDidapat = [
-    {
-      Ikon: Clock,
-      judul: "Waktu berjalan per subtes",
-      isi: "Hitung mundur dan penutupan otomatis persis seperti tes sungguhan.",
-    },
-    {
-      Ikon: ClipboardList,
-      judul: "Skor dan pembahasan",
-      isi: "Selesai mengerjakan, skor per subtes dan kunci tiap soal langsung terbuka.",
-    },
-    {
-      Ikon: CalendarClock,
-      judul: `Akses ${ACCESS_DAYS} hari`,
-      isi: "Beli sekarang, kerjakan saat kamu siap dalam masa akses itu.",
-    },
-  ];
-
   return (
     <>
       <Link
@@ -64,50 +34,32 @@ export function DetailProduk({
       </Link>
 
       <div className="mt-6">
-        <span className="inline-flex items-center gap-2 rounded-full bg-brand-orange/12 px-3 py-1.5 text-xs font-medium text-brand-orange">
-          <span className="size-1.5 rounded-full bg-brand-orange" aria-hidden />
-          {JENIS.simulasi.label} · {tes.subtests.length} subtes ·{" "}
-          {tes.questionCount} soal · {formatDuration(tes.durationSeconds)}
+        <span className="rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-brand/70">
+          {JENIS.simulasi.label}
         </span>
 
-        <h1 className="mt-5 max-w-3xl text-4xl leading-[1.15] font-medium tracking-[-0.01em] text-brand sm:text-5xl">
+        <h1 className="mt-4 max-w-3xl text-3xl leading-tight font-medium tracking-[-0.01em] text-brand sm:text-4xl">
           {tes.name}
         </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-8 font-normal text-brand/80">
+        <p className="mt-4 max-w-2xl text-base leading-7 font-normal text-brand/80">
           {tes.description}
         </p>
       </div>
 
       <div className="mt-9 grid gap-8 lg:grid-cols-[1fr_21rem] lg:items-start">
         <div className="lg:order-first">
-          <ul className="grid gap-3 sm:grid-cols-3">
-            {yangDidapat.map(({ Ikon, judul, isi }) => (
-              <li
-                key={judul}
-                className={`rounded-2xl border ${hairline} bg-white p-5`}
-              >
-                <Ikon className="size-5 text-brand-orange" aria-hidden />
-                <p className="mt-3 text-sm font-medium text-brand">{judul}</p>
-                <p className="mt-1.5 text-xs leading-5 font-normal text-brand/60">
-                  {isi}
-                </p>
-              </li>
-            ))}
-          </ul>
-
-          <h2 className="mt-12 text-2xl font-medium tracking-[-0.01em] text-brand">
+          <h2 className="text-lg font-medium text-brand">
             Urutan subtes
           </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 font-normal text-brand/60">
-            Subtes dikerjakan berurutan. Setiap subtes memiliki batas waktu
-            sendiri dan tidak dapat dibuka kembali setelah dikumpulkan.
+          <p className="mt-1 text-sm font-normal text-brand/60">
+            Dikerjakan berurutan, masing-masing berwaktu.
           </p>
 
-          <ol className="mt-6 space-y-3">
+          <ol className="mt-4 space-y-3">
             {tes.subtests.map((s) => (
               <li
                 key={s.id}
-                className={`rounded-2xl border ${hairline} bg-white p-5 transition-colors hover:border-brand-orange`}
+                className={`rounded-2xl border ${hairline} bg-white p-5`}
               >
                 <div className="flex flex-wrap items-start gap-4">
                   <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand font-mono text-xs font-medium text-white">
@@ -126,15 +78,6 @@ export function DetailProduk({
                     {formatDuration(s.durationSeconds)}
                   </p>
                 </div>
-
-                <div className="mt-4 h-1 overflow-hidden rounded-full bg-brand/10">
-                  <div
-                    className="h-full rounded-full bg-brand-orange/70"
-                    style={{
-                      width: `${(s.durationSeconds / durasiTerpanjang) * 100}%`,
-                    }}
-                  />
-                </div>
               </li>
             ))}
           </ol>
@@ -145,9 +88,6 @@ export function DetailProduk({
         >
           <p className="text-3xl font-medium text-brand-orange">
             {formatPrice(tes.priceAmount)}
-          </p>
-          <p className="mt-1 text-xs font-normal text-brand/50">
-            sekali bayar untuk satu kali pengerjaan
           </p>
 
           <dl className={`mt-5 space-y-2.5 border-t ${hairline} pt-5 text-sm`}>
@@ -166,15 +106,6 @@ export function DetailProduk({
           <div className="mt-6">
             <CheckoutButton slug={tes.slug} />
           </div>
-
-          <p className="mt-4 flex items-start gap-2 text-xs leading-5 font-normal text-brand/60">
-            <ShieldCheck
-              className="mt-0.5 size-4 shrink-0 text-brand/40"
-              aria-hidden
-            />
-            Pembayaran QRIS: kodenya muncul di halaman pesanan dan bisa dipindai
-            dari aplikasi bank atau dompet digital mana pun.
-          </p>
 
           {tautanGratis && (
             <Link

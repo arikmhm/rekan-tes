@@ -223,10 +223,6 @@ export function getPaket(slug: string) {
   return paketSimulasi.find((p) => p.slug === slug) ?? null;
 }
 
-export function daftarSubtes(paket: Paket) {
-  return [...new Set(paket.soal.map((s) => s.subtes))];
-}
-
 export function isiPerSubtes(paket: Paket) {
   const per = new Map<string, number>();
   for (const s of paket.soal) per.set(s.subtes, (per.get(s.subtes) ?? 0) + 1);

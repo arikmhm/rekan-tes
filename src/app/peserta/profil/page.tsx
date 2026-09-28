@@ -14,14 +14,7 @@ export default async function ProfilPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl p-4 pt-5 sm:p-6 sm:pt-6">
-      <h1 className="text-2xl font-medium tracking-[-0.01em] text-brand">
-        Profil
-      </h1>
-      <p className="mt-1.5 text-sm leading-6 font-normal text-brand/60">
-        Identitas akun yang dipakai untuk masuk dan menerima bukti transaksi.
-      </p>
-
-      <section className={`mt-7 rounded-2xl border ${hairline} bg-white p-6`}>
+      <section className={`rounded-2xl border ${hairline} bg-white p-6`}>
         <dl className="grid gap-5 sm:grid-cols-2">
           <div>
             <dt className="text-xs font-normal text-brand/50">Username</dt>
@@ -38,8 +31,7 @@ export default async function ProfilPage() {
         {!user.emailVerified && (
           <div className="mt-6 rounded-xl border border-brand-orange/30 bg-brand-orange/10 p-5">
             <p className="text-sm leading-6 font-normal text-brand">
-              Email belum diverifikasi. Verifikasi dulu sebelum bisa membeli
-              produk.
+              Email belum diverifikasi, wajib sebelum membeli.
             </p>
             <div className="mt-4">
               <ResendVerification email={user.email} />
@@ -47,17 +39,13 @@ export default async function ProfilPage() {
           </div>
         )}
 
-        <p
-          className={`mt-6 border-t ${hairline} pt-5 text-sm font-normal text-brand/60`}
-        >
-          Ingin mengganti password?{" "}
+        <p className={`mt-6 border-t ${hairline} pt-5 text-sm`}>
           <Link
             className="font-medium text-brand transition-colors duration-300 ease-out hover:text-brand-orange"
             href="/lupa-password"
           >
-            Minta tautan setel ulang
+            Ganti password
           </Link>
-          .
         </p>
       </section>
     </div>

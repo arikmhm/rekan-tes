@@ -18,12 +18,9 @@ export async function listPublishedTests() {
       subtestCount: countDistinct(schema.testSubtests.id),
       questionCount: sql<number>`coalesce(sum(${schema.testSubtests.questionLimit}), 0)::int`,
       durationSeconds: sql<number>`coalesce(sum(${schema.testSubtests.durationSeconds}), 0)::int`,
-      // `array_remove`: tes tanpa subtes menghasilkan null.
-      subtestNames: sql<string[]>`array_remove(array_agg(${schema.subtests.name} order by ${schema.testSubtests.position}), null)`,
     })
     .from(schema.tests)
     .leftJoin(schema.testSubtests, eq(schema.testSubtests.testId, schema.tests.id))
-    .leftJoin(schema.subtests, eq(schema.subtests.id, schema.testSubtests.subtestId))
     .where(eq(schema.tests.status, "published"))
     .groupBy(schema.tests.id)
     .orderBy(asc(schema.tests.name));
@@ -90,8 +87,6 @@ export type Produk = {
   nama: string;
   deskripsi: string;
   harga: number;
-  /** Label isi produk: nama subtes untuk simulasi, bisa topik untuk jenis lain. */
-  label: string[];
   fakta: FaktaProduk[];
 };
 
@@ -104,7 +99,6 @@ export async function listProduk(): Promise<Produk[]> {
     nama: t.name,
     deskripsi: t.description,
     harga: t.priceAmount,
-    label: t.subtestNames,
     fakta: [
       { ikon: "subtes" as const, teks: `${t.subtestCount} subtes` },
       { ikon: "soal" as const, teks: `${t.questionCount} soal` },

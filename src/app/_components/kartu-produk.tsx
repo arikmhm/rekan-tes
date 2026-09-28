@@ -1,19 +1,10 @@
-import {
-  ArrowRight,
-  CalendarClock,
-  Clock,
-  FileText,
-  Layers,
-} from "lucide-react";
+import { CalendarClock, Clock, FileText, Layers } from "lucide-react";
 import Link from "next/link";
 
 import { JENIS, type FaktaProduk, type Produk } from "@/lib/produk";
 import { formatPrice } from "@/lib/format";
 
 const hairline = "border-[#105C78]/20";
-
-// Sisanya diringkas jadi satu chip agar tinggi kartu tetap.
-const CHIP_TAMPIL = 4;
 
 const IKON: Record<FaktaProduk["ikon"], typeof Layers> = {
   subtes: Layers,
@@ -32,51 +23,18 @@ export function KartuProduk({
   return (
     <Link
       href={href}
-      className={`group flex h-full flex-col rounded-2xl border ${hairline} bg-white p-6 transition-colors hover:border-brand-orange sm:p-7`}
+      className={`flex h-full flex-col rounded-2xl border ${hairline} bg-white p-5 transition-colors hover:border-brand-orange`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <span className="inline-flex rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-brand/70">
-            {JENIS[produk.jenis].label}
-          </span>
-          <h2 className="mt-3 text-2xl leading-snug font-medium tracking-[-0.01em] text-brand">
-            {produk.nama}
-          </h2>
-        </div>
-        <div className="shrink-0 text-right">
-          <p className="text-xl font-medium text-brand-orange">
-            {formatPrice(produk.harga)}
-          </p>
-          <p className="mt-0.5 text-xs font-normal text-brand/50">
-            sekali bayar
-          </p>
-        </div>
-      </div>
+      <span className="w-fit rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-brand/70">
+        {JENIS[produk.jenis].label}
+      </span>
 
-      <p className="mt-3 line-clamp-2 text-sm leading-6 font-normal text-brand/70">
-        {produk.deskripsi}
-      </p>
+      <h2 className="mt-3 mb-4 text-lg leading-snug font-medium text-brand">
+        {produk.nama}
+      </h2>
 
-      <ul className="mt-5 flex flex-wrap gap-1.5">
-        {produk.label.slice(0, CHIP_TAMPIL).map((nama) => (
-          <li
-            key={nama}
-            className="rounded-full bg-cream px-2.5 py-1 text-xs font-normal text-brand"
-          >
-            {nama}
-          </li>
-        ))}
-        {produk.label.length > CHIP_TAMPIL && (
-          <li className="rounded-full bg-cream px-2.5 py-1 text-xs font-normal text-brand/60">
-            +{produk.label.length - CHIP_TAMPIL} lainnya
-          </li>
-        )}
-      </ul>
-
-      <div
-        className={`mt-auto flex flex-wrap items-center justify-between gap-4 border-t ${hairline} pt-5 text-sm`}
-      >
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-normal text-brand/70">
+      <div className={`mt-auto flex flex-col gap-3 border-t ${hairline} pt-4`}>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-normal text-brand/60">
           {produk.fakta.map(({ ikon, teks }) => {
             const Ikon = IKON[ikon];
             return (
@@ -87,13 +45,9 @@ export function KartuProduk({
             );
           })}
         </div>
-
-        <span
-          className={`inline-flex h-9 items-center gap-1.5 rounded-lg border ${hairline} px-3.5 text-sm font-normal text-brand transition-colors group-hover:border-brand-orange group-hover:bg-brand-orange group-hover:text-white`}
-        >
-          Lihat detail
-          <ArrowRight className="size-4" aria-hidden />
-        </span>
+        <p className="text-lg font-medium text-brand-orange">
+          {formatPrice(produk.harga)}
+        </p>
       </div>
     </Link>
   );

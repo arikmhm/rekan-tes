@@ -21,7 +21,7 @@ export type MilikPeserta = {
   accessExpiresAt: Date | null;
 };
 
-/** Anatominya sengaja sama dengan kartu etalase. */
+/** Anatominya sengaja sama dengan kartu produk. */
 export function KartuPustaka({ milik }: { milik: MilikPeserta }) {
   const rampung = selesai(milik.attemptStatus);
   const tujuan = milik.attemptId
@@ -52,50 +52,36 @@ export function KartuPustaka({ milik }: { milik: MilikPeserta }) {
   ];
 
   return (
-    <div
-      className={`group relative flex h-full flex-col rounded-2xl border ${hairline} bg-white p-6 transition-colors hover:border-brand-orange sm:p-7`}
+    <Link
+      href={tujuan}
+      className={`flex h-full flex-col rounded-2xl border ${hairline} bg-white p-5 transition-colors hover:border-brand-orange`}
     >
-      <span className="inline-flex w-fit rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-brand/70">
+      <span className="w-fit rounded-full bg-cream px-2.5 py-1 text-xs font-medium text-brand/70">
         {JENIS[milik.jenis].label}
       </span>
 
-      {/* Tautan utama menutupi kartu lewat ::after, tanpa tautan bersarang. */}
-      <h2 className="mt-3 text-2xl leading-snug font-medium tracking-[-0.01em] text-brand">
-        <Link href={tujuan} className="after:absolute after:inset-0">
-          {milik.nama}
-        </Link>
+      <h2 className="mt-3 mb-4 text-lg leading-snug font-medium text-brand">
+        {milik.nama}
       </h2>
 
-      <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-normal text-brand/70">
-        {fakta.map(({ Ikon, teks }) => (
-          <li key={teks} className="flex items-center gap-1.5">
-            <Ikon className="size-4 text-brand/40" aria-hidden />
-            {teks}
-          </li>
-        ))}
-      </ul>
-
-      <div
-        className={`mt-auto flex flex-wrap items-center justify-between gap-4 border-t ${hairline} pt-5 text-sm`}
-      >
-        <Link
-          href={`/peserta/pesanan/${milik.orderId}`}
-          className="relative font-normal text-brand/60 transition-colors hover:text-brand-orange"
-        >
-          Rincian pesanan
-        </Link>
-
-        <span
-          className={`inline-flex h-9 items-center gap-1.5 rounded-lg border ${hairline} px-3.5 text-sm font-normal text-brand transition-colors group-hover:border-brand-orange group-hover:bg-brand-orange group-hover:text-white`}
-        >
+      <div className={`mt-auto flex flex-col gap-3 border-t ${hairline} pt-4`}>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-normal text-brand/60">
+          {fakta.map(({ Ikon, teks }) => (
+            <span key={teks} className="flex items-center gap-1.5">
+              <Ikon className="size-4 text-brand/40" aria-hidden />
+              {teks}
+            </span>
+          ))}
+        </div>
+        <p className="flex items-center gap-1.5 text-lg font-medium text-brand-orange">
           {milik.attemptId
             ? rampung
               ? "Lihat hasil"
               : "Kerjakan"
             : "Lihat pesanan"}
           <ArrowRight className="size-4" aria-hidden />
-        </span>
+        </p>
       </div>
-    </div>
+    </Link>
   );
 }

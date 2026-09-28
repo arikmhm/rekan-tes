@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, QrCode } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,22 +8,13 @@ import { formatPrice } from "@/lib/format";
 import { getOrder } from "@/lib/order";
 
 import { CheckPaymentButton } from "../../../_components/check-payment-button";
-import { LABEL_ORDER, tanggal } from "../../_components/label";
+import { LABEL_ORDER, tanggalSingkat } from "../../_components/label";
 
 export const metadata: Metadata = { title: "Rincian pesanan" };
 
 const hairline = "border-[#105C78]/20";
 
 const jam = new Intl.DateTimeFormat("id-ID", { timeStyle: "short" });
-
-const keterangan: Record<string, string> = {
-  pending:
-    "Menunggu pembayaran. Status berubah setelah kami menerima notifikasi resmi DOKU.",
-  paid: "Pembayaran diterima. Sesi sudah dapat dikerjakan dalam masa akses.",
-  expired: "Batas waktu pembayaran terlewat. Silakan buat pesanan baru.",
-  cancelled: "Pesanan dibatalkan.",
-  refunded: "Dana sudah dikembalikan.",
-};
 
 const warnaStatus: Record<string, string> = {
   paid: "bg-brand-orange/15 text-brand-orange",
@@ -91,22 +82,18 @@ export default async function PesananDetailPage({
           </span>
         </div>
 
-        <p className="mt-4 text-sm leading-6 font-normal text-brand/70">
-          {keterangan[order.status] ?? "Status pesanan sedang diproses."}
-        </p>
-
         <dl className={`mt-5 space-y-2.5 border-t ${hairline} pt-5 text-sm`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <dt className="font-normal text-brand/60">Dibuat</dt>
             <dd className="font-medium text-brand">
-              {tanggal.format(order.createdAt)}
+              {tanggalSingkat.format(order.createdAt)}
             </dd>
           </div>
           {order.accessExpiresAt && (
             <div className="flex flex-wrap items-center justify-between gap-2">
               <dt className="font-normal text-brand/60">Masa akses</dt>
               <dd className="font-medium text-brand">
-                sampai {tanggal.format(order.accessExpiresAt)}
+                sampai {tanggalSingkat.format(order.accessExpiresAt)}
               </dd>
             </div>
           )}
@@ -114,53 +101,32 @@ export default async function PesananDetailPage({
       </section>
 
       {order.status === "paid" && order.attemptId && (
-        <section
-          className={`mt-4 rounded-2xl border ${hairline} bg-mint/60 p-6`}
+        <Link
+          href={`/peserta/simulasi/${order.attemptId}`}
+          className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors duration-300 ease-out hover:bg-brand-orange"
         >
-          <h2 className="text-lg font-medium text-brand">
-            Sesi siap dikerjakan
-          </h2>
-          <p className="mt-2 text-sm leading-6 font-normal text-brand/70">
-            Baca petunjuknya dulu; waktu subtes pertama baru berjalan setelah
-            kamu menekan tombol mulai di halaman sesi.
-          </p>
-          <Link
-            href={`/peserta/simulasi/${order.attemptId}`}
-            className="mt-5 inline-flex h-11 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors duration-300 ease-out hover:bg-brand-orange"
-          >
-            Buka sesi pengerjaan
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
-        </section>
+          Buka sesi pengerjaan
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
       )}
 
       {qrSvg && qris?.expiresAt && (
         <section
           className={`mt-4 rounded-2xl border ${hairline} bg-mint/60 p-6 text-center`}
         >
-          <QrCode className="mx-auto size-5 text-brand/40" aria-hidden />
-          <h2 className="mt-3 text-lg font-medium text-brand">
+          <h2 className="text-lg font-medium text-brand">
             Bayar dengan QRIS
           </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 font-normal text-brand/70">
-            Pindai kode ini dengan aplikasi bank atau dompet digital apa pun
-            yang mendukung QRIS. Nominalnya sudah terisi otomatis.
-          </p>
 
           <div
             aria-label="Kode QRIS pembayaran"
             role="img"
-            className="mx-auto mt-6 w-[260px] max-w-full rounded-2xl bg-white p-4 [&>svg]:h-auto [&>svg]:w-full"
+            className="mx-auto mt-4 w-[260px] max-w-full rounded-2xl bg-white p-4 [&>svg]:h-auto [&>svg]:w-full"
             dangerouslySetInnerHTML={{ __html: qrSvg }}
           />
 
-          <p className="mt-5 text-sm font-medium text-brand">
+          <p className="mt-4 text-sm font-normal text-brand/70">
             Berlaku sampai pukul {jam.format(qris.expiresAt)}
-          </p>
-          <p className="mx-auto mt-2 max-w-md text-xs leading-5 font-normal text-brand/60">
-            Halaman ini memuat ulang sendiri untuk membaca notifikasi dari DOKU.
-            Kalau kamu sudah membayar tapi status belum berubah, tekan tombol di
-            bawah untuk memeriksa langsung.
           </p>
         </section>
       )}
@@ -169,15 +135,13 @@ export default async function PesananDetailPage({
         <p
           className={`mt-4 rounded-2xl border border-dashed ${hairline} p-6 text-center text-sm leading-6 font-normal text-brand/60`}
         >
-          Kode QRIS untuk pesanan ini sudah kedaluwarsa.{" "}
+          Kode QRIS sudah kedaluwarsa.{" "}
           <Link
             className="font-medium text-brand hover:text-brand-orange"
             href={`/peserta/produk/${order.testSlug}`}
           >
-            Mulai pembayaran baru
+            Bayar ulang
           </Link>
-          . Sudah sempat membayar sebelum kedaluwarsa? Tekan tombol di bawah
-          untuk memeriksa.
         </p>
       )}
 

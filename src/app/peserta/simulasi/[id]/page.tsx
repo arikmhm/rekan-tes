@@ -1,4 +1,4 @@
-import { ArrowRight, CircleCheck, TriangleAlert } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,6 +13,7 @@ import { formatDuration } from "@/lib/format";
 
 import { StartAttemptButton } from "../../../_components/attempt-buttons";
 import { SesiKerja } from "../../../_components/sesi-kerja";
+import { tanggalSingkat } from "../../_components/label";
 
 export const metadata: Metadata = { title: "Sesi pengerjaan" };
 
@@ -20,10 +21,6 @@ export const dynamic = "force-dynamic";
 
 const hairline = "border-[#105C78]/20";
 
-const tanggal = new Intl.DateTimeFormat("id-ID", {
-  dateStyle: "long",
-  timeStyle: "short",
-});
 const jam = new Intl.DateTimeFormat("id-ID", { timeStyle: "short" });
 
 export default async function SesiPage({
@@ -51,20 +48,16 @@ export default async function SesiPage({
   return (
     <div className="mx-auto w-full max-w-6xl p-4 pt-5 sm:p-6 sm:pt-6">
       {!sedangKerja && (
-        <>
-          <p className="text-xs font-medium text-brand/60">Sesi pengerjaan</p>
-          <h1 className="mt-1 text-2xl leading-snug font-medium tracking-[-0.01em] text-brand">
-            {attempt.testName}
-          </h1>
-        </>
+        <h1 className="text-2xl leading-snug font-medium tracking-[-0.01em] text-brand">
+          {attempt.testName}
+        </h1>
       )}
 
       {masalah ? (
         <div
           className={`mt-6 rounded-2xl border border-dashed ${hairline} bg-white p-7`}
         >
-          <TriangleAlert className="size-5 text-brand-orange" aria-hidden />
-          <p className="mt-3 text-sm leading-6 font-normal text-brand/70">
+          <p className="text-sm leading-6 font-normal text-brand/70">
             {masalah}{" "}
             <Link
               className="font-medium text-brand transition-colors hover:text-brand-orange"
@@ -77,23 +70,19 @@ export default async function SesiPage({
         </div>
       ) : !aktif ? (
         <div className={`mt-6 rounded-2xl border ${hairline} bg-mint/60 p-7`}>
-          <CircleCheck className="size-5 text-brand" aria-hidden />
-          <h2 className="mt-3 text-lg font-medium text-brand">
-            Seluruh subtes selesai
+          <h2 className="text-lg font-medium text-brand">
+            Semua subtes selesai
           </h2>
-          <p className="mt-2 text-sm leading-6 font-normal text-brand/70">
-            Semua subtes sudah dikumpulkan
-            {attempt.submittedAt
-              ? ` pada ${tanggal.format(attempt.submittedAt)}`
-              : ""}
-            . Skor, rincian per subtes, dan pembahasan setiap soal sudah dapat
-            dibuka.
-          </p>
+          {attempt.submittedAt && (
+            <p className="mt-1 text-sm font-normal text-brand/70">
+              Dikumpulkan {tanggalSingkat.format(attempt.submittedAt)}
+            </p>
+          )}
           <Link
             href={`/peserta/simulasi/${attempt.id}/hasil`}
             className="mt-5 inline-flex h-11 items-center gap-2 rounded-lg bg-brand px-5 text-sm font-normal text-white transition-colors hover:bg-brand-orange"
           >
-            Lihat hasil dan pembahasan
+            Lihat hasil
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>
@@ -180,31 +169,19 @@ function Petunjuk({
       <h2 className="text-lg font-medium text-brand">Petunjuk pengerjaan</h2>
       <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-7 font-normal text-brand/70 marker:text-brand-orange">
         <li>
-          Sesi terdiri dari {jumlahSubtes} subtes dengan total durasi{" "}
-          {formatDuration(totalDurasi)}, dikerjakan berurutan.
+          {jumlahSubtes} subtes, total {formatDuration(totalDurasi)},
+          dikerjakan berurutan.
         </li>
-        <li>
-          Setiap subtes punya batas waktunya sendiri yang mulai berjalan saat
-          subtes dibuka dan dihitung oleh server, bukan peramban. Menutup
-          halaman tidak menghentikannya.
-        </li>
-        <li>Subtes yang sudah dikumpulkan tidak dapat dibuka kembali.</li>
-        <li>Setiap soal berupa pilihan ganda dengan satu jawaban benar.</li>
-        <li>
-          Jawaban tersimpan begitu dipilih dan masih dapat diganti selama
-          waktunya belum habis.
-        </li>
-        <li>Satu pesanan memberi satu kali kesempatan mengerjakan.</li>
+        <li>Waktu tiap subtes tetap berjalan walau halaman ditutup.</li>
+        <li>Subtes yang sudah dikumpulkan tidak bisa dibuka lagi.</li>
+        <li>Jawaban tersimpan otomatis dan bisa diganti selama waktu ada.</li>
         {accessExpiresAt && (
-          <li>Masa akses berakhir {tanggal.format(accessExpiresAt)}.</li>
+          <li>Akses berakhir {tanggalSingkat.format(accessExpiresAt)}.</li>
         )}
       </ul>
 
       <div className={`mt-6 border-t ${hairline} pt-6`}>
         <StartAttemptButton attemptId={attemptId} />
-        <p className="mt-3 text-xs leading-5 font-normal text-brand/50">
-          Waktu subtes pertama mulai berjalan begitu tombol ini ditekan.
-        </p>
       </div>
     </div>
   );

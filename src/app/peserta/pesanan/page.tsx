@@ -14,7 +14,7 @@ import { requireUser } from "@/lib/authz";
 import { formatPrice } from "@/lib/format";
 import { listOrdersForUser } from "@/lib/order";
 
-import { LABEL_ORDER, tanggal } from "../_components/label";
+import { LABEL_ORDER, tanggalSingkat } from "../_components/label";
 
 export const metadata: Metadata = { title: "Pesanan" };
 
@@ -68,11 +68,8 @@ export default async function PesananPage() {
                 <TableHead className="font-medium text-brand/60">
                   Jumlah
                 </TableHead>
-                <TableHead className="font-medium text-brand/60">
+                <TableHead className="pr-5 font-medium text-brand/60 sm:pr-6">
                   Status
-                </TableHead>
-                <TableHead className="px-5 text-right font-medium text-brand/60 sm:px-6">
-                  <span className="sr-only">Rincian</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -81,9 +78,9 @@ export default async function PesananPage() {
               {pesanan.map((p) => (
                 <TableRow
                   key={p.id}
-                  className={`${hairline} group hover:bg-cream/50`}
+                  className={`${hairline} hover:bg-cream/50`}
                 >
-                  <TableCell className="px-5 py-4 font-medium whitespace-normal text-brand sm:px-6">
+                  <TableCell className="min-w-44 px-5 py-4 font-medium whitespace-normal text-brand sm:px-6">
                     <Link
                       href={`/peserta/pesanan/${p.id}`}
                       className="transition-colors hover:text-brand-orange"
@@ -92,12 +89,12 @@ export default async function PesananPage() {
                     </Link>
                   </TableCell>
                   <TableCell className="py-4 font-normal whitespace-nowrap text-brand/60">
-                    {tanggal.format(p.createdAt)}
+                    {tanggalSingkat.format(p.createdAt)}
                   </TableCell>
                   <TableCell className="py-4 font-medium whitespace-nowrap text-brand">
                     {formatPrice(p.amount)}
                   </TableCell>
-                  <TableCell className="py-4">
+                  <TableCell className="py-4 pr-5 sm:pr-6">
                     <span
                       className={`inline-flex rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap ${
                         warnaStatus[p.status] ?? "bg-cream text-brand/50"
@@ -105,16 +102,6 @@ export default async function PesananPage() {
                     >
                       {LABEL_ORDER[p.status] ?? p.status}
                     </span>
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-right sm:px-6">
-                    <Link
-                      href={`/peserta/pesanan/${p.id}`}
-                      aria-label={`Rincian pesanan ${p.testName}`}
-                      className={`inline-flex h-9 items-center gap-1.5 rounded-lg border ${hairline} px-3.5 text-sm font-normal whitespace-nowrap text-brand transition-colors group-hover:border-brand-orange group-hover:bg-brand-orange group-hover:text-white`}
-                    >
-                      Rincian
-                      <ArrowRight className="size-4" aria-hidden />
-                    </Link>
                   </TableCell>
                 </TableRow>
               ))}

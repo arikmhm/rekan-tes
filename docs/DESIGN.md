@@ -15,6 +15,7 @@ The product is a bank-recruitment test practice platform, so the design should l
 - **Surface (#FFFFFF):** Base surface for cards, headers, and buttons.
 - **On-surface (#12242B):** Near-black text with a slight cool cast. Used at full opacity for headings and primary copy; drop to 60–80% opacity for secondary text rather than switching to a separate gray.
 - **Error (#E02E2E):** Reserved for validation and destructive states only.
+- **App icon (#15803D):** Green background with a white `RT` monogram. This color is reserved for the favicon and does not replace Primary in the interface.
 
 ## Typography
 Geist (variable) is the only typeface, for display and body alike — no serif or slab pairing. Headlines are bold and tight, not light and airy: `headline-display` and `headline-section` both sit at weight 700 with negative tracking, because this system reads as direct and confident rather than editorial-quiet. Body text stays at regular weight 400 for readability; labels and buttons step up to 600 so controls read as controls. `Geist Mono` appears only where digits need to line up — a timer, a step number — never as a decorative typeface choice.
